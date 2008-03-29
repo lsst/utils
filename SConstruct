@@ -7,9 +7,11 @@ import lsst.SConsUtils as scons
 
 env = scons.makeEnv("utils",
                     r"$HeadURL$",
-                    [["boost", "boost/version.hpp", "boost_filesystem:C++"],
-                     ["python", "Python.h"],
+                    [["boost", "boost/regex.hpp", "boost_regex:C++"],
+                     ["python", "Python.h"], # needed for Swig
                     ])
+
+env.libs["utils"] += env.getlibs("boost")
 
 #
 # Is C++'s TR1 available?  If not, use e.g. #include "lsst/tr1/foo.h"

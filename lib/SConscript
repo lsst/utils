@@ -1,6 +1,5 @@
 # -*- python -*-
 Import('env')
-import os
 
 env.SharedLibrary('utils', map(lambda str: "../src/" + str,
                             ["Demangle.cc",
