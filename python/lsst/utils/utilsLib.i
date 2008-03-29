@@ -1,38 +1,35 @@
 // -*- lsst-c++ -*-
 %define utils_DOCSTRING
 "
-Access to useful Utility classes in the mwi library.
+Access to useful Utility classes.
 "
 %enddef
 
 %feature("autodoc", "1");
-%module(package="lsst.mwi", docstring=utils_DOCSTRING) utils
+%module(package="lsst.utils", docstring=utils_DOCSTRING) utilsLib
 
 %{
-#   include <fstream>
-#   include <exception>
-#   include <map>
-#   include "lsst/mwi/utils/Demangle.h"
-#   include "lsst/mwi/utils/Trace.h"
-#   include "lsst/mwi/utils/Utils.h"
+#   include "lsst/utils/Demangle.h"
+#   include "lsst/utils/Utils.h"
 %}
 
 %inline %{
-namespace lsst { namespace mwi { namespace utils { } } }
+namespace lsst { namespace utils { } }
     
-using namespace lsst;
-using namespace lsst::mwi::utils;
+using namespace lsst::utils;
 %}
 
 %init %{
 %}
 
-%include "p_lsstSwig.i"
-%include "lsst/mwi/utils/Utils.h"
+#define NO_SWIG_LSST_EXCEPTIONS
+%include "../p_lsstSwig.i"
+%include "lsst/utils/Demangle.h"
+%include "lsst/utils/Utils.h"
 
 %pythoncode %{
 
-def version(HeadURL = r"$HeadURL$"):
+def version(HeadURL = r"$HeadURL: svn+ssh://svn.lsstcorp.org/DMS/utils/trunk/python/lsst/utils.i $"):
     """Return a version given a HeadURL string.  If a different version's setup, return that too"""
 
     version_svn = guessSvnVersion(HeadURL)
@@ -53,11 +50,6 @@ def version(HeadURL = r"$HeadURL$"):
         return "%s (setup: %s)" % (version_svn, version_eups)
 
 %}
-
-/******************************************************************************/
-// Trace
-%ignore Trace(const std::string&, const int, const std::string&, va_list ap);
-%include "lsst/mwi/utils/Trace.h"
 
 /******************************************************************************/
 // Local Variables: ***

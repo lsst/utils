@@ -1,3 +1,6 @@
+#include "lsst/utils/Demangle.h"
+
+#include <iostream>
 #include <string>
 #include <stack>
 #include <boost/format.hpp>
@@ -5,12 +8,8 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/member.hpp>
-#include "lsst/mwi/utils/Utils.h"
-#include "lsst/mwi/utils/Trace.h"
-#include "lsst/mwi/utils/Demangle.h"
 
 namespace lsst {
-namespace mwi {
 namespace utils {
 /*
  * Provide a symbol table for "substitutions" while mangling
@@ -89,7 +88,7 @@ static bool interpret_typeletter(const char c, std::string &type) {
 }
 
 
-std::string demangleType(const std::string _typeName) {
+std::string demangleType(std::string const _typeName) {
 #if 1
     typedef multi_index_container<
         Symbol,
@@ -131,8 +130,6 @@ std::string demangleType(const std::string _typeName) {
             currentSymbol = "";
 
             if (typeStack.empty()) {
-                Trace("mwi.utils.demangle", 0,
-                      boost::format("Tried to examine empty stack for %s at \"%s\"") % _typeName % ptr);
                 typeStack.push('\a');   // at least don't crash
             }
 
@@ -278,6 +275,4 @@ std::string demangleType(const std::string _typeName) {
 #endif
 }
 
-} // namespace utils
-} // namespace mwi
-} // namespace lsst
+}} // namespace lsst::utils

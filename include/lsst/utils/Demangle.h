@@ -1,16 +1,13 @@
 // -*- lsst-c++ -*-
-#if !defined(LSST_DEMANGLE)             //! multiple inclusion guard macro
-#define LSST_DEMANGLE 1
+#if !defined(LSST_UTILS_DEMANGLE_H)
+#define LSST_UTILS_DEMANGLE_H 1
 
-#include "lsst/mwi/utils/Utils.h"
+#include <string>
 
 namespace lsst {
-namespace mwi {
 namespace utils {
 
-std::string demangleType(const std::string _typeName);
+std::string demangleType(std::string const _typeName);
     
-} // namespace utils
-} // namespace mwi
-} // namespace lsst
+}} // namespace lsst::utils
 #endif

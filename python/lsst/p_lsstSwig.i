@@ -93,6 +93,8 @@ namespace boost {
     }
 %}
 
+#if !defined(NO_SWIG_LSST_EXCEPTIONS)
+
 /******************************************************************************/
 /*
  * Mapping C++ exceptions to Python
@@ -168,6 +170,7 @@ static void raiseLsstExceptionStack(lsst::mwi::exceptions::ExceptionStack & ex) 
     }
 }
 
+#endif
 
 /******************************************************************************/
 /*
@@ -204,4 +207,3 @@ static void raiseLsstExceptionStack(lsst::mwi::exceptions::ExceptionStack & ex) 
 // Local Variables: ***
 // eval: (setq indent-tabs-mode nil) ***
 // End: ***
-

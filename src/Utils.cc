@@ -1,12 +1,11 @@
+#include "lsst/utils/Utils.h"
+
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <stack>
 #include <boost/regex.hpp>
-#include "lsst/mwi/utils/Utils.h"
 
 namespace lsst {
-namespace mwi {
 namespace utils {
 /*!
  * Return a version name given an SVN HeadURL
@@ -28,8 +27,8 @@ namespace utils {
  * Note: for this to be set by svn, you'll have to set the svn property
  * svn:keywords to expand HeadURL in the file where the HeadURL originates.
  */
-void guessSvnVersion(const std::string &headURL, //!< the HeadURL String
-                     std::string &version //!< the desired version
+void guessSvnVersion(std::string const& headURL, //!< the HeadURL String
+                     std::string& version //!< the desired version
                     ) {
     const boost::regex getURL("^\\$HeadURL:\\s+([^$ ]+)\\s*\\$$");
     boost::smatch matchObject;
@@ -91,6 +90,4 @@ boost::any stringToAny(std::string valueString)
 }
 
 
-} // namespace utils
-} // namespace mwi
-} // namespace lsst
+}} // namespace lsst::utils

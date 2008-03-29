@@ -5,16 +5,10 @@
 import glob, os.path, re, os
 import lsst.SConsUtils as scons
 
-env = scons.makeEnv("mwi",
+env = scons.makeEnv("utils",
                     r"$HeadURL$",
                     [["boost", "boost/version.hpp", "boost_filesystem:C++"],
-                     ["boost", "boost/regex.hpp", "boost_regex:C++"],
-                     ["boost", "boost/serialization/serialization.hpp", "boost_serialization:C++"],
                      ["python", "Python.h"],
-                     ["jaula", "jaula/jaula_parse.h", "jaula:C++"],
-                     ["seal",  "SealBase/config.h", "lcg_SealBase lcg_SealKernel lcg_PluginManager:C++" ],
-                     ["coral", "RelationalAccess/ConnectionService.h", "lcg_CoralBase lcg_RelationalService:C++"],
-                     ["mysqlclient", "mysql/mysql.h", "mysqlclient_r:C"]
                     ])
 
 #
@@ -29,7 +23,7 @@ if not re.search(r"LSST_HAVE_TR1", str(env['CCFLAGS'])):
 #
 # Build/install things
 #
-for d in Split("examples include/lsst/mwi/exceptions lib tests python/lsst/mwi doc"):
+for d in Split("lib python/lsst/utils doc"):
     SConscript(os.path.join(d, "SConscript"))
 
 env['IgnoreFiles'] = r"(~$|\.pyc$|^\.svn$|\.o$)"
@@ -52,6 +46,6 @@ if files:
 
 env.Declare()
 env.Help("""
-LSST FrameWork packages
+LSST general-purpose utilities package
 """)
 
