@@ -49,7 +49,7 @@ namespace boost {
     public:
         // Copy constructor *must* come before the bare pointer constructor. This is because a
         // shared_ptr<T> * is convertible to a T * via SWIG_ConvertPtr, so if the SWIG generated constructor
-        // argument dispatching function doesn't first test to see if an incoming argument is a shared_ptr<T> *,
+        // argument dispatching function does not first test to see if an incoming argument is a shared_ptr<T> *,
         // double deletes will occur
         shared_ptr(shared_ptr<T> const &);
 
@@ -64,8 +64,8 @@ namespace boost {
 }
 
 //
-// Work around a swig 1.33.1 bug wherein swig doesn't realise that python still
-// owns the pointer that's now wrapped in a shared_ptr
+// Work around a swig 1.33.1 bug wherein swig does not realise that python still
+// owns the pointer that is now wrapped in a shared_ptr
 //
 #define HAVE_SMART_POINTER 1            // allow e.g. FW to know that this macro is defined
 %define %smart_pointer(PTR_TYPE, NAME, TYPE...)
@@ -92,85 +92,6 @@ namespace boost {
         make_output_iterator(const OutIter& current, const OutIter& begin,const OutIter& end, PyObject *seq);
     }
 %}
-
-#if !defined(NO_SWIG_LSST_EXCEPTIONS)
-
-/******************************************************************************/
-/*
- * Mapping C++ exceptions to Python
- */
-
-%pythoncode %{
-    import lsst.mwi.exceptions
-%}
-
-%{
-#include <new>
-#include "lsst/mwi/exceptions/Exception.h"
-#include "lsst/mwi/exceptions/Runtime.h"
-%}
-
-%inline %{
-namespace lsst { namespace mwi { namespace exceptions { } } }
-%}
-
-// Use the Python C API to create the constructor argument tuple (a message string and a
-// DataProperty corresponding to an ExceptionStack) for a Python exception class assumed to
-// be derived from lsst.mwi.exceptions.LsstExceptionStack. Also obtain a class object for
-// the desired exception type. Use the class object and tuple to raise a Python exception.
-%{
-static void raiseLsstExceptionStack(lsst::mwi::exceptions::ExceptionStack & ex) {
-    PyObject * modules = PyImport_GetModuleDict();
-    PyObject * module  = PyDict_GetItemString(modules, ex.getPythonModule());
-    if (module == 0) {
-        PyErr_Format(PyExc_ImportError, "failed to find LSST exception module '%s'", ex.getPythonModule());
-        return;
-    }
-    PyObject * clazz  = PyDict_GetItem(PyModule_GetDict(module), PyString_FromString(ex.getPythonClass()));
-    if (clazz == 0) {
-        PyErr_Format(PyExc_AttributeError, "unable to find LSST exception class '%s' in module '%s'",
-                     ex.getPythonClass(), ex.getPythonModule());
-        return;
-    }
-
-    PyObject * args = PyTuple_New(2);
-    if (args == 0) {
-        PyErr_SetString(clazz, ex.what());
-        return;
-    }
-
-    PyTuple_SetItem(args, 0, PyString_FromString(ex.what()));
-
-    PyObject       * stack = 0;
-    swig_type_info * tinfo = SWIG_TypeQuery("boost::shared_ptr<lsst::mwi::data::DataProperty> *");
-    if (tinfo != 0) {
-        void * ptr = static_cast<void *>(new lsst::mwi::data::DataProperty::PtrType(ex.getStack()));
-        stack = SWIG_NewPointerObj(static_cast<void *>(ptr), tinfo, SWIG_POINTER_OWN);
-    } else {
-        stack = Py_None;
-        Py_INCREF(stack);
-    }
-    PyTuple_SetItem(args, 1, stack);
-
-    PyErr_SetObject(clazz, args);
-    Py_DECREF(args);
-}
-%}
-
-// Specifies the default C++ to python exception handling interface
-%exception {
-    try {
-        $action
-    } catch (lsst::mwi::exceptions::ExceptionStack &e) {
-        raiseLsstExceptionStack(e);
-        SWIG_fail;
-    } catch (std::exception & e) {
-        PyErr_SetString(PyExc_Exception, e.what());
-        SWIG_fail;
-    }
-}
-
-#endif
 
 /******************************************************************************/
 /*
