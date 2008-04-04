@@ -54,7 +54,7 @@ def findFileFromRoot(ifile):
     """Find file which is specified as a path relative to the toplevel directory;
     we start in $cwd and walk up until we find the file (or throw IOError if it doesn't exist)
 
-    This is useful for running tests that may be run from mwi/tests or mwi"""
+    This is useful for running tests that may be run from <dir>/tests or <dir>"""
     
     if os.path.isfile(ifile):
         return ifile
