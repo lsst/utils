@@ -16,8 +16,16 @@ namespace utils {
 
 void guessSvnVersion(std::string const& headURL, std::string& OUTPUT);
 boost::any stringToAny(std::string valueString);
-
 }} // namespace lsst::utils
+
+//! @namespace lsst::utils
+//@brief LSST utilities
+namespace lsst {
+namespace utils {
+namespace eups {
+    std::string productDir(std::string const& product, std::string const& version = "setup");
+}}} // namespace lsst::utils:eups
+
 
 #endif
 

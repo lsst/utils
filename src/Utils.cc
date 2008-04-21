@@ -1,9 +1,14 @@
 #include "lsst/utils/Utils.h"
 
+#include <cctype>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 #include <boost/regex.hpp>
+#include <stdexcept>
+
+using namespace std;
 
 namespace lsst {
 namespace utils {
@@ -27,8 +32,8 @@ namespace utils {
  * Note: for this to be set by svn, you'll have to set the svn property
  * svn:keywords to expand HeadURL in the file where the HeadURL originates.
  */
-void guessSvnVersion(std::string const& headURL, //!< the HeadURL String
-                     std::string& version //!< the desired version
+void guessSvnVersion(string const& headURL, //!< the HeadURL String
+                     string& version //!< the desired version
                     ) {
     const boost::regex getURL("^\\$HeadURL:\\s+([^$ ]+)\\s*\\$$");
     boost::smatch matchObject;
@@ -37,7 +42,7 @@ void guessSvnVersion(std::string const& headURL, //!< the HeadURL String
 
         const boost::regex getVersion("(branches|tags|tickets|trunk)/([^/]+)");
         if (boost::regex_search(version, matchObject, getVersion)) {
-            std::string type = matchObject[1];
+            string type = matchObject[1];
             version = matchObject[2];
         
             if (type == "branches") {
@@ -57,7 +62,7 @@ void guessSvnVersion(std::string const& headURL, //!< the HeadURL String
 
 // Free utility function
 
-boost::any stringToAny(std::string valueString)
+boost::any stringToAny(string valueString)
 {
     const boost::regex intRegex("(\\Q+\\E|\\Q-\\E){0,1}[0-9]+");
     const boost::regex doubleRegex("(\\Q+\\E|\\Q-\\E){0,1}([0-9]*\\.[0-9]+|[0-9]+\\.[0-9]*)((e|E)(\\Q+\\E|\\Q-\\E){0,1}[0-9]+){0,1}");
@@ -65,7 +70,7 @@ boost::any stringToAny(std::string valueString)
 
     boost::smatch matchStrings;
 
-    std::istringstream converter(valueString);
+    istringstream converter(valueString);
 
     if (boost::regex_match(valueString, intRegex)) {
         // convert the string to an int
@@ -89,5 +94,30 @@ boost::any stringToAny(std::string valueString)
     return boost::any(valueString);
 }
 
+/*!
+ * \brief return an eups PRODUCT_DIR
+ *
+ * Return the directory of a setup product
+ *
+ * \throws std::invalid_argument if version != "setup"
+ * \throws std::runtime_error if desired version can't be found
+ */
+string eups::productDir(string const& product, string const& version) {
+    if (version != "setup") {
+        throw std::invalid_argument("Unsupported version: " + version);
+    }
+
+    string var = product;      // product's environment variable
+    
+    transform(var.begin(), var.end(), var.begin(), (int (*)(int)) toupper);
+    var += "_DIR";
+
+    char const *dir = getenv(var.c_str());
+    if (!dir) {
+        throw std::runtime_error("Product " + product + " has no version " + version);
+    }
+
+    return dir;
+}
 
 }} // namespace lsst::utils
