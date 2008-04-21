@@ -12,16 +12,6 @@ env = scons.makeEnv("utils",
                     ])
 
 env.libs["utils"] += env.getlibs("boost")
-
-#
-# Is C++'s TR1 available?  If not, use e.g. #include "lsst/tr1/foo.h"
-#
-# This test is in SConsUtils >= 1.17, so when a suitable version is deployed we can delete the test from here
-#
-if not re.search(r"LSST_HAVE_TR1", str(env['CCFLAGS'])):
-    conf = env.Configure()
-    env.Append(CCFLAGS = '-DLSST_HAVE_TR1=%d' % int(conf.CheckHeader("tr1/unordered_map", language="C++")))
-    conf.Finish()
 #
 # Build/install things
 #
