@@ -17,7 +17,12 @@ def init():
 
 def run(suite, exit=True):
     """Exit with the status code resulting from running the provided test suite"""
-    status = 0 if unittest.TextTestRunner().run(suite).wasSuccessful() else 1
+
+    if unittest.TextTestRunner().run(suite).wasSuccessful():
+        status = 0
+    else:
+        status = 1
+
     if exit:
         sys.exit(status)
     else:
