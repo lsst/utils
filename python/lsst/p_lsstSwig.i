@@ -18,6 +18,7 @@
 %include "std_vector.i"
 %include "std_iostream.i"
 %include "typemaps.i"
+%include "boost_shared_ptr.i"
 
 %include "carrays.i"
 
@@ -38,48 +39,6 @@
 
 %array_class(float, floatArray);
 %array_class(double, doubleArray);
-
-/******************************************************************************/
-/*
- * Don't expose the entire boost::shared_ptr to swig; it is complicated...
- */
-namespace boost {
-    template<class T>
-    class shared_ptr {
-    public:
-        // Copy constructor *must* come before the bare pointer constructor. This is because a
-        // shared_ptr<T> * is convertible to a T * via SWIG_ConvertPtr, so if the SWIG generated constructor
-        // argument dispatching function does not first test to see if an incoming argument is a shared_ptr<T> *,
-        // double deletes will occur
-        shared_ptr(shared_ptr<T> const &);
-
-        // assume ownership of bare pointers
-        shared_ptr(T * DISOWN);
-
-        ~shared_ptr();
-        T *operator->() const;
-        int use_count() const;
-        T *get() const;
-    };
-}
-
-//
-// Work around a swig 1.33.1 bug wherein swig does not realise that python still
-// owns the pointer that is now wrapped in a shared_ptr
-//
-#define HAVE_SMART_POINTER 1            // allow e.g. FW to know that this macro is defined
-%define %smart_pointer(PTR_TYPE, NAME, TYPE...)
-// The next three lines are equivalent to %extend_smart_pointer(PTR_TYPE<TYPE >);
-   //%implicitconv PTR_TYPE<TYPE >;
-   %apply const SWIGTYPE& SMARTPOINTER { const PTR_TYPE<TYPE >& };
-   %apply SWIGTYPE SMARTPOINTER { PTR_TYPE<TYPE > };
-
-   %template(NAME) PTR_TYPE<TYPE >;
-%enddef
-
-%define %boost_shared_ptr(NAME, TYPE...)
-    %smart_pointer(boost::shared_ptr, NAME, TYPE)
-%enddef
 
 /************************************************************************************************************/
 /*
