@@ -17,9 +17,10 @@
 %include "std_set.i"
 %include "std_vector.i"
 %include "std_iostream.i"
-%include "typemaps.i"
-
+%include "boost_shared_ptr.i"
 %include "carrays.i"
+
+%include "typemaps.i"
 
 // N.b. these may interfere with the use of e.g. std_list.i for primitive types;
 // you will have to say e.g.
@@ -39,29 +40,6 @@
 %array_class(float, floatArray);
 %array_class(double, doubleArray);
 
-/******************************************************************************/
-/*
- * Don't expose the entire boost::shared_ptr to swig; it is complicated...
- */
-namespace boost {
-    template<class T>
-    class shared_ptr {
-    public:
-        // Copy constructor *must* come before the bare pointer constructor. This is because a
-        // shared_ptr<T> * is convertible to a T * via SWIG_ConvertPtr, so if the SWIG generated constructor
-        // argument dispatching function does not first test to see if an incoming argument is a shared_ptr<T> *,
-        // double deletes will occur
-        shared_ptr(shared_ptr<T> const &);
-
-        // assume ownership of bare pointers
-        shared_ptr(T * DISOWN);
-
-        ~shared_ptr();
-        T *operator->() const;
-        int use_count() const;
-        T *get() const;
-    };
-}
 
 //
 // Work around a swig 1.33.1 bug wherein swig does not realise that python still
