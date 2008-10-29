@@ -20,12 +20,16 @@ for d in Split("lib python/lsst/utils doc"):
 
 env['IgnoreFiles'] = r"(~$|\.pyc$|^\.svn$|\.o$)"
 
-Alias("install", [env.Install(env['prefix'], "python"),
-                  env.Install(env['prefix'], "include"),
-                  env.Install(env['prefix'], "lib"),
-                  env.InstallAs(os.path.join(env['prefix'], "doc", "doxygen"),
-                                os.path.join("doc", "htmlDir")),
-                  env.InstallEups(env['prefix'] + "/ups", glob.glob("ups/*.table"))])
+if False:
+    Alias("install", [env.Install(env['prefix'], "python"),
+                      env.Install(env['prefix'], "include"),
+                      env.Install(env['prefix'], "lib"),
+                      env.InstallAs(os.path.join(env['prefix'], "doc", "doxygen"),
+                                    os.path.join("doc", "htmlDir")),
+                      env.InstallEups(env['prefix'] + "/ups", glob.glob("ups/*.table"))])
+    Clean("install", env['prefix'])
+else:
+    env.InstallLSST(env['prefix'], ["python", "include", "lib", "doc", "ups"])
 
 scons.CleanTree(r"*~ core *.so *.os *.o")
 

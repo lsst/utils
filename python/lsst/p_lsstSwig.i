@@ -17,10 +17,10 @@
 %include "std_set.i"
 %include "std_vector.i"
 %include "std_iostream.i"
-%include "typemaps.i"
 %include "boost_shared_ptr.i"
-
 %include "carrays.i"
+
+%include "typemaps.i"
 
 // N.b. these may interfere with the use of e.g. std_list.i for primitive types;
 // you will have to say e.g.
