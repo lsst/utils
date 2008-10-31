@@ -9,17 +9,8 @@ Access to useful Utility classes.
 %module(package="lsst.utils", docstring=utils_DOCSTRING) utilsLib
 
 %{
-#   include "lsst/utils/Demangle.h"
-#   include "lsst/utils/Utils.h"
-%}
-
-%inline %{
-namespace lsst { namespace utils { } }
-    
-using namespace lsst::utils;
-%}
-
-%init %{
+#include "lsst/utils/Demangle.h"
+#include "lsst/utils/Utils.h"
 %}
 
 #define NO_SWIG_LSST_EXCEPTIONS
@@ -51,7 +42,3 @@ def version(HeadURL = r"$HeadURL: svn+ssh://svn.lsstcorp.org/DMS/utils/trunk/pyt
 
 %}
 
-/******************************************************************************/
-// Local Variables: ***
-// eval: (setq indent-tabs-mode nil) ***
-// End: ***
