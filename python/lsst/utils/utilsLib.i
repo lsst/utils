@@ -19,26 +19,37 @@ Access to useful Utility classes.
 %include "lsst/utils/Utils.h"
 
 %pythoncode %{
+import re
 
-def version(HeadURL = r"$HeadURL: svn+ssh://svn.lsstcorp.org/DMS/utils/trunk/python/lsst/utils.i $"):
-    """Return a version given a HeadURL string.  If a different version's setup, return that too"""
+def version(HeadURL = r"$HeadURL: svn+ssh://svn.lsstcorp.org/DMS/utils/trunk/python/lsst/utils.i $",
+            ProductName=None):
+    """
+    Return a product name and version string, given a HeadURL string.
+    If a different version is setup in eups, include it in the return string.
+    """
 
     version_svn = guessSvnVersion(HeadURL)
 
+    if not ProductName:
+        # Guess the package name from HeadURL by extracting directory components
+        # between DMS and trunk/branches/tickets/tags
+        try:
+            m = re.match(r".*/DMS/(.*)/(?:branches|tags|tickets|trunk)/.*", HeadURL)
+            ProductName = m.group(1).replace('/','_')
+        except:
+            return "unknown product " + version_svn
     try:
         import eups
     except ImportError:
-        return version_svn
+        pass
     else:
         try:
-            version_eups = eups.setup("fw")
-        except AttributeError:
-            return version_svn
-
-    if version_eups == version_svn:
-        return version_svn
-    else:
-        return "%s (setup: %s)" % (version_svn, version_eups)
+            version_eups = eups.Eups().findSetupVersion(ProductName)[0]
+        except:
+            version_eups = None
+        if (version_eups and version_eups != version_svn): 
+            return "%s %s (setup: %s)" % (ProductName, version_svn, version_eups)
+    return "%s %s" % (ProductName, version_svn)
 
 %}
 
