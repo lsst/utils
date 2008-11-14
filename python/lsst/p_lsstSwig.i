@@ -1,14 +1,22 @@
 // -*- lsst-c++ -*-
+
+// This SWIG file provides generally useful functionality, macros,
+// and includes to all LSST packages.
+//
+// Any types or SWIG typemaps added to this file will therefore
+// affect a lot of code, and should be _very_ carefully considered.
+
+
 #if defined(SWIGPYTHON)
-/*
- * don't allow user to add attributes to C-defined classes; catches a variety of
- * typos when the user _thinks_ that they're setting a C-level object, but in
- * reality they're adding a new (and irrelevent) member to the class
- */
+
+// Don't allow user to add attributes to C-defined classes; catches a variety of
+// typos when the user _thinks_ that they're setting a C-level object, but in
+// reality they're adding a new (and irrelevent) member to the class
 %pythonnondynamic;
 #endif
 
-%naturalvar;                            // use const reference typemaps
+%naturalvar;  // use const reference typemaps
+
 %include "cpointer.i"
 %include "exception.i"
 %include "std_list.i"
@@ -19,7 +27,6 @@
 %include "std_iostream.i"
 %include "boost_shared_ptr.i"
 %include "carrays.i"
-
 %include "typemaps.i"
 
 // N.b. these may interfere with the use of e.g. std_list.i for primitive types;
@@ -37,46 +44,13 @@
 // %apply float &OUTPUT { float & };
 // %apply double &OUTPUT { double & };
 
-%array_class(float, floatArray);
-%array_class(double, doubleArray);
+// %array_class(float, floatArray);
+// %array_class(double, doubleArray);
 
 
-//
-// Work around a swig 1.33.1 bug wherein swig does not realise that python still
-// owns the pointer that is now wrapped in a shared_ptr
-//
-#define HAVE_SMART_POINTER 1            // allow e.g. FW to know that this macro is defined
-%define %smart_pointer(PTR_TYPE, NAME, TYPE...)
-// The next three lines are equivalent to %extend_smart_pointer(PTR_TYPE<TYPE >);
-   //%implicitconv PTR_TYPE<TYPE >;
-   %apply const SWIGTYPE& SMARTPOINTER { const PTR_TYPE<TYPE >& };
-   %apply SWIGTYPE SMARTPOINTER { PTR_TYPE<TYPE > };
-
-   %template(NAME) PTR_TYPE<TYPE >;
-%enddef
-
-%define %boost_shared_ptr(NAME, TYPE...)
-    %smart_pointer(boost::shared_ptr, NAME, TYPE)
-%enddef
-
-/************************************************************************************************************/
-/*
- * Required forward declaration to use make_output_iterator --- swig bug?
- */
-%{
-    namespace swig {
-        template<typename OutIter>
-        PySwigIterator*
-        make_output_iterator(const OutIter& current, const OutIter& begin,const OutIter& end, PyObject *seq);
-    }
-%}
+// Mapping C++ exceptions to Python
 
 #if !defined(NO_SWIG_LSST_EXCEPTIONS)
-
-/******************************************************************************/
-/*
- * Mapping C++ exceptions to Python
- */
 
 %pythoncode %{
     import lsst.pex.exceptions
@@ -86,10 +60,6 @@
 #include <new>
 #include "lsst/pex/exceptions/Exception.h"
 #include "lsst/pex/exceptions/Runtime.h"
-%}
-
-%inline %{
-namespace lsst { namespace pex { namespace exceptions { } } }
 %}
 
 // Use the Python C API to create the constructor argument tuple (a message string and a
@@ -133,27 +103,28 @@ static void raiseLsstExceptionStack(lsst::pex::exceptions::ExceptionStack & ex) 
     PyErr_SetObject(clazz, args);
     Py_DECREF(args);
 }
-%}
 
-// Specifies the default C++ to python exception handling interface
-%exception {
-    try {
-        $action
-    } catch (lsst::pex::exceptions::ExceptionStack &e) {
-        raiseLsstExceptionStack(e);
-        SWIG_fail;
-    } catch (std::exception & e) {
-        PyErr_SetString(PyExc_Exception, e.what());
-        SWIG_fail;
-    }
-}
+%}
 
 #endif
 
-/******************************************************************************/
-/*
- * Throw an exception if func returns NULL
- */
+// Turns on the default C++ to python exception handling interface
+%define %lsst_exceptions()
+    %exception {
+        try {
+            $action
+        } catch (lsst::pex::exceptions::ExceptionStack &e) {
+            raiseLsstExceptionStack(e);
+            SWIG_fail;
+        } catch (std::exception & e) {
+            PyErr_SetString(PyExc_Exception, e.what());
+            SWIG_fail;
+        }
+    }
+%enddef
+
+
+// Throw an exception if func returns NULL
 %define NOTNULL(func)
     %exception func {
         $action;
@@ -163,9 +134,7 @@ static void raiseLsstExceptionStack(lsst::pex::exceptions::ExceptionStack & ex) 
     }
 %enddef
 
-/*
- * Throw an exception if func returns a negative value
- */
+// Throw an exception if func returns a negative value
 %define NOTNEGATIVE(func)
     %exception func {
         $action;
@@ -175,13 +144,8 @@ static void raiseLsstExceptionStack(lsst::pex::exceptions::ExceptionStack & ex) 
     }
 %enddef
 
-/******************************************************************************/
-
+// convert void pointer to (TYPE *)
 %define CAST(TYPE)
-    %pointer_cast(void *, TYPE *, cast_ ## TYPE ## Ptr); // convert void pointer to (TYPE *)
+    %pointer_cast(void *, TYPE *, cast_ ## TYPE ## Ptr);
 %enddef
 
-/******************************************************************************/
-// Local Variables: ***
-// eval: (setq indent-tabs-mode nil) ***
-// End: ***
