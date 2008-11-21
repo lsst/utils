@@ -20,7 +20,7 @@ for d in Split("lib python/lsst/utils doc"):
 
 env['IgnoreFiles'] = r"(~$|\.pyc$|^\.svn$|\.o$)"
 
-if False:
+if True:
     Alias("install", [env.Install(env['prefix'], "python"),
                       env.Install(env['prefix'], "include"),
                       env.Install(env['prefix'], "lib"),
