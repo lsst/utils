@@ -62,10 +62,9 @@
 #include "lsst/pex/exceptions/Runtime.h"
 %}
 
-// Use the Python C API to create the constructor argument tuple (a message string and a
-// DataProperty corresponding to an ExceptionStack) for a Python exception class assumed to
-// be derived from lsst.pex.exceptions.LsstExceptionStack. Also obtain a class object for
-// the desired exception type. Use the class object and tuple to raise a Python exception.
+// Use the Python C API to raise an exception of type
+// lsst.pex.exceptions.Exception with a value that is a SWIGged proxy for a
+// copy of the exception object.
 %{
 static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     PyObject* pyex = 0;
@@ -79,7 +78,16 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
         pyex = Py_None;
     }
 
-    PyErr_SetObject(PyObject_Type(pyex), pyex);
+    PyObject* pyexbase = PyExc_RuntimeError;
+    PyObject* module = PyImport_AddModule("lsst.pex.exceptions");
+    if (module != 0) {
+        pyexbase = PyObject_GetAttrString(module, "LsstCppException");
+        if (pyexbase == 0) {
+            pyexbase = PyExc_RuntimeError;
+        }
+    }
+
+    PyErr_SetObject(pyexbase, pyex);
 }
 
 %}
