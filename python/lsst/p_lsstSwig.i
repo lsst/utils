@@ -68,7 +68,7 @@
 %{
 static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     PyObject* pyex = 0;
-    swig_type_info* tinfo = SWIG_TypeQuery(ex.ctype());
+    swig_type_info* tinfo = SWIG_TypeQuery(ex.getType());
     if (tinfo != 0) {
 	lsst::pex::exceptions::Exception* e = ex.clone();
         pyex = SWIG_NewPointerObj(static_cast<void*>(e), tinfo,
