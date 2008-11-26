@@ -46,7 +46,7 @@ class MemoryTestCase(unittest.TestCase):
             if nleak <= nleakPrintMax:
                 print dafBase.Citizen_census(dafBase.cout, memId0)
             else:
-                census = dafBase.Citizen_census_for_swig()
+                census = dafBase.Citizen_census()
                 print "..."
                 for i in range(nleakPrintMax - 1, -1, -1):
                     print census[i].repr()
