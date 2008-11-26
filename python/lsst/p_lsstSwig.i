@@ -62,46 +62,31 @@
 #include "lsst/pex/exceptions/Runtime.h"
 %}
 
-// Use the Python C API to create the constructor argument tuple (a message string and a
-// DataProperty corresponding to an ExceptionStack) for a Python exception class assumed to
-// be derived from lsst.pex.exceptions.LsstExceptionStack. Also obtain a class object for
-// the desired exception type. Use the class object and tuple to raise a Python exception.
+// Use the Python C API to raise an exception of type
+// lsst.pex.exceptions.Exception with a value that is a SWIGged proxy for a
+// copy of the exception object.
 %{
-static void raiseLsstExceptionStack(lsst::pex::exceptions::ExceptionStack & ex) {
-    PyObject * modules = PyImport_GetModuleDict();
-    PyObject * module  = PyDict_GetItemString(modules, ex.getPythonModule());
-    if (module == 0) {
-        PyErr_Format(PyExc_ImportError, "failed to find LSST exception module '%s'", ex.getPythonModule());
-        return;
-    }
-    PyObject * clazz  = PyDict_GetItem(PyModule_GetDict(module), PyString_FromString(ex.getPythonClass()));
-    if (clazz == 0) {
-        PyErr_Format(PyExc_AttributeError, "unable to find LSST exception class '%s' in module '%s'",
-                     ex.getPythonClass(), ex.getPythonModule());
-        return;
-    }
-
-    PyObject * args = PyTuple_New(2);
-    if (args == 0) {
-        PyErr_SetString(clazz, ex.what());
-        return;
-    }
-
-    PyTuple_SetItem(args, 0, PyString_FromString(ex.what()));
-
-    PyObject       * stack = 0;
-    swig_type_info * tinfo = SWIG_TypeQuery("boost::shared_ptr<lsst::daf::base::DataProperty> *");
+static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
+    PyObject* pyex = 0;
+    swig_type_info* tinfo = SWIG_TypeQuery(ex.getType());
     if (tinfo != 0) {
-        void * ptr = static_cast<void *>(new lsst::daf::base::DataProperty::PtrType(ex.getStack()));
-        stack = SWIG_NewPointerObj(static_cast<void *>(ptr), tinfo, SWIG_POINTER_OWN);
+	lsst::pex::exceptions::Exception* e = ex.clone();
+        pyex = SWIG_NewPointerObj(static_cast<void*>(e), tinfo,
+            SWIG_POINTER_OWN);
     } else {
-        stack = Py_None;
-        Py_INCREF(stack);
+        pyex = Py_None;
     }
-    PyTuple_SetItem(args, 1, stack);
 
-    PyErr_SetObject(clazz, args);
-    Py_DECREF(args);
+    PyObject* pyexbase = PyExc_RuntimeError;
+    PyObject* module = PyImport_AddModule("lsst.pex.exceptions");
+    if (module != 0) {
+        pyexbase = PyObject_GetAttrString(module, "LsstCppException");
+        if (pyexbase == 0) {
+            pyexbase = PyExc_RuntimeError;
+        }
+    }
+
+    PyErr_SetObject(pyexbase, pyex);
 }
 
 %}
@@ -113,8 +98,8 @@ static void raiseLsstExceptionStack(lsst::pex::exceptions::ExceptionStack & ex) 
     %exception {
         try {
             $action
-        } catch (lsst::pex::exceptions::ExceptionStack &e) {
-            raiseLsstExceptionStack(e);
+        } catch (lsst::pex::exceptions::Exception &e) {
+            raiseLsstException(e);
             SWIG_fail;
         } catch (std::exception & e) {
             PyErr_SetString(PyExc_Exception, e.what());
