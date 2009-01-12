@@ -17,6 +17,10 @@ namespace utils {
 void guessSvnVersion(std::string const& headURL, std::string& OUTPUT);
 boost::any stringToAny(std::string valueString);
 
+/// @brief EUPS bindings
+namespace eups {
+    std::string productDir(std::string const& product, std::string const& version="setup");
+}
 }} // namespace lsst::utils
 
 #endif

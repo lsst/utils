@@ -3,7 +3,11 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/regex.hpp>
+#include "boost/regex.hpp"
+#define USE_PEX_EXCEPTIONS_H 0
+#if USE_PEX_EXCEPTIONS_H
+#include "lsst/pex/exceptions.h"
+#endif
 
 namespace lsst {
 namespace utils {
@@ -89,5 +93,34 @@ boost::any stringToAny(std::string valueString)
     return boost::any(valueString);
 }
 
-
+/*!
+ * \brief return an eups PRODUCT_DIR
+ *
+ * Return the directory of a setup product
+ *
+ * \throws lsst::pex::exceptions::InvalidParameterException if version != "setup"
+ * \throws lsst::pex::exceptions::NotFoundException if desired version can't be found
+ */
+std::string eups::productDir(std::string const& product, std::string const& version) {
+    if (version != "setup") {
+#if USE_PEX_EXCEPTIONS_H
+        LSST_THROW(lsst::pex::exceptions::InvalidParameterException, "Unsupported version: " + version);
+#endif
+    }
+    
+    std::string var = product;      // product's environment variable
+    
+    transform(var.begin(), var.end(), var.begin(), (int (*)(int)) toupper);
+    var += "_DIR";
+    
+    char const *dir = getenv(var.c_str());
+    if (!dir) {
+#if USE_PEX_EXCEPTIONS_H
+        LSST_THROW(lsst::pex::exceptions::NotFoundException, "Product " + product + " has no version " + version);
+#endif
+    }
+    
+    return dir;
+}
+    
 }} // namespace lsst::utils
