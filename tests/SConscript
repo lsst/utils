@@ -1,0 +1,15 @@
+# -*- python -*-
+Import("env")
+import os
+import sys
+
+import lsst.tests
+#
+# Tests
+#
+ignoreList=[]
+tests = lsst.tests.Control(env, ignoreList=ignoreList, verbose=True)
+    
+# set up python tests
+for target in tests.run("*.py"):
+    env.Depends(target, "../python/lsst/utils/_utilsLib%s" % (env["LDMODULESUFFIX"]))

@@ -9,13 +9,14 @@ env = scons.makeEnv("utils",
                     r"$HeadURL$",
                     [["boost", "boost/regex.hpp", "boost_regex:C++"],
                      ["python", "Python.h"], # needed for Swig
+                     ["pex_exceptions", "lsst/pex/exceptions.h", "pex_exceptions:C++"],
                     ])
 
-env.libs["utils"] += env.getlibs("boost")
+env.libs["utils"] += env.getlibs("boost pex_exceptions")
 #
 # Build/install things
 #
-for d in Split("lib python/lsst/utils doc"):
+for d in Split("lib python/lsst/utils doc tests"):
     SConscript(os.path.join(d, "SConscript"))
 
 env['IgnoreFiles'] = r"(~$|\.pyc$|^\.svn$|\.o$)"

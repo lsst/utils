@@ -4,4 +4,5 @@ Import('env')
 env.SharedLibrary('utils', map(lambda str: "../src/" + str,
                             ["Demangle.cc",
                              "Utils.cc"
-                            ]), LIBS=env.getlibs("boost"))
+                            ]),
+                  LIBS=filter(lambda x: x != "utils", env.getlibs("utils")))

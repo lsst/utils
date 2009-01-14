@@ -4,10 +4,7 @@
 #include <sstream>
 #include <string>
 #include "boost/regex.hpp"
-#define USE_PEX_EXCEPTIONS_H 0
-#if USE_PEX_EXCEPTIONS_H
 #include "lsst/pex/exceptions.h"
-#endif
 
 namespace lsst {
 namespace utils {
@@ -103,9 +100,7 @@ boost::any stringToAny(std::string valueString)
  */
 std::string eups::productDir(std::string const& product, std::string const& version) {
     if (version != "setup") {
-#if USE_PEX_EXCEPTIONS_H
-        LSST_THROW(lsst::pex::exceptions::InvalidParameterException, "Unsupported version: " + version);
-#endif
+        throw LSST_EXCEPT(lsst::pex::exceptions::InvalidParameterException, "Unsupported version: " + version);
     }
     
     std::string var = product;      // product's environment variable
@@ -115,9 +110,7 @@ std::string eups::productDir(std::string const& product, std::string const& vers
     
     char const *dir = getenv(var.c_str());
     if (!dir) {
-#if USE_PEX_EXCEPTIONS_H
-        LSST_THROW(lsst::pex::exceptions::NotFoundException, "Product " + product + " has no version " + version);
-#endif
+        throw LSST_EXCEPT(lsst::pex::exceptions::NotFoundException, "Product " + product + " has no version " + version);
     }
     
     return dir;

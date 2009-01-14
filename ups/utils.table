@@ -1,4 +1,5 @@
 setupRequired(base)
+setupRequired(pex_exceptions)
 setupRequired(boost >= 1.34.1)
 
 setupOptional("swig")

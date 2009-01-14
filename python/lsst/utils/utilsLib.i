@@ -13,8 +13,8 @@ Access to useful Utility classes.
 #include "lsst/utils/Utils.h"
 %}
 
-#define NO_SWIG_LSST_EXCEPTIONS
 %include "../p_lsstSwig.i"
+%lsst_exceptions();
 %include "lsst/utils/Demangle.h"
 %include "lsst/utils/Utils.h"
 
