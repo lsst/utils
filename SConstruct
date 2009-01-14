@@ -9,9 +9,10 @@ env = scons.makeEnv("utils",
                     r"$HeadURL$",
                     [["boost", "boost/regex.hpp", "boost_regex:C++"],
                      ["python", "Python.h"], # needed for Swig
+                     ["pex_exceptions", "lsst/pex/exceptions.h", "pex_exceptions:C++"],
                     ])
 
-env.libs["utils"] += env.getlibs("boost")
+env.libs["utils"] += env.getlibs("boost pex_exceptions")
 #
 # Build/install things
 #

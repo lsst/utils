@@ -4,4 +4,4 @@ Import('env')
 env.SharedLibrary('utils', map(lambda str: "../src/" + str,
                             ["Demangle.cc",
                              "Utils.cc"
-                            ]), LIBS=env.getlibs("boost"))
+                            ]), LIBS=env.getlibs("boost pex_exceptions"))

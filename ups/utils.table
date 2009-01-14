@@ -1,5 +1,6 @@
 setupRequired(base)
 setupRequired(boost >= 1.34.1)
+setupRequired(pex_exceptions >= svn6994)
 
 setupOptional("swig")
 setupOptional("doxygen")
