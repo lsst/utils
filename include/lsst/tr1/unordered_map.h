@@ -5,9 +5,7 @@
 
 namespace std {
     namespace tr1 {
-        template <typename KEY_t, typename VAL_t>
-        class unordered_map : public boost::unordered_map<KEY_t, VAL_t> {
-        };
+        using ::boost::unordered_map;
     }
 }
 
