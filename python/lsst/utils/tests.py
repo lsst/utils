@@ -13,6 +13,7 @@ except NameError:
     nleakPrintMax = 20                  # maximum number of leaked blocks to print
 
 def init():
+    pass
 #    global memId0
 #    memId0 = dafBase.Citizen_getNextMemId()  # used by MemoryTestCase
 
