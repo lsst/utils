@@ -1,6 +1,6 @@
 setupRequired(base)
 setupRequired(pex_exceptions)
-setupRequired(boost >= 1.34.1)
+setupRequired(boost >= 1.37.0)
 
 setupOptional("swig")
 setupOptional("doxygen")
