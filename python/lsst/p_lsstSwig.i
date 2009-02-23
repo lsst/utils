@@ -62,6 +62,13 @@
 #include "lsst/pex/exceptions/Runtime.h"
 %}
 
+// Ignore commonly-used boost idiom to prevent warnings and avoid the need for
+// even more %imports.
+%ignore boost::noncopyable;
+namespace boost {
+    class noncopyable { };
+}
+
 // Use the Python C API to raise an exception of type
 // lsst.pex.exceptions.Exception with a value that is a SWIGged proxy for a
 // copy of the exception object.
