@@ -1,5 +1,5 @@
-setupRequired(base)
-setupRequired(pex_exceptions)
+setupRequired(base >= 3.1)
+setupRequired(pex_exceptions >= 3.2.1)
 setupRequired(boost >= 1.37.0)
 
 setupOptional("swig")
