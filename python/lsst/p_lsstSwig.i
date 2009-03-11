@@ -81,7 +81,8 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
         pyex = SWIG_NewPointerObj(static_cast<void*>(e), tinfo,
             SWIG_POINTER_OWN);
     } else {
-        pyex = Py_None;
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(ex.what()))
+	return;
     }
 
     PyObject* pyexbase = PyExc_RuntimeError;
