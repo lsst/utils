@@ -1,7 +1,11 @@
 """Support code for running unit tests"""
 
 import unittest
-# import lsst.daf.base as dafBase
+try:
+    import lsst.daf.base as dafBase
+except ImportError:
+    dafBase = None
+    
 import lsst.pex.exceptions as pexExcept
 import os
 import sys
@@ -13,9 +17,9 @@ except NameError:
     nleakPrintMax = 20                  # maximum number of leaked blocks to print
 
 def init():
-    pass
-#    global memId0
-#    memId0 = dafBase.Citizen_getNextMemId()  # used by MemoryTestCase
+    global memId0
+    if dafBase:
+        memId0 = dafBase.Citizen_getNextMemId() # used by MemoryTestCase
 
 def run(suite, exit=True):
     """Exit with the status code resulting from running the provided test suite"""
@@ -38,23 +42,22 @@ class MemoryTestCase(unittest.TestCase):
         pass
 
     def testLeaks(self):
-        """Check for memory leaks in the preceding tests (NOT IMPLEMENTED)"""
-        pass
+        """Check for memory leaks in the preceding tests"""
+        if dafBase:
+            global memId0, nleakPrintMax
+            nleak = dafBase.Citizen_census(0, memId0)
+            if nleak != 0:
+                print "\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0)
 
-#        global memId0, nleakPrintMax
-#        nleak = dafBase.Citizen_census(0, memId0)
-#        if nleak != 0:
-#            print "\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0)
-#            
-#            if nleak <= nleakPrintMax:
-#                print dafBase.Citizen_census(dafBase.cout, memId0)
-#            else:
-#                census = dafBase.Citizen_census()
-#                print "..."
-#                for i in range(nleakPrintMax - 1, -1, -1):
-#                    print census[i].repr()
-#                
-#            self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
+                if nleak <= nleakPrintMax:
+                    print dafBase.Citizen_census(dafBase.cout, memId0)
+                else:
+                    census = dafBase.Citizen_census()
+                    print "..."
+                    for i in range(nleakPrintMax - 1, -1, -1):
+                        print census[i].repr()
+
+                self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
