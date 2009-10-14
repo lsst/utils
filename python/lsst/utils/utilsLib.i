@@ -11,12 +11,15 @@ Access to useful Utility classes.
 %{
 #include "lsst/utils/Demangle.h"
 #include "lsst/utils/Utils.h"
+#include "lsst/utils/RaDecStr.h"
 %}
 
 %include "../p_lsstSwig.i"
 %lsst_exceptions();
 %include "lsst/utils/Demangle.h"
 %include "lsst/utils/Utils.h"
+%include "lsst/utils/RaDecStr.h"
+
 
 %pythoncode %{
 import re
