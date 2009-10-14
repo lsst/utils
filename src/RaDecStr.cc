@@ -4,23 +4,53 @@
 using namespace std;
 namespace except = lsst::pex::exceptions;
 
+/**
+ \defgroup RaDec  Right Ascension and Declination Parsers
+
+\brief Routines for converting right ascension and declination from degrees or
+radians into strings and back again.
+
+Right ascensions and declinations (raDecs) are easiest read as strings
+in the form hh:mm:ss.ss +dd:mm::ss.s, but for calculations, they need
+to be in degrees or radians. These functions perform those calculations. 
+The function names themselves use the following abbreviations
+
+- <STRONG>ra</STRONG> Right Ascension
+- <STRONG>dec</STRONG> Declination
+- <STRONG>str</STRONG> String
+- <STRONG>deg</STRONG> Degrees
+- <STRONG>rad</STRONG> Radians.
+
+So, for example raStrToRad() converts a right ascension in the form of a string to
+radians.
+
+The ouput strings are in fixed length Ra = hh:mm:ss.ss and Dec= +dd:mm::ss.s
+with all zeros present (not replaced with whitespace).
+
+Input strings must be of a similar format, although some variation is allowed.
+The default delimiter (the colon) can be supplied as an optional argument
+ @{
+*/
 
 
 using namespace std;
 namespace ut = lsst::utils;
 
-inline double radToDeg(double angleInRadians) {
+double radToDeg(double angleInRadians) {
     const double pi = 3.141592653589793115997963468544;
     return angleInRadians * 180/pi;
 }
 
 
-inline double degToRad(double angleInDegrees) {
+double degToRad(double angleInDegrees) {
     const double pi = 3.141592653589793115997963468544;
     return angleInDegrees * pi / 180.;
 }
 
-string ut::raRadToStr(double raRad) {
+
+///Convert a right ascension in radians to a string format
+///\param raRad Ra in radians
+string ut::raRadToStr(double raRad ) {
     return raDegToStr( radToDeg(raRad) );
 }
     
@@ -88,21 +118,20 @@ string ut::raDecDegToStr(double raDeg, double decDeg) {
 
 
     
+
     
-// *********************************************************************
+// ////////////////////////////////////////////////////////////////
 
 //
 // Converting strings to numbers
 //
 
-#include <iostream>
-#include <cstdio>
-double ut::raStrToRad(string raStr, string delimiter) {
+double ut::raStrToRad(std::string raStr, std::string delimiter) {
     return degToRad( raStrToDeg(raStr) );
 }
 
 
-double ut::raStrToDeg(string raStr, string delimiter) {
+double ut::raStrToDeg(std::string raStr, std::string delimiter) {
     
     //Regex the hours, minutes and seconds
     string regexStr = "(\\d+)";
@@ -111,11 +140,10 @@ double ut::raStrToDeg(string raStr, string delimiter) {
     regexStr.append(delimiter);    
     regexStr.append("([\\d\\.]+)");
     
-     //http://www.boost.org/doc/libs/1_40_0/libs/regex/doc/html/boost_regex/captures.html
-    static const boost::regex re(regexStr);
+         static const boost::regex re(regexStr);
     boost::cmatch what;
-    //This throws an exception of failure. I could catch it, but I'd only throw it 
-    //again
+    //This throws an exception of failure. I could catch it, 
+    //but I'd only throw it again
     if(! boost::regex_match(raStr.c_str(), what, re)) {
         string msg= boost::str(boost::format("Failed to parse %s as a declination") % raStr);
         throw LSST_EXCEPT(except::RuntimeErrorException, msg);
@@ -138,12 +166,12 @@ double ut::raStrToDeg(string raStr, string delimiter) {
 }
 
 
-double ut::decStrToRad(string decStr, string delimiter) {
+double ut::decStrToRad(std::string decStr, std::string delimiter) {
     return degToRad( decStrToDeg(decStr) );
 }
 
 
-double ut::decStrToDeg(string decStr, string delimiter) {
+double ut::decStrToDeg(std::string decStr, std::string delimiter) {
     
     //Regex the degrees, minutes and seconds
     string regexStr = "([\\d]+)";
@@ -177,3 +205,5 @@ double ut::decStrToDeg(string decStr, string delimiter) {
     
     return degrees;
 }
+
+/*@}*/
