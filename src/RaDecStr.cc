@@ -36,14 +36,14 @@ The default delimiter (the colon) can be supplied as an optional argument
 using namespace std;
 namespace ut = lsst::utils;
 
-double radToDeg(double angleInRadians) {
-    const double pi = 3.141592653589793115997963468544;
-    return angleInRadians * 180/pi;
+double radToDeg(long double angleInRadians) {
+    const long double pi = 3.141592653589793115997963468544;
+    return angleInRadians * 180./pi;
 }
 
 
-double degToRad(double angleInDegrees) {
-    const double pi = 3.141592653589793115997963468544;
+double degToRad(long double angleInDegrees) {
+    const long double pi = 3.141592653589793115997963468544;
     return angleInDegrees * pi / 180.;
 }
 
@@ -59,15 +59,16 @@ string ut::raDegToStr(double raDeg){
     double ra = raDeg;  //Shorthand
     
     //Convert to seconds of arc
-    ra *= 86400/3600;
+    ra = round(ra*1e6)/1e6;
+    ra *= 86400/360;
     
-    int hr = (int) floor(raDeg/3600.);
+    int hr = (int) floor(ra/3600.);
     ra -= hr*3600;
-
+    
     int mn = (int) floor(ra/60.);
     ra -= mn*60;    //Only seconds remain
-
-    return str( boost::format("%2i:%02i:%5.2f") % hr % mn % ra);
+    
+    return str( boost::format("%02i:%02i:%05.2f") % hr % mn % ra);
 }
     
 
@@ -80,14 +81,11 @@ string ut::decDegToStr(double decDeg) {
 
     double dec = decDeg;    //Shorthand
     
-    string sgn;
-    if(dec < 0) {
-        sgn="-";
-    } else {
-        sgn="+";
-    }
+    string sgn = (dec<0) ? "-" : "+";
 
-    dec = fabs(dec);
+    //Rounding the declination prevents 14.999999999 being represented
+    //as 14.:59:60.00
+    dec = fabs(round(dec*1e6)/1e6);
 
     int degrees = (int) floor(dec);
     dec -= degrees;
@@ -96,9 +94,10 @@ string ut::decDegToStr(double decDeg) {
     dec -= min/60.;
 
     double sec = dec*3600;
+    sec = floor(sec*100)/100.;
 
     string str = sgn;
-    return str + boost::str(boost::format("%2i:%02i:%05.2f") %  degrees % min % sec);
+    return boost::str(boost::format("%s%02i:%02i:%05.2f") % sgn % degrees % min % sec);
    
 }
     
