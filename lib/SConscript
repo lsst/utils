@@ -3,6 +3,7 @@ Import('env')
 
 env.SharedLibrary('utils', map(lambda str: "../src/" + str,
                             ["Demangle.cc",
-                             "Utils.cc"
+                             "Utils.cc",
+                             "RaDecStr.cc"
                             ]),
                   LIBS=filter(lambda x: x != "utils", env.getlibs("utils")))
