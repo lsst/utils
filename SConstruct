@@ -25,6 +25,8 @@ if True:
     Alias("install", [env.Install(env['prefix'], "python"),
                       env.Install(env['prefix'], "include"),
                       env.Install(env['prefix'], "lib"),
+                      env.InstallAs(os.path.join(env['prefix'], "doc", "doxygen.conf"),
+                                    os.path.join("doc", "doxygen.conf")),
                       env.InstallAs(os.path.join(env['prefix'], "doc", "doxygen"),
                                     os.path.join("doc", "htmlDir")),
                       env.InstallEups(env['prefix'] + "/ups", glob.glob("ups/*.table"))])
