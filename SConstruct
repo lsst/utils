@@ -8,6 +8,7 @@ import lsst.SConsUtils as scons
 env = scons.makeEnv("utils",
                     r"$HeadURL$",
                     [["boost", "boost/regex.hpp", "boost_regex:C++"],
+                     ["boost", "boost/test/unit_test.hpp", "boost_unit_test_framework:C++"],
                      ["python", "Python.h"], # needed for Swig
                      ["pex_exceptions", "lsst/pex/exceptions.h", "pex_exceptions:C++"],
                     ])
