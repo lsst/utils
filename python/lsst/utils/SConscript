@@ -1,5 +1,5 @@
 # -*- python -*-
 Import("env")
 
-env.CheckSwig("python", ilang="c++")
-env.LoadableModuleIncomplete("_utilsLib", Split("utilsLib.i"), LIBS=env.libs["boost"] + ["utils"])
+env.LoadableModuleIncomplete("utilsLib", Split("utilsLib.cc"),
+                             LIBS=env.getlibs("python boost_python utils"))

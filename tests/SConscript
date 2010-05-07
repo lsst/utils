@@ -16,4 +16,4 @@ tests.run("*.cc")
 
 # set up python tests
 for target in tests.run("*.py"):
-    env.Depends(target, "../python/lsst/utils/_utilsLib%s" % (env["LDMODULESUFFIX"]))
+    env.Depends(target, "../python/lsst/utils/utilsLib%s" % (env["LDMODULESUFFIX"]))
