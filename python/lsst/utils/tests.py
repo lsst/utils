@@ -31,6 +31,7 @@ except ImportError:
 import lsst.pex.exceptions as pexExcept
 import os
 import sys
+import gc
 
 try:
     type(memId0)
@@ -66,6 +67,7 @@ class MemoryTestCase(unittest.TestCase):
     def testLeaks(self):
         """Check for memory leaks in the preceding tests"""
         if dafBase:
+            gc.collect()
             global memId0, nleakPrintMax
             nleak = dafBase.Citizen_census(0, memId0)
             if nleak != 0:
