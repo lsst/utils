@@ -1,0 +1,41 @@
+#include <boost/python.hpp>
+#include "lsst/utils/Demangle.h"
+#include "lsst/utils/RaDecStr.h"
+#include "lsst/utils/Utils.h"
+
+namespace bp = boost::python;
+
+namespace lsst { namespace utils { %%scope(lsst::utils)%%
+
+namespace {
+
+bp::str pyGuessSvnVersion(std::string const& headURL) {
+    std::string result;
+    guessSvnVersion(headURL, result);
+    return bp::str(result);
+}
+
+void declareUtils() {
+    bp::import("lsst.pex.exceptions");
+    %%auto_function(demangleType)%%;
+    %%auto_function(raRadToStr)%%;
+    %%auto_function(raDegToStr)%%;
+    %%auto_function(decRadToStr)%%;
+    %%auto_function(decDegToStr)%%;
+    %%auto_function(raDecRadToStr)%%;
+    %%auto_function(raDecDegToStr)%%;
+    %%auto_function(raStrToRad)%%;
+    %%auto_function(raStrToDeg)%%;
+    %%auto_function(decStrToRad)%%;
+    %%auto_function(decStrToDeg)%%;
+    %%auto_function(eups::productDir)%%;
+    bp::def("guessSvnVersion", &lsst::utils::pyGuessSvnVersion);
+}
+
+} // anonymous
+
+}}
+
+BOOST_PYTHON_MODULE(utilsLib) {
+    lsst::utils::declareUtils();
+}

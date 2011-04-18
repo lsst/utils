@@ -1,6 +1,5 @@
-setupRequired(base >= 3.1)
-setupRequired(pex_exceptions >= 3.2.1)
-setupRequired(boost >= 1.37.0)
+setupRequired(base == bp)
+setupRequired(pex_exceptions == bp)
 
 setupOptional("doxygen")
 
@@ -8,4 +7,4 @@ envAppend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
 envAppend(DYLD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
 
 envAppend(PYTHONPATH, ${PRODUCT_DIR}/python)
-
+envAppend(BPDOX_PATH, ${PRODUCT_DIR}/doc/xml)

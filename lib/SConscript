@@ -6,4 +6,4 @@ env.SharedLibrary('utils', map(lambda str: "../src/" + str,
                              "Utils.cc",
                              "RaDecStr.cc"
                             ]),
-                  LIBS=filter(lambda x: x != "utils", env.getlibs("utils")))
+                  LIBS=env.getlibs("boost_regex pex_exceptions"))

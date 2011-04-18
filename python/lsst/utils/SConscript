@@ -1,5 +1,8 @@
 # -*- python -*-
 Import("env")
 
-env.LoadableModuleIncomplete("utilsLib", Split("utilsLib.cc"),
-                             LIBS=env.getlibs("python boost_python utils"))
+src = env.BPDox("#pysrc/utilsLib.cc.in")
+
+env.Depends(src, "#doc/xml/utils")
+
+env.LoadableModuleIncomplete("utilsLib", src, LIBS=env.getpylibs("utils bputils"))

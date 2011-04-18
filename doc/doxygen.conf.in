@@ -12,10 +12,18 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 
+# This tag specifies the encoding used for all characters in the config file 
+# that follow. The default is UTF-8 which is also the encoding used for all 
+# text before the first occurrence of this tag. Doxygen uses libiconv (or the 
+# iconv built into libc) for the transcoding. See 
+# http://www.gnu.org/software/libiconv for the list of possible encodings.
+
+DOXYFILE_ENCODING      = UTF-8
+
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = LSST
+PROJECT_NAME           = LSST::UTILS
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
@@ -463,7 +471,8 @@ RECURSIVE              = YES
 
 EXCLUDE                = ../.sconf_temp \
                          ../examples \
-			 ../tests
+			 ../tests \
+			 ../pysrc
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -874,13 +883,13 @@ MAN_LINKS              = NO
 # generate an XML file that captures the structure of 
 # the code including all documentation.
 
-GENERATE_XML           = NO
+GENERATE_XML           = YES
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
 # put in front of it. If left blank `xml' will be used as the default path.
 
-XML_OUTPUT             = xml
+XML_OUTPUT             = xml/utils
 
 # The XML_SCHEMA tag can be used to specify an XML schema, 
 # which can be used by a validating XML parser to check the 

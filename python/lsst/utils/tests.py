@@ -1,3 +1,25 @@
+# 
+# LSST Data Management System
+# Copyright 2008, 2009, 2010 LSST Corporation.
+# 
+# This product includes software developed by the
+# LSST Project (http://www.lsst.org/).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the LSST License Statement and 
+# the GNU General Public License along with this program.  If not, 
+# see <http://www.lsstcorp.org/LegalNotices/>.
+#
+
 """Support code for running unit tests"""
 
 import unittest
@@ -9,6 +31,7 @@ except ImportError:
 import lsst.pex.exceptions as pexExcept
 import os
 import sys
+import gc
 
 try:
     type(memId0)
@@ -44,6 +67,7 @@ class MemoryTestCase(unittest.TestCase):
     def testLeaks(self):
         """Check for memory leaks in the preceding tests"""
         if dafBase:
+            gc.collect()
             global memId0, nleakPrintMax
             nleak = dafBase.Citizen_census(0, memId0)
             if nleak != 0:
@@ -85,23 +109,3 @@ def findFileFromRoot(ifile):
         file = dirname
 
     raise IOError, "Can't find %s" % ifile
-
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
-    """
-    Fail unless an LSST C++ exception of SWIG-wrapper class excClass
-    is thrown by callableObj when invoked with arguments args and
-    keywords arguments kwargs. If a different type of exception
-    is thrown, it will not be caught, and the test case will be
-    deemed to have suffered an error, exactly as for an
-    unexpected exception.
-    """
-    try:
-        callableObj(*args, **kwargs)
-    except pexExcept.LsstCppException, e:
-        if (isinstance(e.args[0], excClass)): return
-    if hasattr(excClass,'__name__'): excName = excClass.__name__
-    else: excName = str(excClass)
-    raise testcase.failureException, "lsst.pex.exceptions.LsstCppException wrapping %s not raised" % excName
-

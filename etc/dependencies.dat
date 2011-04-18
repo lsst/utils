@@ -1,0 +1,4 @@
+pex_exceptions:
+bputils:
+"boost_regex", "boost/regex.hpp", "boost_regex:C++"
+"pex_exceptions", "lsst/pex/exceptions.h", "pex_exceptions:C++"
