@@ -1,9 +1,4 @@
 # -*- python -*-
 Import('env')
 
-env.SharedLibrary('utils', map(lambda str: "../src/" + str,
-                            ["Demangle.cc",
-                             "Utils.cc",
-                             "RaDecStr.cc"
-                            ]),
-                  LIBS=env.getlibs("boost_regex pex_exceptions"))
+env.SharedLibrary('utils', Glob("#src/*.cc"), LIBS=env.getLibs("self"))

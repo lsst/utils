@@ -5,4 +5,4 @@ src = env.BPDox("#pysrc/utilsLib.cc.in")
 
 env.Depends(src, "#doc/xml/utils")
 
-env.LoadableModuleIncomplete("utilsLib", src, LIBS=env.getpylibs("utils bputils"))
+env.LoadableModuleIncomplete("utilsLib", src, LIBS=env.getLibs("main python"))

@@ -42,7 +42,7 @@ except NameError:
 def init():
     global memId0
     if dafBase:
-        memId0 = dafBase.Citizen_getNextMemId() # used by MemoryTestCase
+        memId0 = dafBase.Citizen.getNextMemId() # used by MemoryTestCase
 
 def run(suite, exit=True):
     """Exit with the status code resulting from running the provided test suite"""
@@ -69,19 +69,19 @@ class MemoryTestCase(unittest.TestCase):
         if dafBase:
             gc.collect()
             global memId0, nleakPrintMax
-            nleak = dafBase.Citizen_census(0, memId0)
+            nleak = dafBase.Citizen.census(0, memId0)
             if nleak != 0:
-                print "\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0)
+                print "\n%d Objects leaked:" % dafBase.Citizen.census(0, memId0)
 
                 if nleak <= nleakPrintMax:
-                    print dafBase.Citizen_census(dafBase.cout, memId0)
+                    print dafBase.Citizen.census(dafBase.cout, memId0)
                 else:
-                    census = dafBase.Citizen_census()
+                    census = dafBase.Citizen.census()
                     print "..."
                     for i in range(nleakPrintMax - 1, -1, -1):
                         print census[i].repr()
 
-                self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
+                self.fail("Leaked %d blocks" % dafBase.Citizen.census(0, memId0))
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 

@@ -1,6 +1,5 @@
 # -*- python -*-
 Import("env")
-import glob, os, sys
 
 import lsst.scons.tests
 #
@@ -9,8 +8,8 @@ import lsst.scons.tests
 ignoreList=[]
 tests = lsst.scons.tests.Control(env, ignoreList=ignoreList, verbose=True)
     
-for fileName in glob.glob("*.cc"):
-    env.Program(fileName, LIBS=env.getlibs("utils") + env.gettestlibs("boost"))
+for fileName in Glob("*.cc"):
+    env.Program(fileName, LIBS=env.getLibs("main test"))
 
 tests.run("*.cc")
 
