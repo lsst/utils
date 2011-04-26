@@ -1,8 +1,8 @@
 # -*- python -*-
 Import("env")
 
-src = env.BPDox("#pysrc/utilsLib.cc.in")
+src = env.BPDox("#pysrc/_utils.cc.in")
 
 env.Depends(src, "#doc/xml/utils")
 
-env.LoadableModuleIncomplete("utilsLib", src, LIBS=env.getLibs("main python"))
+env.LoadableModuleIncomplete("_utils", src, LIBS=env.getLibs("main python"))

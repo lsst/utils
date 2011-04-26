@@ -40,7 +40,7 @@ import unittest
 
 import lsst.utils.tests as utilsTests
 import lsst.pex.exceptions as pexExcept
-import lsst.utils.utilsLib as utilsLib
+import lsst.utils
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -56,13 +56,13 @@ class UtilsTestCase(unittest.TestCase):
     def testProductDir(self):
         """Test the C++'s productDir returns the same value as the python one"""
         
-        self.assertTrue(utilsLib.productDir("utils") == eups.productDir("utils"))
+        self.assertTrue(lsst.utils.productDir("utils") == eups.productDir("utils"))
 
     def testProductDirCurrent(self):
         """Test the C++'s productDir returns the same value as the python one"""
         
         def tst():
-            utilsLib.productDir("utils", "current")
+            lsst.utils.productDir("utils", "current")
 
         self.assertRaises(pexExcept.InvalidParameterException, tst)
 
@@ -70,7 +70,7 @@ class UtilsTestCase(unittest.TestCase):
         """Test the C++'s productDir returns the same value as the python one"""
         
         def tst():
-            utilsLib.productDir("XXX utils XXX non existent")
+            lsst.utils.productDir("XXX utils XXX non existent")
 
         self.assertRaises(pexExcept.NotFoundException, tst)
 

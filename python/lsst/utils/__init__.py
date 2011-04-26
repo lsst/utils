@@ -20,7 +20,10 @@
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
-from utilsLib import *
+from . import _utils
+import lsst.bputils
+
+lsst.bputils.rescope(_utils, globals(), ignore=())
 
 def version(
     HeadURL = r"$HeadURL: svn+ssh://svn.lsstcorp.org/DMS/utils/trunk/python/lsst/__init__.i $",

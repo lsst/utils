@@ -32,7 +32,6 @@ import unittest
 
 import lsst.utils.tests as utilsTests
 import lsst.pex.exceptions as pexExcept
-import lsst.utils.utilsLib as utilsLib
 import lsst.utils as lsstutils
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

@@ -36,6 +36,6 @@ void declareUtils() {
 
 }}
 
-BOOST_PYTHON_MODULE(utilsLib) {
+BOOST_PYTHON_MODULE(_utils) {
     lsst::utils::declareUtils();
 }
