@@ -1,4 +1,4 @@
-#include <boost/python.hpp>
+#include "lsst/bputils.h"
 #include "lsst/utils/Demangle.h"
 #include "lsst/utils/RaDecStr.h"
 #include "lsst/utils/Utils.h"
@@ -37,5 +37,7 @@ void declareUtils() {
 }}
 
 BOOST_PYTHON_MODULE(_utils) {
+    lsst::bputils::registerConversions();
+    bp::import("lsst.pex.exceptions");
     lsst::utils::declareUtils();
 }
