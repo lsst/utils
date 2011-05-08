@@ -9,6 +9,8 @@ env = scons.makeEnv("utils",
                     r"$HeadURL$",
                     scons.ConfigureDependentProducts("utils"))
 
+env.Append(CXXFLAGS="-std=c++0x")
+
 #
 # Build/install things
 #
