@@ -17,7 +17,7 @@ env.libs["utils"] += env.getlibs("boost pex_exceptions")
 #
 # Build/install things
 #
-for d in Split("lib python/lsst/utils doc tests examples"):
+for d in Split("lib python/lsst/utils doc tests"):
     SConscript(os.path.join(d, "SConscript"))
 
 env['IgnoreFiles'] = r"(~$|\.pyc$|^\.svn$|\.o$)"
