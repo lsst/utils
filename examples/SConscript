@@ -1,0 +1,6 @@
+# -*- python -*-
+Import("env")
+import glob
+
+for fileName in glob.glob("*.cc"):
+    env.Program(fileName, LIBS=env.getlibs("utils"))

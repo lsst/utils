@@ -145,7 +145,9 @@ std::string demangleType(std::string const _typeName) {
     std::string currentSymbol = "";     // Current symbol
     std::stack<char> typeStack;         // Did we last see an N or an I?
 
+    int lastTokenWasType = 0;           // When > 0, the last token was a type such as int or float
     while (*ptr != '\0') {
+        lastTokenWasType--;
         switch (*ptr) {
           case 'E':
             ptr++;
@@ -223,7 +225,7 @@ std::string demangleType(std::string const _typeName) {
                             } else {
                                 subst = 36*subst + 10 + (*ptr - 'A');
                             }
-                            *ptr++;
+                            ptr++;
                         }
                         subst++;            // S_ == 0; S1_ == 1
                         assert (*ptr == '_');
@@ -270,7 +272,11 @@ std::string demangleType(std::string const _typeName) {
             {
                 std::string type;
                 if (interpret_typeletter(*ptr, type)) {
+                    if (lastTokenWasType > 0) {
+                        typeName += ",";
+                    }
                     typeName += type;
+                    lastTokenWasType = 2; // it'll be decremented on every char in the name
                 } else {
                     typeName += *ptr;
                 }
