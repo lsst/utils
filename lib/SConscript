@@ -1,9 +1,4 @@
 # -*- python -*-
 Import('env')
-
-env.SharedLibrary('utils', map(lambda str: "../src/" + str,
-                            ["Demangle.cc",
-                             "Utils.cc",
-                             "RaDecStr.cc"
-                            ]),
-                  LIBS=filter(lambda x: x != "utils", env.getlibs("utils")))
+import lsst.sconsUtils.scripts
+lsst.sconsUtils.scripts.BasicSConscript(env).lib()

@@ -1,5 +1,5 @@
 # -*- python -*-
 Import("env")
+import lsst.sconsUtils.scripts
+lsst.sconsUtils.scripts.BasicSConscript(env).python()
 
-env.CheckSwig("python", ilang="c++")
-env.LoadableModuleIncomplete("_utilsLib", Split("utilsLib.i"), LIBS=env.libs["boost"] + ["utils"])
