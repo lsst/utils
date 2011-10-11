@@ -1,5 +1,4 @@
 # -*- python -*-
-Import("env")
-import lsst.sconsUtils.scripts
-lsst.sconsUtils.scripts.BasicSConscript(env).python()
+from lsst.sconsUtils import scripts
+scripts.BasicSConscript.python()
 

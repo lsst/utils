@@ -1,5 +1,5 @@
 # -*- python -*-
-Import("env")
+from lsst.sconsUtils import env
 
 for fileName in Glob("*.cc"):
     env.Program(fileName, LIBS=env.getLibs("main"))
