@@ -1,16 +1,3 @@
 # -*- python -*-
-from lsst.sconsUtils import tests, env
-#
-# Tests
-#
-ignoreList=[]
-control = tests.Control(env, ignoreList=ignoreList, verbose=True)
-    
-for fileName in Glob("*.cc"):
-    env.Program(fileName, LIBS=env.getLibs("main test"))
-
-control.run("*.cc")
-
-# set up python tests
-for target in control.run("*.py"):
-    env.Depends(target, "#python")
+from lsst.sconsUtils import scripts
+scripts.BasicSConscript.tests()
