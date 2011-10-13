@@ -36,7 +36,6 @@ class LockProtected(object):
     protected.  A method that is to be protected from simultaneous access 
     would include (at its beginning) a call to _checkLocked():
 
-    @verbatim
     class MyClass(BaseClass, LockProtected):
         def __init__(self, lock=SharedLock):
             LockProtected.__init__(self, lock)
@@ -45,16 +44,14 @@ class LockProtected(object):
         def dangerous(self):
             self._checkLocked()
             ...
-    @endverbatim
 
     Doing so will require that the protected class be "locked" before a 
     protected method can be called or else an UnsafeAccessError will be
     raised.  Locking is done via the with statement:
-    @verbatim
+
     mc = MyClass()
     with mc:
         mc.dangerous()
-    @endverbatim
 
     For the locking to work, the protected class must provide to the
     LockProtected constructor a lock object.  Typically this is a
