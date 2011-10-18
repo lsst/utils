@@ -1,9 +1,6 @@
-setupRequired(base >= 3.1)
-setupRequired(pex_exceptions >= 3.2.1)
-setupRequired(boost >= 1.37.0)
-
-setupOptional("swig")
-setupOptional("doxygen")
+setupRequired(base >= 4.6.0.0)
+setupRequired(pex_exceptions >= 4.6.0.0)
+setupRequired(boost >= 1.47.0)
 
 envAppend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
 envAppend(DYLD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
