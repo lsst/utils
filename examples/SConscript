@@ -1,5 +1,4 @@
 # -*- python -*-
-from lsst.sconsUtils import env
+from lsst.sconsUtils import scripts
 
-for fileName in Glob("*.cc"):
-    env.Program(fileName, LIBS=env.getLibs("main"))
+scripts.BasicSConscript.examples()
