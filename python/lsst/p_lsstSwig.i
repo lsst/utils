@@ -92,6 +92,23 @@ namespace boost {
     class noncopyable { };
 }
 
+// Make types from boost::cstdint known to SWIG
+namespace boost {
+    typedef signed char int8_t;
+    typedef unsigned char uint8_t;
+    typedef short int16_t;
+    typedef unsigned short uint16_t;
+    typedef int int32_t;
+    typedef unsigned int uint32_t;
+#if defined(SWIGWORDSIZE64)
+    typedef long int64_t;
+    typedef unsigned long uint64_t;
+#else
+    typedef long long int64_t;
+    typedef unsigned long long uint64_t;
+#endif
+}
+
 // Use the Python C API to raise an exception of type
 // lsst.pex.exceptions.Exception with a value that is a SWIGged proxy for a
 // copy of the exception object.
