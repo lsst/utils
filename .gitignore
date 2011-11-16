@@ -1,0 +1,27 @@
+
+# /
+/.*
+/config.log
+
+# /doc/
+/doc/htmlDir
+
+# /examples/
+/examples/demangle
+
+# /lib/
+/lib/libutils.dylib
+/lib/libutils.so
+
+# /python/lsst/utils/
+/python/lsst/utils/utilsLib_wrap.*
+/python/lsst/utils/_utilsLib.*
+/python/lsst/utils/utilsLib.py
+
+# /src/
+/src/*.os
+/src/*.o
+
+# /tests/
+/tests/.tests
+/tests/ieee
