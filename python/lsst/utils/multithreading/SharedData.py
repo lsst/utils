@@ -26,8 +26,7 @@ import threading
 
 class SharedData(object):
     """
-    @brief a lock-protected container for data that can be shared amongst
-    threads.
+    a lock-protected container for data that can be shared amongst threads.
 
     This container holds data that is intended to be shared amongst multiple
     threads.  In order to update or (optionally) examine the data, one must
@@ -38,11 +37,11 @@ class SharedData(object):
     acquire() is reentrant.  
 
     SharedData instances may be used with the with statement:
-    @verbatim
+
       sd = SharedData()
       with sd:
           sd.blah = 1
-    @endverbatim
+
     The with statement will acquire the lock and ensure that it is released
     when its block is exited.  
     """

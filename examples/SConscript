@@ -1,6 +1,4 @@
 # -*- python -*-
-Import("env")
-import glob
+from lsst.sconsUtils import scripts
 
-for fileName in glob.glob("*.cc"):
-    env.Program(fileName, LIBS=env.getlibs("utils"))
+scripts.BasicSConscript.examples()
