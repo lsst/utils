@@ -112,6 +112,29 @@ def findFileFromRoot(ifile):
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+class temporaryFile:
+    """A class to be used with a with statement to ensure that a file is deleted
+E.g.
+
+with temporaryFile("foo.fits") as filename:
+    image.writeFits(filename)
+    readImage = Image(filename)
+    """
+    def __init__(self, filename):
+        self.filename = filename
+
+    def __enter__(self):
+        return self.filename
+
+    def __exit__(self, type, value, traceback):
+        import os
+        try:
+            os.remove(self.filename)
+        except OSError:
+            pass
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
     """
     Fail unless an LSST C++ exception of SWIG-wrapper class excClass
