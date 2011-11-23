@@ -42,6 +42,7 @@
 
 %include "cpointer.i"
 %include "exception.i"
+%include "stdint.i"
 %include "std_list.i"
 %include "std_map.i"
 %include "std_string.i"
@@ -94,19 +95,14 @@ namespace boost {
 
 // Make types from boost::cstdint known to SWIG
 namespace boost {
-    typedef signed char int8_t;
-    typedef unsigned char uint8_t;
-    typedef short int16_t;
-    typedef unsigned short uint16_t;
-    typedef int int32_t;
-    typedef unsigned int uint32_t;
-#if defined(SWIGWORDSIZE64)
-    typedef long int64_t;
-    typedef unsigned long uint64_t;
-#else
-    typedef long long int64_t;
-    typedef unsigned long long uint64_t;
-#endif
+    using ::int8_t;
+    using ::uint8_t;
+    using ::int16_t;
+    using ::uint16_t;
+    using ::int32_t;
+    using ::uint32_t;
+    using ::int64_t;
+    using ::uint64_t;
 }
 
 // Use the Python C API to raise an exception of type
