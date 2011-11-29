@@ -178,3 +178,53 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     %pointer_cast(void *, TYPE *, cast_ ## TYPE ## Ptr);
 %enddef
 
+// std_vector.i is broken when using %shared_ptr(std::vector<...>),
+// apparently because %typemap_traits_ptr() overwrites typemaps setup
+// by %shared_ptr. Therefore, create a std::vector specialization visible
+// only to swig for a specific type, and move the %typemap_traits_ptr()
+// invocation post-vector-method expansion.
+//
+// Note that macros should be invoked in the following order:
+//
+// %shared_vec(T);
+// %shared_ptr(std::vector<T>);
+// %include "header/file/for/T.h"
+// %template(VecOfT) std::vector<T>;
+//
+%define %shared_vec(TYPE...)
+    namespace std {
+        template <class _Alloc >
+        class vector<TYPE, _Alloc > {
+        public:
+            typedef size_t size_type;
+            typedef ptrdiff_t difference_type;
+            typedef TYPE value_type;
+            typedef value_type* pointer;
+            typedef const value_type* const_pointer;
+            typedef TYPE& reference;
+            typedef const TYPE& const_reference;
+            typedef _Alloc allocator_type;
+
+            %traits_swigtype(TYPE);
+
+            %fragment(SWIG_Traits_frag(std::vector<TYPE, _Alloc >), "header",
+                      fragment=SWIG_Traits_frag(TYPE),
+                      fragment="StdVectorTraits") {
+                namespace swig {
+                    template <>  struct traits<std::vector<TYPE, _Alloc > > {
+                        typedef pointer_category category;
+                        static const char* type_name() {
+                            return "std::vector<" #TYPE " >";
+                        }
+                    };
+                }
+            }
+
+            %swig_vector_methods(std::vector<TYPE, _Alloc >);
+            %std_vector_methods(vector);
+
+            %typemap_traits_ptr(SWIG_TYPECHECK_VECTOR, std::vector<TYPE, _Alloc >);
+        };
+    }
+%enddef
+
