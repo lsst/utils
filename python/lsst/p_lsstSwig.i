@@ -53,6 +53,8 @@
 %include "carrays.i"
 %include "typemaps.i"
 
+%include "lsst/base.h"
+
 // N.b. these may interfere with the use of e.g. std_list.i for primitive types;
 // you will have to say e.g.
 // %clear int &;
