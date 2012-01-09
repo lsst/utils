@@ -51,7 +51,7 @@ class SwigTestCase(unittest.TestCase):
 
     def testConstructors(self):
         self.assertEqual(self.example.getValue(), "foo")
-        self.assertRaises(NotImplementedError, testLib.Example, [5])
+        self.assertRaises(Exception, testLib.Example, [5])
         self.assertEqual(testLib.Example("bar").getValue(), "bar")
     
     def testReturnNone(self):
