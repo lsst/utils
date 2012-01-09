@@ -74,18 +74,6 @@
 
 // Mapping C++ exceptions to Python
 
-#if !defined(NO_SWIG_LSST_EXCEPTIONS)
-
-%pythoncode %{
-    import lsst.pex.exceptions
-%}
-
-%{
-#include <new>
-#include "lsst/pex/exceptions/Exception.h"
-#include "lsst/pex/exceptions/Runtime.h"
-%}
-
 // Ignore commonly-used boost idiom to prevent warnings and avoid the need for
 // even more %imports.
 %ignore boost::noncopyable;
@@ -104,6 +92,18 @@ namespace boost {
     using ::int64_t;
     using ::uint64_t;
 }
+
+#if !defined(NO_SWIG_LSST_EXCEPTIONS)
+
+%pythoncode %{
+    import lsst.pex.exceptions
+%}
+
+%{
+#include <new>
+#include "lsst/pex/exceptions/Exception.h"
+#include "lsst/pex/exceptions/Runtime.h"
+%}
 
 // Use the Python C API to raise an exception of type
 // lsst.pex.exceptions.Exception with a value that is a SWIGged proxy for a
@@ -228,3 +228,51 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     }
 %enddef
 
+// Makes Python-to-C++ conversions to bool safer, by requiring that the object
+// actually be a Python bool object.
+// This may break some code that uses 0 and 1 in place of false and true, but
+// it also prevents errors where arbitrary objects like lists are converted to
+// C++ bools.
+%typemap(typecheck, precedence=SWIG_TYPECHECK_BOOL, noblock=1) bool {
+    $1 = PyBool_Check($input) ? 1 : 0;
+}
+
+// Adds __repr__ and __str__ to a class, assuming a stream operator<< has been provided.
+%define %addStreamRepr(CLASS)
+%{
+#include <sstream>
+%}
+%extend CLASS {
+    std::string __repr__() const {
+        std::ostringstream os;
+        os << (*self);
+        return os.str();
+    }
+    std::string __str__() const {
+        std::ostringstream os;
+        os << (*self);
+        return os.str();
+    }
+}
+%enddef
+
+// Causes a Python wrapper for a function or member function to return None,
+// regardless of what its C++ signature is.  Very useful for fixing up
+// methods that unsafely return *this.
+%define %returnNone(FUNC)
+%feature("pythonappend") FUNC %{ val = None %}
+%enddef
+
+// Causes a Python wrapper for a function or member function to return 'self' in a safe way.
+%define %returnSelf(FUNC)
+%feature("pythonappend") FUNC %{ val = self %}
+%enddef
+
+// Causes a Python wrapper for a function of member function to return a copy.
+// This can be used to make a C++ member function that returns a data member
+// by reference safe in Python.  It is implemented by calling the copy
+// constructor in Python, and hence will only work if the copy constructor
+// has been wrapped.
+%define %returnCopy(FUNC)
+%feature("pythonappend") FUNC %{ val = type(val)(val) %}
+%enddef
