@@ -239,6 +239,18 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     $1 = PyBool_Check($input) ? 1 : 0;
 }
 
+// Define Python __eq__ and __ne__ operators based on C++ pointer equality.
+%define %usePointerEquality(CLASS)
+%extend CLASS {
+    bool __eq__(CLASS const * other) const {
+        return self == other;
+    }
+    bool __ne__(CLASS const * other) const {
+        return self != other;
+    }
+}
+%enddef
+
 // Adds __repr__ and __str__ to a class, assuming a stream operator<< has been provided.
 %define %addStreamRepr(CLASS)
 %{
