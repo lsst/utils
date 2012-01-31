@@ -261,9 +261,11 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
 
 // Define Python __eq__ and __ne__ operators based on C++ pointer equality.
 %define %usePointerEquality(CLS...)
+%ignore CLS::operator==;  // just to quiet warnings
+%ignore CLS::operator!=;  // just to quiet warnings
 %extend CLS {
     bool _eq_impl(CLS const * other) const {
-        return *self == other;
+        return self == other;
     }
     %pythoncode %{
         def __eq__(self, rhs):
