@@ -74,6 +74,12 @@ class SwigTestCase(unittest.TestCase):
         self.assertEqual(str(self.example), s)
         self.assertEqual(repr(self.example), s)
 
+    def testEqualityComparison(self):
+        self.assertNotEqual(self.example, testLib.Example("bar"))
+        self.assertEqual(self.example, testLib.Example("foo"))
+        self.assertNotEqual(self.example, [3,4,5]) # should not throw
+        self.assertNotEqual([3,4,5], self.example) # should not throw
+
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 def suite():

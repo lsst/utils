@@ -42,6 +42,7 @@ Test module for various utilities in p_lsstSwig.i
 %returnSelf(Example::get2)
 %returnCopy(Example::get3)
 %addStreamRepr(Example)
+%useValueEquality(Example)
 
 %inline %{
     class Example {
@@ -60,12 +61,18 @@ Test module for various utilities in p_lsstSwig.i
         std::string getValue() const { return _value; }
         void setValue(std::string const & v) { _value = v; }
         
+        bool operator==(Example const & other) const {
+            return other._value == _value;
+        }
+
     private:
         std::string _value;
     };
 
+#ifndef SWIG
     inline std::ostream & operator<<(std::ostream & os, Example const & ex) {
         return os << "Example(" << ex.getValue() << ")";
     }
+#endif
 
 %}

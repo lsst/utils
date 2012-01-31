@@ -239,24 +239,49 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     $1 = PyBool_Check($input) ? 1 : 0;
 }
 
-// Define Python __eq__ and __ne__ operators based on C++ pointer equality.
-%define %usePointerEquality(CLASS)
-%extend CLASS {
-    bool __eq__(CLASS const * other) const {
-        return self == other;
+// Define Python __eq__ and __ne__ operators based on C++ operator== overload.
+%define %useValueEquality(CLS...)
+%ignore CLS::operator==;  // just to quiet warnings
+%ignore CLS::operator!=;  // just to quiet warnings
+%extend CLS {
+    bool _eq_impl(CLS const & other) const {
+        return *self == other;
     }
-    bool __ne__(CLASS const * other) const {
-        return self != other;
-    }
+    %pythoncode %{
+        def __eq__(self, rhs):
+            try:
+                return self._eq_impl(rhs)
+            except Exception:
+                return NotImplemented
+        def __ne__(self, rhs):
+            return not self == rhs
+   %}
 }
 %enddef
 
+// Define Python __eq__ and __ne__ operators based on C++ pointer equality.
+%define %usePointerEquality(CLS...)
+%extend CLS {
+    bool _eq_impl(CLS const * other) const {
+        return *self == other;
+    }
+    %pythoncode %{
+        def __eq__(self, rhs):
+            try:
+                return self._eq_impl(rhs)
+            except Exception:
+                return NotImplemented
+        def __ne__(self, rhs):
+            return not self == rhs
+   %}
+}
+%enddef 
 // Adds __repr__ and __str__ to a class, assuming a stream operator<< has been provided.
-%define %addStreamRepr(CLASS)
+%define %addStreamRepr(CLS...)
 %{
 #include <sstream>
 %}
-%extend CLASS {
+%extend CLS {
     std::string __repr__() const {
         std::ostringstream os;
         os << (*self);
