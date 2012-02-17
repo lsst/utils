@@ -203,7 +203,7 @@ std::string demangleType(std::string const _typeName) {
             currentSymbol = "";
             break;
           case 'S':
-            *ptr++;
+            ++ptr;
             switch (*ptr) {
               case 't': typeName += "::std::"; break;
               case 'a': typeName += "::std::allocator"; break;
