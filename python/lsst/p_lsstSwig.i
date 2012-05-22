@@ -129,10 +129,13 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
         pyexbase = PyObject_GetAttrString(module, "LsstCppException");
         if (pyexbase == 0) {
             pyexbase = PyExc_RuntimeError;
+            Py_INCREF(pyexbase); // so ownership is same as if we use LsstCppException
         }
     }
 
     PyErr_SetObject(pyexbase, pyex);
+    Py_DECREF(pyex);
+    Py_DECREF(pyexbase);
 }
 
 %}
