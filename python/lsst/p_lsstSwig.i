@@ -126,6 +126,8 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     PyObject* pyexbase = PyExc_RuntimeError;
     PyObject* module = PyImport_AddModule("lsst.pex.exceptions");
     if (module != 0) {
+        // this call returns a "new reference"; we're responsible for decrementing the reference count
+        // when we're done with it
         pyexbase = PyObject_GetAttrString(module, "LsstCppException");
         if (pyexbase == 0) {
             pyexbase = PyExc_RuntimeError;
@@ -134,6 +136,8 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
     }
 
     PyErr_SetObject(pyexbase, pyex);
+    // PyErr_SetObject doesn't "steal" ownership of its arguments, so we have to decrement
+    // the count on the references we still own.
     Py_DECREF(pyex);
     Py_DECREF(pyexbase);
 }
