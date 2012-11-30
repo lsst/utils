@@ -152,3 +152,30 @@ def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
     else: excName = str(excClass)
     raise testcase.failureException, "lsst.pex.exceptions.LsstCppException wrapping %s not raised" % excName
 
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+import functools
+def debugger(*exceptions):
+    """Decorator to enter the debugger when there's an uncaught exception
+
+    To use, just slap a "@debugger()" on your function.
+
+    You may provide specific exception classes to catch as arguments to
+    the decorator function, e.g., "@debugger(RuntimeError, NotImplementedError)".
+    This defaults to just 'AssertionError', for use on unittest.TestCase methods.
+
+    Code provided by "Rosh Oxymoron" on StackOverflow:
+    http://stackoverflow.com/questions/4398967/python-unit-testing-automatically-running-the-debugger-when-a-test-fails
+    """
+    if not exceptions:
+        exceptions = (AssertionError, )
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except exceptions:
+                import sys, pdb
+                pdb.post_mortem(sys.exc_info()[2])
+        return wrapper
+    return decorator
