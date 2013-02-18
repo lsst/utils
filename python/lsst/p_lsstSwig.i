@@ -154,8 +154,31 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
         } catch (lsst::pex::exceptions::Exception &e) {
             raiseLsstException(e);
             SWIG_fail;
+        } catch (std::invalid_argument & e) {
+            PyErr_SetString(PyExc_ValueError, e.what());
+            SWIG_fail;
+        } catch (std::out_of_range & e) {
+            PyErr_SetString(PyExc_LookupError, e.what());
+            SWIG_fail;
+        } catch (std::logic_error & e) {
+            PyErr_SetString(PyExc_RuntimeError, e.what());
+            SWIG_fail;
+        } catch (std::range_error & e) {
+            PyErr_SetString(PyExc_ValueError, e.what());
+            SWIG_fail;
+        } catch (std::overflow_error & e) {
+            PyErr_SetString(PyExc_OverflowError, e.what());
+            SWIG_fail;
+        } catch (std::runtime_error & e) {
+            PyErr_SetString(PyExc_RuntimeError, e.what());
+            SWIG_fail;
+        } catch (std::bad_alloc & e) {
+            PyErr_SetString(PyExc_MemoryError, e.what());
+            SWIG_fail;
         } catch (std::exception & e) {
-            PyErr_SetString(PyExc_Exception, e.what());
+            PyErr_SetString(PyExc_StandardError, e.what());
+            SWIG_fail;
+        } catch (...) {
             SWIG_fail;
         }
     }
