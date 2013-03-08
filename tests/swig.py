@@ -84,8 +84,6 @@ class SwigTestCase(unittest.TestCase):
     def testExceptions(self):
         """Test the exception wrappers
         """
-        self.assertRaises(pexExcept.LsstCppException, testLib.raiseException, "lsstException")
-
         for name, exception in (
             ("lsstException", pexExcept.LsstCppException),
             ("invalid_argument", ValueError),

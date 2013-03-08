@@ -81,31 +81,6 @@ Test module for various utilities in p_lsstSwig.i
     }
 #endif
 
-    /**
-    Temporarily allocate n gitabytes of RAM
-    @param[in] n: number of gigabytes to allocate; if negative then raise std::bad_alloc immediately.
-    
-    @raise std::bad_alloc if n < 0 or insufficient memory
-    */
-    char allocGigabytes(double n) {
-        if (n < 0) {
-            throw std::bad_alloc();
-        }
-        double nBytesD = n * 1073741824.0;
-        std::size_t nBytes = static_cast<std::size_t>(nBytesD);
-        char *arr = new char[nBytes];
-        if (arr == 0) {
-            // paranoia: old C++ might return a null ptr instead of raising bad_alloc
-            throw std::bad_alloc();
-        }
-        for (std::size_t i = nBytes - 1000; i < nBytes; ++i) {
-            arr[i] = '+';
-        }
-        char retVal = arr[nBytes-1];
-        delete[] arr;
-        return retVal;
-    }
-
     void raiseException(std::string const &name) {
         if (name == "lsstException") {
             throw LSST_EXCEPT(lsst::pex::exceptions::RuntimeErrorException, name);
