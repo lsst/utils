@@ -38,6 +38,7 @@ import pdb  # we may want to say pdb.set_trace()
 import sys
 import unittest
 
+import lsst.pex.exceptions as pexExcept
 import lsst.utils.tests as utilsTests
 import testLib
 
@@ -79,6 +80,25 @@ class SwigTestCase(unittest.TestCase):
         self.assertEqual(self.example, testLib.Example("foo"))
         self.assertNotEqual(self.example, [3,4,5]) # should not throw
         self.assertNotEqual([3,4,5], self.example) # should not throw
+
+    def testExceptions(self):
+        """Test the exception wrappers
+        """
+        self.assertRaises(pexExcept.LsstCppException, testLib.raiseException, "lsstException")
+
+        for name, exception in (
+            ("lsstException", pexExcept.LsstCppException),
+            ("invalid_argument", ValueError),
+            ("out_of_range", LookupError),
+            ("logic_error", RuntimeError),
+            ("range_error", ValueError),
+            ("overflow_error", OverflowError),
+            ("runtime_error", RuntimeError),
+            ("bad_alloc", SystemExit),
+            ("exception", Exception),
+        ):
+            self.assertRaises(exception, testLib.raiseException, name)
+        
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
