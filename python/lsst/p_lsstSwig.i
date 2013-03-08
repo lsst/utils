@@ -103,6 +103,7 @@ namespace boost {
 
 %{
 #include <new>
+#include <stdexcept>
 #include "lsst/pex/exceptions/Exception.h"
 #include "lsst/pex/exceptions/Runtime.h"
 %}
@@ -173,7 +174,11 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
             PyErr_SetString(PyExc_RuntimeError, e.what());
             SWIG_fail;
         } catch (std::bad_alloc & e) {
-            PyErr_SetString(PyExc_MemoryError, e.what());
+            // A memory error should not be caught in python using "except Exception"
+            // because such an error is almost certainly too serious to continue from.
+            // So raise SystemExit instead of MemoryError, in the expectation that the user
+            // will not trap it and a Python traceback will be printed.
+            PyErr_SetString(PyExc_SystemExit, e.what());
             SWIG_fail;
         } catch (std::exception & e) {
             PyErr_SetString(PyExc_StandardError, e.what());
