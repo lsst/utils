@@ -183,8 +183,6 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
         } catch (std::exception & e) {
             PyErr_SetString(PyExc_StandardError, e.what());
             SWIG_fail;
-        } catch (...) {
-            SWIG_fail;
         }
     }
 %enddef

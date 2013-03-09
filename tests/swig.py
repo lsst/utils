@@ -96,7 +96,6 @@ class SwigTestCase(unittest.TestCase):
             ("exception", Exception),
         ):
             self.assertRaises(exception, testLib.raiseException, name)
-        
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
