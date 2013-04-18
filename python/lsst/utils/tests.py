@@ -136,6 +136,21 @@ with temporaryFile("foo.fits") as filename:
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+class TestCase(unittest.TestCase):
+    """Subclass of unittest.TestCase that adds some custom assertions for
+    convenience.
+    """
+
+def inTestCase(func):
+    """A decorator to add a free function to our custom TestCase class, while also
+    making it available as a free function.
+    """
+    setattr(TestCase, func.__name__, func)
+    return func
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+@inTestCase
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
     """
     Fail unless an LSST C++ exception of SWIG-wrapper class excClass
@@ -183,6 +198,7 @@ def debugger(*exceptions):
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+@inTestCase
 def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_info.epsilon, relTo=None,
                 printFailures=True, plotOnFailure=False, plotFileName=None, invert=False):
     """Highly-configurable floating point comparisons for scalars and arrays.
@@ -282,6 +298,7 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
                     msg.append("%r %s %r" % (a, cmpStr, b))
     testCase.assertFalse(failed, msg="\n".join(msg))
 
+@inTestCase
 def assertNotClose(testCase, lhs, rhs, **kwds):
     """Fail a test if the given floating point values are completely equal to within the given tolerances.
 
