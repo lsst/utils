@@ -218,7 +218,8 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
     @param[in]  rtol           Relative tolerance for comparison; defaults to double-precision epsilon.
     @param[in]  atol           Absolute tolerance for comparison; defaults to double-precision epsilon.
     @param[in]  relTo          Value to which comparison with rtol is relative.
-    @param[in]  printFailures  Upon failure, print all inequal elements as part of the message.
+    @param[in]  printFailures  Upon failure, print all inequal elements as part of the message.  Equal
+                               elements will be shaded to emphasize the inequal elements.
     @param[in]  plotOnFailure  Upon failure, plot the originals and their residual with matplotlib.
                                Only 2-d arrays are supported.
     @param[in]  plotFileName   Filename to save the plot to.  If None, the plot will be displayed in a
@@ -261,13 +262,14 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
             if plotOnFailure:
                 if len(lhs.shape) != 2 or len(rhs.shape) != 2:
                     raise ValueError("plotOnFailure is only valid for 2-d arrays")
-                kwargs = dict(
-                    )
                 from matplotlib import pyplot
                 pyplot.figure()
-                xg, yg = numpy.meshgrid(numpy.arange(bad.shape[1]), numpy.arange(bad.shape[0]))
-                badX = xg[bad]
-                badY = yg[bad]
+                # make an rgba image that's red and transparent where not bad
+                badImage = numpy.zeros(bad.shape + (4,), dtype=numpy.uint8)
+                badImage[:,:,0] = 255
+                badImage[:,:,1] = 0
+                badImage[:,:,2] = 0
+                badImage[:,:,3] = 255*bad
                 vmin1 = numpy.minimum(numpy.min(lhs), numpy.min(rhs))
                 vmax1 = numpy.maximum(numpy.max(lhs), numpy.max(rhs))
                 vmin2 = numpy.min(diff)
@@ -276,13 +278,13 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
                     pyplot.subplot(2,3,n+1)
                     im1 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
                                         vmin=vmin1, vmax=vmax1)
-                    pyplot.plot(badX, badY, 'rx')
+                    pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
                     pyplot.axis("off")
                     pyplot.title(title)
                     pyplot.subplot(2,3,n+4)
                     im2 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
                                         vmin=vmin2, vmax=vmax2)
-                    pyplot.plot(badX, badY, 'rx')
+                    pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
                     pyplot.axis("off")
                     pyplot.title(title)
                 pyplot.subplots_adjust(left=0.05, bottom=0.05, top=0.92, right=0.75, wspace=0.05, hspace=0.05)
