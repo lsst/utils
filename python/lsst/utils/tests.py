@@ -253,7 +253,8 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
     msg = []
     if failed:
         if numpy.isscalar(bad):
-            msg = ["%r %s %r with rtol=%s, atol=%s" % (lhs, cmpStr, rhs, rtol, atol)]
+            msg = ["%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
+                   % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol, atol)]
         else:
             msg = ["%d/%d elements %s with rtol=%s, atol=%s"
                    % (bad.sum(), bad.size, failStr, rtol, atol)]
@@ -294,8 +295,10 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
                 else:
                     pyplot.show()
             if printFailures:
-                for a, b in zip(lhs[bad], rhs[bad]):
-                    msg.append("%r %s %r" % (a, cmpStr, b))
+                if numpy.isscalar:
+                    relTo = numpy.ones(bad.shape, dtype=float) * relTo
+                for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
+                    msg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
     testCase.assertFalse(failed, msg="\n".join(msg))
 
 @inTestCase
