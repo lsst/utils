@@ -198,6 +198,59 @@ def debugger(*exceptions):
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
+    """Plot the comparison of two 2-d NumPy arrays.
+
+    NOTE: this method uses matplotlib and imports it internally; it should be
+    wrapped in a try/except block within packages that do not depend on
+    matplotlib (including utils).
+
+    @param[in]  lhs            LHS values to compare; a 2-d NumPy array
+    @param[in]  rhs            RHS values to compare; a 2-d NumPy array
+    @param[in]  bad            A 2-d boolean NumPy array of values to emphasize in the plots
+    @param[in]  plotFileName   Filename to save the plot to.  If None, the plot will be displayed in a
+                               a window.
+    """
+    from matplotlib import pyplot
+    if diff is None:
+        diff = lhs - rhs
+    pyplot.figure()
+    if bad is not None:
+        # make an rgba image that's red and transparent where not bad
+        badImage = numpy.zeros(bad.shape + (4,), dtype=numpy.uint8)
+        badImage[:,:,0] = 255
+        badImage[:,:,1] = 0
+        badImage[:,:,2] = 0
+        badImage[:,:,3] = 255*bad
+    vmin1 = numpy.minimum(numpy.min(lhs), numpy.min(rhs))
+    vmax1 = numpy.maximum(numpy.max(lhs), numpy.max(rhs))
+    vmin2 = numpy.min(diff)
+    vmax2 = numpy.max(diff)
+    for n, (image, title) in enumerate([(lhs, "lhs"), (rhs, "rhs"), (diff, "diff")]):
+        pyplot.subplot(2,3,n+1)
+        im1 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
+                            vmin=vmin1, vmax=vmax1)
+        if bad is not None:
+            pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
+        pyplot.axis("off")
+        pyplot.title(title)
+        pyplot.subplot(2,3,n+4)
+        im2 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
+                            vmin=vmin2, vmax=vmax2)
+        if bad is not None:
+            pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
+        pyplot.axis("off")
+        pyplot.title(title)
+    pyplot.subplots_adjust(left=0.05, bottom=0.05, top=0.92, right=0.75, wspace=0.05, hspace=0.05)
+    cax1 = pyplot.axes([0.8, 0.55, 0.05, 0.4])
+    pyplot.colorbar(im1, cax=cax1)
+    cax2 = pyplot.axes([0.8, 0.05, 0.05, 0.4])
+    pyplot.colorbar(im2, cax=cax2)
+    if plotFileName:
+        pyplot.savefig(plotFileName)
+    else:
+        pyplot.show()
+
 @inTestCase
 def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_info.epsilon, relTo=None,
                 printFailures=True, plotOnFailure=False, plotFileName=None, invert=False):
@@ -210,7 +263,9 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
 
     If rtol or atol is None, that term in the comparison is not performed at all.
 
-    When not specified, relTo is the elementwise maximum of the absolute values of lhs and rhs.
+    When not specified, relTo is the elementwise maximum of the absolute values of lhs and rhs.  If
+    set manually, it should usually be set to either lhs or rhs, or a scalar value typical of what
+    is expected.
 
     @param[in]  testCase       unittest.TestCase instance the test is part of
     @param[in]  lhs            LHS value(s) to compare; may be a scalar or a numpy array of any dimension
@@ -262,43 +317,20 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
             if plotOnFailure:
                 if len(lhs.shape) != 2 or len(rhs.shape) != 2:
                     raise ValueError("plotOnFailure is only valid for 2-d arrays")
-                from matplotlib import pyplot
-                pyplot.figure()
-                # make an rgba image that's red and transparent where not bad
-                badImage = numpy.zeros(bad.shape + (4,), dtype=numpy.uint8)
-                badImage[:,:,0] = 255
-                badImage[:,:,1] = 0
-                badImage[:,:,2] = 0
-                badImage[:,:,3] = 255*bad
-                vmin1 = numpy.minimum(numpy.min(lhs), numpy.min(rhs))
-                vmax1 = numpy.maximum(numpy.max(lhs), numpy.max(rhs))
-                vmin2 = numpy.min(diff)
-                vmax2 = numpy.max(diff)
-                for n, (image, title) in enumerate([(lhs, "lhs"), (rhs, "rhs"), (diff, "diff")]):
-                    pyplot.subplot(2,3,n+1)
-                    im1 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
-                                        vmin=vmin1, vmax=vmax1)
-                    pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
-                    pyplot.axis("off")
-                    pyplot.title(title)
-                    pyplot.subplot(2,3,n+4)
-                    im2 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
-                                        vmin=vmin2, vmax=vmax2)
-                    pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
-                    pyplot.axis("off")
-                    pyplot.title(title)
-                pyplot.subplots_adjust(left=0.05, bottom=0.05, top=0.92, right=0.75, wspace=0.05, hspace=0.05)
-                cax1 = pyplot.axes([0.8, 0.55, 0.05, 0.4])
-                pyplot.colorbar(im1, cax=cax1)
-                cax2 = pyplot.axes([0.8, 0.05, 0.05, 0.4])
-                pyplot.colorbar(im2, cax=cax2)
-                if plotFileName:
-                    pyplot.savefig(plotFileName)
-                else:
-                    pyplot.show()
+                try:
+                    plotImageDiff(lhs, rhs, bad, diff=diff, plotFileName=plotFileName)
+                except ImportError:
+                    msg.append("Failure plot requested but matplotlib could not be imported.")
             if printFailures:
-                if numpy.isscalar:
+                # Make sure everything is an array if any of them are, so we can treat
+                # them the same (diff and absDiff are arrays if either rhs or lhs is),
+                # and we don't get here if neither is.
+                if numpy.isscalar(relTo):
                     relTo = numpy.ones(bad.shape, dtype=float) * relTo
+                if numpy.isscalar(lhs):
+                    lhs = numpy.ones(bad.shape, dtype=float) * lhs
+                if numpy.isscalar(rhs):
+                    rhs = numpy.ones(bad.shape, dtype=float) * rhs
                 for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
                     msg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
     testCase.assertFalse(failed, msg="\n".join(msg))
