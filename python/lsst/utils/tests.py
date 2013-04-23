@@ -273,8 +273,7 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
     @param[in]  rtol           Relative tolerance for comparison; defaults to double-precision epsilon.
     @param[in]  atol           Absolute tolerance for comparison; defaults to double-precision epsilon.
     @param[in]  relTo          Value to which comparison with rtol is relative.
-    @param[in]  printFailures  Upon failure, print all inequal elements as part of the message.  Equal
-                               elements will be shaded to emphasize the inequal elements.
+    @param[in]  printFailures  Upon failure, print all inequal elements as part of the message.
     @param[in]  plotOnFailure  Upon failure, plot the originals and their residual with matplotlib.
                                Only 2-d arrays are supported.
     @param[in]  plotFileName   Filename to save the plot to.  If None, the plot will be displayed in a
