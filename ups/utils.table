@@ -1,6 +1,7 @@
 setupRequired(base >= 4.6.0.0)
 setupRequired(pex_exceptions >= 4.7.3.0)
 setupRequired(boost >= 1.47.0)
+setupRequired(numpy)
 
 envAppend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
 envAppend(DYLD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
