@@ -282,6 +282,10 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
                                Used to implement assertNotClose, which should generally be used instead
                                for clarity.
     """
+    if not numpy.isfinite(lhs).all():
+        testCase.fail("Non-finite values in lhs")
+    if not numpy.isfinite(rhs).all():
+        testCase.fail("Non-finite values in rhs")
     diff = lhs - rhs
     absDiff = numpy.abs(lhs - rhs)
     if rtol is not None:
