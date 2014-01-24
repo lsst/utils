@@ -324,3 +324,11 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
 %define %returnCopy(FUNC)
 %feature("pythonappend") FUNC %{ val = type(val)(val) %}
 %enddef
+
+%define %castShared(DERIVED, BASE)
+    %extend DERIVED {
+        static boost::shared_ptr< DERIVED > cast(boost::shared_ptr< BASE > p) {
+            return boost::dynamic_pointer_cast< DERIVED >(p);
+        }
+    }
+%enddef
