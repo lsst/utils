@@ -325,6 +325,19 @@ static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
 %feature("pythonappend") FUNC %{ val = type(val)(val) %}
 %enddef
 
+//
+// Macro to add support for dynamic_cast in Python.  Should be added to all polymorphic
+// derived classes wrapped with %shared_ptr.
+//
+// Unfortunately, this macro is a bit tricky to use on templated classes with more than
+// one template parameter, as Swig's preprocessor can't handle the extra commas in the
+// macro arguments.  In those cases, use an extra level of macro indirection:
+//
+//   template <typename T, typename U> class Foo : public Bar {}; // exposition
+//   #define ARGS T, U
+//   %castShared(Foo<ARGS>, Bar)
+//   #undef ARGS
+//
 %define %castShared(DERIVED, BASE)
     %extend DERIVED {
         static boost::shared_ptr< DERIVED > cast(boost::shared_ptr< BASE > p) {
