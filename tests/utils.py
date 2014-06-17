@@ -33,9 +33,7 @@ or
 """
 
 import eups
-import os
 import pdb  # we may want to say pdb.set_trace()
-import sys
 import unittest
 import numpy
 
@@ -65,7 +63,7 @@ class UtilsTestCase(utilsTests.TestCase):
         def tst():
             utilsLib.productDir("utils", "current")
 
-        self.assertRaisesLsstCpp(pexExcept.InvalidParameterException, tst)
+        self.assertRaisesLsstCpp(pexExcept.InvalidParameterError, tst)
 
     def testProductDirUnsetup(self):
         """Test the C++'s productDir returns the same value as the python one"""
@@ -73,7 +71,7 @@ class UtilsTestCase(utilsTests.TestCase):
         def tst():
             utilsLib.productDir("XXX utils XXX non existent")
 
-        self.assertRaisesLsstCpp(pexExcept.NotFoundException, tst)
+        self.assertRaisesLsstCpp(pexExcept.NotFoundError, tst)
 
     def testCompareArrays(self):
         self.assertClose(0.0, 0.0)
