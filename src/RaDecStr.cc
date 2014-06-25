@@ -167,7 +167,7 @@ double ut::raStrToDeg(std::string raStr, std::string delimiter) {
     //but I'd only throw it again
     if(! boost::regex_match(raStr.c_str(), what, re)) {
         string msg= boost::str(boost::format("Failed to parse %s as a declination") % raStr);
-        throw LSST_EXCEPT(except::RuntimeErrorException, msg);
+        throw LSST_EXCEPT(except::RuntimeError, msg);
     }  
        
 
@@ -207,7 +207,7 @@ double ut::decStrToDeg(std::string decStr, std::string delimiter) {
 
     if(! boost::regex_search(decStr.c_str(), what, re)) {
         string msg= boost::str(boost::format("Failed to parse %s as a declination") % decStr);
-        throw LSST_EXCEPT(except::RuntimeErrorException, msg);
+        throw LSST_EXCEPT(except::RuntimeError, msg);
     }  
 
     //Convert strings to doubles. Automatically pass the exception up the stack
