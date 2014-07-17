@@ -35,10 +35,15 @@ Access to useful Utility classes.
 #include "lsst/utils/Demangle.h"
 #include "lsst/utils/Utils.h"
 #include "lsst/utils/RaDecStr.h"
+#include "lsst/pex/exceptions.h"
 %}
 
+%import "lsst/pex/exceptions/exceptionsLib.i"
+
 %include "../p_lsstSwig.i"
-%lsst_exceptions();
+
+%lsst_exceptions()
+
 %include "lsst/utils/Demangle.h"
 %include "lsst/utils/Utils.h"
 %include "lsst/utils/RaDecStr.h"
