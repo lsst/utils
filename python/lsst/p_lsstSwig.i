@@ -95,72 +95,7 @@ namespace boost {
     using ::uint64_t;
 }
 
-#if !defined(NO_SWIG_LSST_EXCEPTIONS)
-
-%pythoncode %{
-    import lsst.pex.exceptions
-%}
-
-%{
-#include <new>
-#include "lsst/pex/exceptions/Exception.h"
-#include "lsst/pex/exceptions/Runtime.h"
-%}
-
-// Use the Python C API to raise an exception of type
-// lsst.pex.exceptions.Exception with a value that is a SWIGged proxy for a
-// copy of the exception object.
-%{
-static void raiseLsstException(lsst::pex::exceptions::Exception& ex) {
-    PyObject* pyex = 0;
-    swig_type_info* tinfo = SWIG_TypeQuery(ex.getType());
-    if (tinfo != 0) {
-	lsst::pex::exceptions::Exception* e = ex.clone();
-        pyex = SWIG_NewPointerObj(static_cast<void*>(e), tinfo,
-            SWIG_POINTER_OWN);
-    } else {
-        PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(ex.what()));
-	return;
-    }
-
-    PyObject* pyexbase = PyExc_RuntimeError;
-    PyObject* module = PyImport_AddModule("lsst.pex.exceptions");
-    if (module != 0) {
-        // this call returns a "new reference"; we're responsible for decrementing the reference count
-        // when we're done with it
-        pyexbase = PyObject_GetAttrString(module, "LsstCppException");
-        if (pyexbase == 0) {
-            pyexbase = PyExc_RuntimeError;
-            Py_INCREF(pyexbase); // so ownership is same as if we use LsstCppException
-        }
-    }
-
-    PyErr_SetObject(pyexbase, pyex);
-    // PyErr_SetObject doesn't "steal" ownership of its arguments, so we have to decrement
-    // the count on the references we still own.
-    Py_DECREF(pyex);
-    Py_DECREF(pyexbase);
-}
-
-%}
-
-#endif
-
-// Turns on the default C++ to python exception handling interface
-%define %lsst_exceptions()
-    %exception {
-        try {
-            $action
-        } catch (lsst::pex::exceptions::Exception &e) {
-            raiseLsstException(e);
-            SWIG_fail;
-        } catch (std::exception & e) {
-            PyErr_SetString(PyExc_Exception, e.what());
-            SWIG_fail;
-        }
-    }
-%enddef
-
+%include "lsst/pex/exceptions/handler.i"
 
 // Throw an exception if func returns NULL
 %define NOTNULL(func)

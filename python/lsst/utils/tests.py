@@ -23,6 +23,7 @@
 """Support code for running unit tests"""
 
 import unittest
+import warnings
 import numpy
 try:
     import lsst.daf.base as dafBase
@@ -152,21 +153,9 @@ def inTestCase(func):
 
 @inTestCase
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
-    """
-    Fail unless an LSST C++ exception of SWIG-wrapper class excClass
-    is thrown by callableObj when invoked with arguments args and
-    keywords arguments kwargs. If a different type of exception
-    is thrown, it will not be caught, and the test case will be
-    deemed to have suffered an error, exactly as for an
-    unexpected exception.
-    """
-    try:
-        callableObj(*args, **kwargs)
-    except pexExcept.LsstCppException, e:
-        if (isinstance(e.args[0], excClass)): return
-    if hasattr(excClass,'__name__'): excName = excClass.__name__
-    else: excName = str(excClass)
-    raise testcase.failureException, "lsst.pex.exceptions.LsstCppException wrapping %s not raised" % excName
+    warnings.warn("assertRaisesLsstCpp is deprecated; please just use TestCase.assertRaises",
+                  DeprecationWarning)
+    return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 

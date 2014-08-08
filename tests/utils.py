@@ -63,7 +63,7 @@ class UtilsTestCase(utilsTests.TestCase):
         def tst():
             utilsLib.productDir("utils", "current")
 
-        self.assertRaisesLsstCpp(pexExcept.InvalidParameterError, tst)
+        self.assertRaises(pexExcept.InvalidParameterError, tst)
 
     def testProductDirUnsetup(self):
         """Test the C++'s productDir returns the same value as the python one"""
@@ -71,7 +71,7 @@ class UtilsTestCase(utilsTests.TestCase):
         def tst():
             utilsLib.productDir("XXX utils XXX non existent")
 
-        self.assertRaisesLsstCpp(pexExcept.NotFoundError, tst)
+        self.assertRaises(pexExcept.NotFoundError, tst)
 
     def testCompareArrays(self):
         self.assertClose(0.0, 0.0)
