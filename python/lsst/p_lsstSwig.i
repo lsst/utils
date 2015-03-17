@@ -191,10 +191,7 @@ namespace boost {
     }
     %pythoncode %{
         def __eq__(self, rhs):
-            try:
-                return self._eq_impl(rhs)
-            except Exception:
-                return NotImplemented
+            return self._eq_impl(rhs)
         def __ne__(self, rhs):
             return not self == rhs
    %}
@@ -211,10 +208,7 @@ namespace boost {
     }
     %pythoncode %{
         def __eq__(self, rhs):
-            try:
-                return self._eq_impl(rhs)
-            except Exception:
-                return NotImplemented
+            return self._eq_impl(rhs)
         def __ne__(self, rhs):
             return not self == rhs
    %}
