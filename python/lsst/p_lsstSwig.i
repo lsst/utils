@@ -181,13 +181,16 @@ namespace boost {
     $1 = PyBool_Check($input) ? 1 : 0;
 }
 
-// Define Python __eq__ and __ne__ operators based on C++ operator== overload.
+// Define Python __eq__ and __ne__ operators based on C++ operator==/!= overload.
 %define %useValueEquality(CLS...)
 %ignore CLS::operator==;  // just to quiet warnings
 %ignore CLS::operator!=;  // just to quiet warnings
 %extend CLS {
     bool _eq_impl(CLS const & other) const {
         return *self == other;
+    }
+    bool _ne_impl(CLS const & other) const {
+        return *self != other;
     }
     %pythoncode %{
         def __eq__(self, rhs):
@@ -196,7 +199,10 @@ namespace boost {
             except Exception:
                 return NotImplemented
         def __ne__(self, rhs):
-            return not self == rhs
+            try:
+                return self._ne_impl(rhs)
+            except Exception:
+                return NotImplemented
    %}
 }
 %enddef

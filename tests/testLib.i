@@ -64,6 +64,9 @@ Test module for various utilities in p_lsstSwig.i
         bool operator==(Example const & other) const {
             return other._value == _value;
         }
+        bool operator!=(Example const & other) const {
+            return !(*this == other);
+        }
 
     private:
         std::string _value;
