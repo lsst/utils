@@ -37,6 +37,7 @@ import os
 import pdb  # we may want to say pdb.set_trace()
 import sys
 import unittest
+import numpy
 
 import lsst.utils.tests as utilsTests
 import testLib
@@ -79,6 +80,24 @@ class SwigTestCase(unittest.TestCase):
         self.assertEqual(self.example, testLib.Example("foo"))
         self.assertNotEqual(self.example, [3,4,5]) # should not throw
         self.assertNotEqual([3,4,5], self.example) # should not throw
+
+    def checkNumPyScalar(self, name):
+        """Helper function for testNumPyScalars: check a single scalar of type numpy.{name}
+        """
+        dtype = numpy.dtype(getattr(numpy, name))
+        array = numpy.zeros(1, dtype=dtype)
+        function = getattr(testLib, "accept_%s" % name)
+        self.assertTrue(function(array[0]), "Failure converting NumPy scalar of type %s" % name)
+
+    def testNumPyIntScalars(self):
+        """Test that we can pass NumPy scalars to Swigged methods that take the corresponding
+        C++ type.
+        """
+        self.checkNumPyScalar("float32")
+        self.checkNumPyScalar("float64")
+        for size in (8, 16, 32, 64):
+            self.checkNumPyScalar("int%d" % size)
+            self.checkNumPyScalar("uint%d" % size)
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 

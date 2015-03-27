@@ -34,6 +34,10 @@ Test module for various utilities in p_lsstSwig.i
 %pythonnondynamic;
 %naturalvar;  // use const reference typemaps
 
+%{
+#include <boost/cstdint.hpp>
+%}
+
 %include "lsst/p_lsstSwig.i"
 
 %lsst_exceptions()
@@ -78,4 +82,18 @@ Test module for various utilities in p_lsstSwig.i
     }
 #endif
 
+    template <typename T>
+    bool acceptNumber(T value) { return true; }
+
 %}
+
+%template(accept_int8) acceptNumber<boost::int8_t>;
+%template(accept_uint8) acceptNumber<boost::uint8_t>;
+%template(accept_int16) acceptNumber<boost::int16_t>;
+%template(accept_uint16) acceptNumber<boost::uint16_t>;
+%template(accept_int32) acceptNumber<boost::int32_t>;
+%template(accept_uint32) acceptNumber<boost::uint32_t>;
+%template(accept_int64) acceptNumber<boost::int64_t>;
+%template(accept_uint64) acceptNumber<boost::uint64_t>;
+%template(accept_float32) acceptNumber<float>;
+%template(accept_float64) acceptNumber<double>;
