@@ -81,23 +81,54 @@ class SwigTestCase(unittest.TestCase):
         self.assertNotEqual(self.example, [3,4,5]) # should not throw
         self.assertNotEqual([3,4,5], self.example) # should not throw
 
-    def checkNumPyScalar(self, name):
-        """Helper function for testNumPyScalars: check a single scalar of type numpy.{name}
-        """
-        dtype = numpy.dtype(getattr(numpy, name))
-        array = numpy.zeros(1, dtype=dtype)
-        function = getattr(testLib, "accept_%s" % name)
-        self.assertTrue(function(array[0]), "Failure converting NumPy scalar of type %s" % name)
+    def assertAccepts(self, function, value, msg):
+        try:
+            self.assertEqual(function(value), value, msg="%s: %r != %r" % (msg, function(value), value))
+        except TypeError:
+            self.fail(msg)
 
-    def testNumPyIntScalars(self):
-        """Test that we can pass NumPy scalars to Swigged methods that take the corresponding
-        C++ type.
-        """
-        self.checkNumPyScalar("float32")
-        self.checkNumPyScalar("float64")
+    def checkNumericTypemap(self, function):
+        self.assertAccepts(function, int(1), msg="Failure passing int to %s" % function.__name__)
+        self.assertAccepts(function, long(1), msg="Failure passing long to %s" % function.__name__)
+        self.assertRaises((TypeError, NotImplementedError),
+                          function, "5")  # should fail to convert even numeric strings
+        # We should be able to coerce integers with different signedness and size to any numeric
+        # type argument (as long as we don't trigger overflow)
         for size in (8, 16, 32, 64):
-            self.checkNumPyScalar("int%d" % size)
-            self.checkNumPyScalar("uint%d" % size)
+            for name in ("int%d" % size, "uint%d" % size):
+                array = numpy.ones(1, dtype=getattr(numpy, name))
+                self.assertAccepts(function, array[0],
+                                   msg="Failure passing numpy.%s to %s" % (name, function.__name__))
+
+    def checkFloatingTypemap(self, function):
+        self.checkNumericTypemap(function)
+        self.assertAccepts(function, float(3.5), "Failure passing float to %s" % function.__name__)
+
+    def checkIntegerTypemap(self, function, size):
+        # if we pass an integer that doesn't fit in the C++ argument type, we should raise
+        # OverflowError
+        self.checkNumericTypemap(function)
+        tooBig = 2**(size + 1)
+        self.assertRaises(OverflowError, function, tooBig)
+
+    def testNumericTypemaps(self):
+        """Test our customized numeric scalar typemaps, including support for NumPy scalars.
+        """
+        self.checkFloatingTypemap(testLib.accept_float32)
+        self.checkFloatingTypemap(testLib.accept_cref_float32)
+        self.checkFloatingTypemap(testLib.accept_cref_float64)
+        for size in (8, 16, 32, 64):
+            self.checkIntegerTypemap(getattr(testLib, "accept_int%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_uint%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_cref_int%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_cref_uint%d" % size), size)
+        # Test that we choose the floating point overload when we pass a float,
+        # and we get the integer overload when we pass an int.
+        # We can't ever distinguish between different kinds of ints or different
+        # kinds of floats in an overloading context, but that's a Swig limitation.
+        self.assertEqual(testLib.getName(int(1)), "int")
+        self.assertEqual(testLib.getName(float(1)), "double")
+
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
