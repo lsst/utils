@@ -22,18 +22,20 @@
 
 """Support code for running unit tests"""
 
+from contextlib import contextmanager
+import gc
+import inspect
+import os
+import sys
 import unittest
 import warnings
+
 import numpy
+
 try:
     import lsst.daf.base as dafBase
 except ImportError:
     dafBase = None
-
-import lsst.pex.exceptions as pexExcept
-import os
-import sys
-import gc
 
 try:
     type(memId0)
@@ -47,7 +49,7 @@ def init():
         memId0 = dafBase.Citizen_getNextMemId() # used by MemoryTestCase
 
 def run(suite, exit=True):
-    """Exit with the status code resulting from running the provided test suite"""
+    """!Exit with the status code resulting from running the provided test suite"""
 
     if unittest.TextTestRunner().run(suite).wasSuccessful():
         status = 0
@@ -62,12 +64,12 @@ def run(suite, exit=True):
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         
 class MemoryTestCase(unittest.TestCase):
-    """Check for memory leaks since memId0 was allocated"""
+    """!Check for memory leaks since memId0 was allocated"""
     def setUp(self):
         pass
 
     def testLeaks(self):
-        """Check for memory leaks in the preceding tests"""
+        """!Check for memory leaks in the preceding tests"""
         if dafBase:
             gc.collect()
             global memId0, nleakPrintMax
@@ -88,10 +90,10 @@ class MemoryTestCase(unittest.TestCase):
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 def findFileFromRoot(ifile):
-    """Find file which is specified as a path relative to the toplevel directory;
+    """!Find file which is specified as a path relative to the toplevel directory;
     we start in $cwd and walk up until we find the file (or throw IOError if it doesn't exist)
 
-    This is useful for running tests that may be run from <dir>/tests or <dir>"""
+    This is useful for running tests that may be run from _dir_/tests or _dir_"""
     
     if os.path.isfile(ifile):
         return ifile
@@ -114,36 +116,73 @@ def findFileFromRoot(ifile):
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-class temporaryFile:
-    """A class to be used with a with statement to ensure that a file is deleted
-E.g.
+@contextmanager
+def getTempFilePath(ext):
+    """!Return a path suitable for a temporary file and try to delete the file on success
 
-with temporaryFile("foo.fits") as filename:
-    image.writeFits(filename)
-    readImage = Image(filename)
+    If the with block completes successfully then the file is deleted, if possible;
+    failure results in a printed warning.
+    If the block exits with an exception the file if left on disk so it can be examined.
+
+    @param[in] ext  file name extension, e.g. ".fits"
+    @return path for a temporary file. The path is a combination of the caller's file path
+    and the name of the top-level function, as per this simple example:
+    @code
+    # file tests/testFoo.py
+    import unittest
+    import lsst.utils.tests
+    class FooTestCase(unittest.TestCase):
+        def testBasics(self):
+            self.runTest()
+
+        def runTest(self):
+            with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+                # if tests/.tests exists then tmpFile = "tests/.tests/testFoo_testBasics.fits"
+                # otherwise tmpFile = "testFoo_testBasics.fits"
+                ...
+                # at the end of this "with" block the path tmpFile will be deleted, but only if
+                # the file exists and the "with" block terminated normally (rather than with an exception)
+    ...
+    @endcode
     """
-    def __init__(self, filename):
-        self.filename = filename
+    stack = inspect.stack()
+    # get name of first function in the file
+    for i in range(2, len(stack)):
+        frameInfo = inspect.getframeinfo(stack[i][0]) 
+        if i == 2:
+            callerFilePath = frameInfo.filename
+            callerFuncName = frameInfo.function
+        elif callerFilePath == frameInfo.filename:
+            # this function called the previous function
+            callerFuncName = frameInfo.function
+        else:
+            break
 
-    def __enter__(self):
-        return self.filename
-
-    def __exit__(self, type, value, traceback):
-        import os
+    callerDir, callerFileNameWithExt = os.path.split(callerFilePath)
+    callerFileName = os.path.splitext(callerFileNameWithExt)[0]
+    outDir = os.path.join(callerDir, ".tests")
+    if not os.path.isdir(outDir):
+        outDir = ""
+    outName = "%s_%s%s" % (callerFileName, callerFuncName, ext)
+    outPath = os.path.join(outDir, outName)
+    yield outPath
+    if os.path.isfile(outPath):
         try:
-            os.remove(self.filename)
-        except OSError:
-            pass
+            os.remove(outPath)
+        except OSError as e:
+            print "Warning: could not remove file %r: %s" % (outPath, e)
+    else:
+        print "Warning: could not find file %r" % (outPath,)
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 class TestCase(unittest.TestCase):
-    """Subclass of unittest.TestCase that adds some custom assertions for
+    """!Subclass of unittest.TestCase that adds some custom assertions for
     convenience.
     """
 
 def inTestCase(func):
-    """A decorator to add a free function to our custom TestCase class, while also
+    """!A decorator to add a free function to our custom TestCase class, while also
     making it available as a free function.
     """
     setattr(TestCase, func.__name__, func)
@@ -161,7 +200,7 @@ def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
 
 import functools
 def debugger(*exceptions):
-    """Decorator to enter the debugger when there's an uncaught exception
+    """!Decorator to enter the debugger when there's an uncaught exception
 
     To use, just slap a "@debugger()" on your function.
 
@@ -188,7 +227,7 @@ def debugger(*exceptions):
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
-    """Plot the comparison of two 2-d NumPy arrays.
+    """!Plot the comparison of two 2-d NumPy arrays.
 
     NOTE: this method uses matplotlib and imports it internally; it should be
     wrapped in a try/except block within packages that do not depend on
@@ -197,6 +236,7 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
     @param[in]  lhs            LHS values to compare; a 2-d NumPy array
     @param[in]  rhs            RHS values to compare; a 2-d NumPy array
     @param[in]  bad            A 2-d boolean NumPy array of values to emphasize in the plots
+    @param[in]  diff           difference array; a 2-d NumPy array, or None to show lhs-rhs
     @param[in]  plotFileName   Filename to save the plot to.  If None, the plot will be displayed in a
                                a window.
     """
@@ -243,7 +283,7 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
 @inTestCase
 def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_info.epsilon, relTo=None,
                 printFailures=True, plotOnFailure=False, plotFileName=None, invert=False):
-    """Highly-configurable floating point comparisons for scalars and arrays.
+    """!Highly-configurable floating point comparisons for scalars and arrays.
 
     The test assertion will fail if all elements lhs and rhs are not equal to within the tolerances
     specified by rtol and atol.  More precisely, the comparison is:
@@ -329,7 +369,7 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
 
 @inTestCase
 def assertNotClose(testCase, lhs, rhs, **kwds):
-    """Fail a test if the given floating point values are completely equal to within the given tolerances.
+    """!Fail a test if the given floating point values are completely equal to within the given tolerances.
 
     See assertClose for more information.
     """
