@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# 
+#
 # LSST Data Management System
-# Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+# Copyright 2008-2015 LSST/AURA
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,14 +11,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
@@ -32,10 +32,6 @@ or
    >>> import swig; swig.run()
 """
 
-import eups
-import os
-import pdb  # we may want to say pdb.set_trace()
-import sys
 import unittest
 import numpy
 
@@ -54,7 +50,7 @@ class SwigTestCase(unittest.TestCase):
         self.assertEqual(self.example.getValue(), "foo")
         self.assertRaises(Exception, testLib.Example, [5])
         self.assertEqual(testLib.Example("bar").getValue(), "bar")
-    
+
     def testReturnNone(self):
         result = self.example.get1()
         self.assert_(result is None)
@@ -62,7 +58,7 @@ class SwigTestCase(unittest.TestCase):
     def testReturnSelf(self):
         result = self.example.get2()
         self.assert_(result is self.example)
-    
+
     def testReturnCopy(self):
         result = self.example.get3()
         self.assert_(result is not self.example)
