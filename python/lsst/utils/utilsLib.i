@@ -40,8 +40,8 @@ Access to useful Utility classes.
 
 %import "lsst/pex/exceptions/exceptionsLib.i"
 
-%include "../p_lsstSwig.i"
-
+%include "lsst/p_lsstSwig.i"
+%initializeNumPy(utils)
 %lsst_exceptions()
 
 %include "lsst/utils/Demangle.h"

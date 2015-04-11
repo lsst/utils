@@ -55,6 +55,8 @@
 
 %include "lsst/base.h"
 
+%include "lsst/lsstNumPy.i"
+
 // N.b. these may interfere with the use of e.g. std_list.i for primitive types;
 // you will have to say e.g.
 // %clear int &;

@@ -24,7 +24,7 @@
  
 %define testLib_DOCSTRING
 "
-Test module for various utilities in p_lsstSwig.i
+Test module for various utilities in p_lsstSwig.i and lsstNumPy.i
 "
 %enddef
 
@@ -35,14 +35,21 @@ Test module for various utilities in p_lsstSwig.i
 %naturalvar;  // use const reference typemaps
 
 %include "lsst/p_lsstSwig.i"
+%include "lsst/lsstNumPy.i"
 
 %lsst_exceptions()
+
+%initializeNumPy(utils_tests_testLib)
 
 %returnNone(Example::get1)
 %returnSelf(Example::get2)
 %returnCopy(Example::get3)
 %addStreamRepr(Example)
 %useValueEquality(Example)
+
+%{
+#include <limits>
+%}
 
 %inline %{
     class Example {
@@ -78,4 +85,45 @@ Test module for various utilities in p_lsstSwig.i
     }
 #endif
 
+    template <typename T>
+    T acceptNumber(T value) { return value; }
+
+    template <typename T>
+    T acceptNumberConstRef(T const & value) { return value; }
+
+    // This is a dummy overload that's intended never to actually succeed - we just want to make
+    // sure the typecheck typemaps work, and we need it to be templated just so we get one for
+    // each instantiated wrapper for the other acceptNumber, and numeric_limits is something
+    // templated we know we won't be passing.
+    template <typename T>
+    bool acceptNumber(std::numeric_limits<T> *) { return false; }
+
+    template <typename T>
+    bool acceptNumberConstRef(std::numeric_limits<T> *) { return false; }
+
+    std::string getName(int) { return "int"; }
+    std::string getName(double) { return "double"; }
+
 %}
+
+%template(accept_float32) acceptNumber<float>;
+%template(accept_float64) acceptNumber<double>;
+%template(accept_uint8) acceptNumber<unsigned char>;
+%template(accept_uint16) acceptNumber<unsigned short>;
+%template(accept_uint32) acceptNumber<unsigned int>;
+%template(accept_uint64) acceptNumber<unsigned long long>;
+%template(accept_int8) acceptNumber<signed char>;
+%template(accept_int16) acceptNumber<short>;
+%template(accept_int32) acceptNumber<int>;
+%template(accept_int64) acceptNumber<long long>;
+
+%template(accept_cref_float32) acceptNumberConstRef<float>;
+%template(accept_cref_float64) acceptNumberConstRef<double>;
+%template(accept_cref_uint8) acceptNumberConstRef<unsigned char>;
+%template(accept_cref_uint16) acceptNumberConstRef<unsigned short>;
+%template(accept_cref_uint32) acceptNumberConstRef<unsigned int>;
+%template(accept_cref_uint64) acceptNumberConstRef<unsigned long long>;
+%template(accept_cref_int8) acceptNumberConstRef<signed char>;
+%template(accept_cref_int16) acceptNumberConstRef<short>;
+%template(accept_cref_int32) acceptNumberConstRef<int>;
+%template(accept_cref_int64) acceptNumberConstRef<long long>;

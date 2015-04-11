@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-# 
+#
 # LSST Data Management System
-# Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+# Copyright 2008-2015 LSST/AURA
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -11,14 +11,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
@@ -32,11 +32,8 @@ or
    >>> import swig; swig.run()
 """
 
-import eups
-import os
-import pdb  # we may want to say pdb.set_trace()
-import sys
 import unittest
+import numpy
 
 import lsst.utils.tests as utilsTests
 import testLib
@@ -53,7 +50,7 @@ class SwigTestCase(unittest.TestCase):
         self.assertEqual(self.example.getValue(), "foo")
         self.assertRaises(Exception, testLib.Example, [5])
         self.assertEqual(testLib.Example("bar").getValue(), "bar")
-    
+
     def testReturnNone(self):
         result = self.example.get1()
         self.assert_(result is None)
@@ -61,7 +58,7 @@ class SwigTestCase(unittest.TestCase):
     def testReturnSelf(self):
         result = self.example.get2()
         self.assert_(result is self.example)
-    
+
     def testReturnCopy(self):
         result = self.example.get3()
         self.assert_(result is not self.example)
@@ -79,6 +76,55 @@ class SwigTestCase(unittest.TestCase):
         self.assertEqual(self.example, testLib.Example("foo"))
         self.assertNotEqual(self.example, [3,4,5]) # should not throw
         self.assertNotEqual([3,4,5], self.example) # should not throw
+
+    def assertAccepts(self, function, value, msg):
+        try:
+            self.assertEqual(function(value), value, msg="%s: %r != %r" % (msg, function(value), value))
+        except TypeError:
+            self.fail(msg)
+
+    def checkNumericTypemap(self, function):
+        self.assertAccepts(function, int(1), msg="Failure passing int to %s" % function.__name__)
+        self.assertAccepts(function, long(1), msg="Failure passing long to %s" % function.__name__)
+        self.assertRaises((TypeError, NotImplementedError),
+                          function, "5")  # should fail to convert even numeric strings
+        # We should be able to coerce integers with different signedness and size to any numeric
+        # type argument (as long as we don't trigger overflow)
+        for size in (8, 16, 32, 64):
+            for name in ("int%d" % size, "uint%d" % size):
+                array = numpy.ones(1, dtype=getattr(numpy, name))
+                self.assertAccepts(function, array[0],
+                                   msg="Failure passing numpy.%s to %s" % (name, function.__name__))
+
+    def checkFloatingTypemap(self, function):
+        self.checkNumericTypemap(function)
+        self.assertAccepts(function, float(3.5), "Failure passing float to %s" % function.__name__)
+
+    def checkIntegerTypemap(self, function, size):
+        # if we pass an integer that doesn't fit in the C++ argument type, we should raise
+        # OverflowError
+        self.checkNumericTypemap(function)
+        tooBig = 2**(size + 1)
+        self.assertRaises(OverflowError, function, tooBig)
+
+    def testNumericTypemaps(self):
+        """Test our customized numeric scalar typemaps, including support for NumPy scalars.
+        """
+        self.checkFloatingTypemap(testLib.accept_float32)
+        self.checkFloatingTypemap(testLib.accept_cref_float32)
+        self.checkFloatingTypemap(testLib.accept_cref_float64)
+        for size in (8, 16, 32, 64):
+            self.checkIntegerTypemap(getattr(testLib, "accept_int%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_uint%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_cref_int%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_cref_uint%d" % size), size)
+        # Test that we choose the floating point overload when we pass a float,
+        # and we get the integer overload when we pass an int.
+        # We can't ever distinguish between different kinds of ints or different
+        # kinds of floats in an overloading context, but that's a Swig limitation.
+        self.assertEqual(testLib.getName(int(1)), "int")
+        self.assertEqual(testLib.getName(float(1)), "double")
+
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
