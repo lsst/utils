@@ -1,6 +1,7 @@
+from __future__ import absolute_import, division, print_function
 # 
 # LSST Data Management System
-# Copyright 2008, 2009, 2010 LSST Corporation.
+# Copyright 2015 LSST Corporation.
 # 
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -19,7 +20,14 @@
 # the GNU General Public License along with this program.  If not, 
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
+import os
 
-from utilsLib import *
-from getPackageDir import *
-from .version import *
+__all__ = ["getPackageDir"]
+
+def getPackageDir(packageName):
+    """Return the path to a package, or None if not unknown
+
+    This implementation assumes that available packages are pointed to using
+    an environment variable *packagename*_DIR, which is true of eups.
+    """
+    return os.environ.get("%s_DIR" % packageName.upper())
