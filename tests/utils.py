@@ -32,47 +32,15 @@ or
    >>> import utils; utils.run()
 """
 
-import eups
-import pdb  # we may want to say pdb.set_trace()
 import unittest
 import numpy
 
 import lsst.utils.tests as utilsTests
-import lsst.pex.exceptions as pexExcept
-import lsst.utils.utilsLib as utilsLib
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 class UtilsTestCase(utilsTests.TestCase):
     """A test case for Utils"""
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def testProductDir(self):
-        """Test the C++'s productDir returns the same value as the python one"""
-        
-        self.assertTrue(utilsLib.productDir("utils") == eups.productDir("utils"))
-
-    def testProductDirCurrent(self):
-        """Test the C++'s productDir returns the same value as the python one"""
-        
-        def tst():
-            utilsLib.productDir("utils", "current")
-
-        self.assertRaises(pexExcept.InvalidParameterError, tst)
-
-    def testProductDirUnsetup(self):
-        """Test the C++'s productDir returns the same value as the python one"""
-        
-        def tst():
-            utilsLib.productDir("XXX utils XXX non existent")
-
-        self.assertRaises(pexExcept.NotFoundError, tst)
-
     def testCompareArrays(self):
         self.assertClose(0.0, 0.0)
         self.assertClose(0.0, 1E-8, atol=1E-7)

@@ -21,5 +21,4 @@
 #
 
 from utilsLib import *
-from getPackageDir import *
 from .version import *

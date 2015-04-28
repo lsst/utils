@@ -2,7 +2,7 @@
 
 # 
 # LSST Data Management System
-# Copyright 2008, 2009, 2010 LSST Corporation.
+# Copyright 2015 LSST Corporation.
 # 
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -33,11 +33,9 @@ class GetPackageDirTestCase(unittest.TestCase):
     """Test getPackageDir"""
     def testBasics(self):
         utilsPath = getPackageDir("utils")
-        self.assertFalse(utilsPath is None)
-        self.assertTrue(os.path.isfile(os.path.join(utilsPath, "ups", "utils.table")))
+        self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "testGetPackageDir.py")))
 
-        badPath = getPackageDir("nameOfNonexistendPackage2234q?#!")
-        self.assertTrue(badPath is None)
+        self.assertRaises(Exception, getPackageDir, "nameOfNonexistendPackage2234q?#!")
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

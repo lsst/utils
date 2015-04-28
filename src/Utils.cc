@@ -112,27 +112,15 @@ boost::any stringToAny(std::string valueString)
     return boost::any(valueString);
 }
 
-/*!
- * \brief return an eups PRODUCT_DIR
- *
- * Return the directory of a setup product
- *
- * \throws lsst::pex::exceptions::InvalidParameterError if version != "setup"
- * \throws lsst::pex::exceptions::NotFoundError if desired version can't be found
- */
-std::string eups::productDir(std::string const& product, std::string const& version) {
-    if (version != "setup") {
-        throw LSST_EXCEPT(lsst::pex::exceptions::InvalidParameterError, "Unsupported version: " + version);
-    }
+std::string getPackageDir(std::string const& packageName) {
+    std::string envVar = packageName;      // package's environment variable
     
-    std::string var = product;      // product's environment variable
+    transform(envVar.begin(), envVar.end(), envVar.begin(), (int (*)(int)) toupper);
+    envVar += "_DIR";
     
-    transform(var.begin(), var.end(), var.begin(), (int (*)(int)) toupper);
-    var += "_DIR";
-    
-    char const *dir = getenv(var.c_str());
+    char const *dir = getenv(envVar.c_str());
     if (!dir) {
-        throw LSST_EXCEPT(lsst::pex::exceptions::NotFoundError, "Product " + product + " has no version " + version);
+        throw LSST_EXCEPT(lsst::pex::exceptions::NotFoundError, "Package " + packageName + " not found");
     }
     
     return dir;
