@@ -37,13 +37,15 @@
 namespace lsst {
 namespace utils {
 
-void guessSvnVersion(std::string const& headURL, std::string& OUTPUT);
-boost::any stringToAny(std::string valueString);
+/*!
+ * \brief return the root directory of a setup package
+ *
+ * \param[in] packageName  name of package (e.g. "utils")
+ *
+ * \throw lsst::pex::exceptions::NotFoundError if desired version can't be found
+ */
+std::string getPackageDir(std::string const& packageName);
 
-/// @brief EUPS bindings
-namespace eups {
-    std::string productDir(std::string const& product, std::string const& version="setup");
-}
 }} // namespace lsst::utils
 
 #endif

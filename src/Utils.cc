@@ -30,55 +30,6 @@
 
 namespace lsst {
 namespace utils {
-/*!
- * Return a version name given an SVN HeadURL
- *
- * Given a string of the form
- *   Dollar HeadURL: svn+ssh://svn.lsstcorp.org/DC2/fw/tags/1.1/foo Dollar
- * (where I've written Dollar to foil svn) try to guess the version.
- *
- *    If the string is misformed, return "(NOSVN)";
- *
- *    If the version appears to be on the trunk, return "svn"
- *    as this is presumably an untagged * version
- *
- *    If the version appears to be in branches, tags, or tickets return
- *    the version string (with " B", "", or " T" appended respectively)
- *
- *    Otherwise return the svn URL
- *
- * Note: for this to be set by svn, you'll have to set the svn property
- * svn:keywords to expand HeadURL in the file where the HeadURL originates.
- */
-void guessSvnVersion(std::string const& headURL, //!< the HeadURL String
-                     std::string& version //!< the desired version
-                    ) {
-    const boost::regex getURL("^\\$HeadURL:\\s+([^$ ]+)\\s*\\$$");
-    boost::smatch matchObject;
-    if (boost::regex_search(headURL, matchObject, getURL)) {
-        version = matchObject[1];
-
-        const boost::regex getVersion("(branches|tags|tickets|trunk)/([^/]+)");
-        if (boost::regex_search(version, matchObject, getVersion)) {
-            std::string type = matchObject[1];
-            version = matchObject[2];
-        
-            if (type == "branches") {
-                version += "B";
-            } else if (type == "tickets") {
-                version += "T" ;
-            } else if (type == "trunk") {
-                version = "svn";
-            }
-        }
-    } else {
-        version = "(NOSVN)";
-        return;
-    }
-}
-
-
-// Free utility function
 
 boost::any stringToAny(std::string valueString)
 {
@@ -112,27 +63,15 @@ boost::any stringToAny(std::string valueString)
     return boost::any(valueString);
 }
 
-/*!
- * \brief return an eups PRODUCT_DIR
- *
- * Return the directory of a setup product
- *
- * \throws lsst::pex::exceptions::InvalidParameterError if version != "setup"
- * \throws lsst::pex::exceptions::NotFoundError if desired version can't be found
- */
-std::string eups::productDir(std::string const& product, std::string const& version) {
-    if (version != "setup") {
-        throw LSST_EXCEPT(lsst::pex::exceptions::InvalidParameterError, "Unsupported version: " + version);
-    }
+std::string getPackageDir(std::string const& packageName) {
+    std::string envVar = packageName;      // package's environment variable
     
-    std::string var = product;      // product's environment variable
+    transform(envVar.begin(), envVar.end(), envVar.begin(), (int (*)(int)) toupper);
+    envVar += "_DIR";
     
-    transform(var.begin(), var.end(), var.begin(), (int (*)(int)) toupper);
-    var += "_DIR";
-    
-    char const *dir = getenv(var.c_str());
+    char const *dir = getenv(envVar.c_str());
     if (!dir) {
-        throw LSST_EXCEPT(lsst::pex::exceptions::NotFoundError, "Product " + product + " has no version " + version);
+        throw LSST_EXCEPT(lsst::pex::exceptions::NotFoundError, "Package " + packageName + " not found");
     }
     
     return dir;
