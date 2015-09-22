@@ -174,15 +174,6 @@ namespace boost {
     }
 %enddef
 
-// Makes Python-to-C++ conversions to bool safer, by requiring that the object
-// actually be a Python bool object.
-// This may break some code that uses 0 and 1 in place of false and true, but
-// it also prevents errors where arbitrary objects like lists are converted to
-// C++ bools.
-%typemap(typecheck, precedence=SWIG_TYPECHECK_BOOL, noblock=1) bool {
-    $1 = PyBool_Check($input) ? 1 : 0;
-}
-
 // Define Python __eq__ and __ne__ operators based on C++ operator==/!= overload.
 %define %useValueEquality(CLS...)
 %ignore CLS::operator==;  // just to quiet warnings
