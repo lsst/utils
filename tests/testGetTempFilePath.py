@@ -4,8 +4,10 @@ import os.path
 
 import lsst.utils.tests
 
+
 class GetTempFilePathTestCase(unittest.TestCase):
     """Test case for getTempFilePath"""
+
     def testBasics(self):
         with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
             baseName = os.path.basename(tmpFile)
@@ -54,6 +56,7 @@ def suite():
     suites += unittest.makeSuite(lsst.utils.tests.MemoryTestCase)
 
     return unittest.TestSuite(suites)
+
 
 def run(shouldExit=False):
     """Run the tests"""

@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,14 +9,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
@@ -44,10 +44,12 @@ except NameError:
     memId0 = 0                          # ignore leaked blocks with IDs before memId0
     nleakPrintMax = 20                  # maximum number of leaked blocks to print
 
+
 def init():
     global memId0
     if dafBase:
-        memId0 = dafBase.Citizen_getNextMemId() # used by MemoryTestCase
+        memId0 = dafBase.Citizen_getNextMemId()  # used by MemoryTestCase
+
 
 def run(suite, exit=True):
     """!Exit with the status code resulting from running the provided test suite"""
@@ -62,10 +64,12 @@ def run(suite, exit=True):
     else:
         return status
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 class MemoryTestCase(unittest.TestCase):
     """!Check for memory leaks since memId0 was allocated"""
+
     def setUp(self):
         pass
 
@@ -93,14 +97,15 @@ class MemoryTestCase(unittest.TestCase):
 
                 self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 def findFileFromRoot(ifile):
     """!Find file which is specified as a path relative to the toplevel directory;
     we start in $cwd and walk up until we find the file (or throw IOError if it doesn't exist)
 
     This is useful for running tests that may be run from _dir_/tests or _dir_"""
-    
+
     if os.path.isfile(ifile):
         return ifile
 
@@ -120,7 +125,8 @@ def findFileFromRoot(ifile):
 
     raise IOError("Can't find %s" % ifile)
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 @contextmanager
 def getTempFilePath(ext):
@@ -154,7 +160,7 @@ def getTempFilePath(ext):
     stack = inspect.stack()
     # get name of first function in the file
     for i in range(2, len(stack)):
-        frameInfo = inspect.getframeinfo(stack[i][0]) 
+        frameInfo = inspect.getframeinfo(stack[i][0])
         if i == 2:
             callerFilePath = frameInfo.filename
             callerFuncName = frameInfo.function
@@ -180,12 +186,14 @@ def getTempFilePath(ext):
     else:
         print("Warning: could not find file %r" % (outPath,))
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 class TestCase(unittest.TestCase):
     """!Subclass of unittest.TestCase that adds some custom assertions for
     convenience.
     """
+
 
 def inTestCase(func):
     """!A decorator to add a free function to our custom TestCase class, while also
@@ -194,7 +202,8 @@ def inTestCase(func):
     setattr(TestCase, func.__name__, func)
     return func
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 @inTestCase
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
@@ -202,9 +211,11 @@ def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
                   DeprecationWarning)
     return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import functools
+
+
 def debugger(*exceptions):
     """!Decorator to enter the debugger when there's an uncaught exception
 
@@ -219,18 +230,21 @@ def debugger(*exceptions):
     """
     if not exceptions:
         exceptions = (AssertionError, )
+
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
             try:
                 return f(*args, **kwargs)
             except exceptions:
-                import sys, pdb
+                import sys
+                import pdb
                 pdb.post_mortem(sys.exc_info()[2])
         return wrapper
     return decorator
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
     """!Plot the comparison of two 2-d NumPy arrays.
@@ -253,23 +267,23 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
     if bad is not None:
         # make an rgba image that's red and transparent where not bad
         badImage = numpy.zeros(bad.shape + (4,), dtype=numpy.uint8)
-        badImage[:,:,0] = 255
-        badImage[:,:,1] = 0
-        badImage[:,:,2] = 0
-        badImage[:,:,3] = 255*bad
+        badImage[:, :, 0] = 255
+        badImage[:, :, 1] = 0
+        badImage[:, :, 2] = 0
+        badImage[:, :, 3] = 255*bad
     vmin1 = numpy.minimum(numpy.min(lhs), numpy.min(rhs))
     vmax1 = numpy.maximum(numpy.max(lhs), numpy.max(rhs))
     vmin2 = numpy.min(diff)
     vmax2 = numpy.max(diff)
     for n, (image, title) in enumerate([(lhs, "lhs"), (rhs, "rhs"), (diff, "diff")]):
-        pyplot.subplot(2,3,n+1)
+        pyplot.subplot(2, 3, n + 1)
         im1 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
                             vmin=vmin1, vmax=vmax1)
         if bad is not None:
             pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
         pyplot.axis("off")
         pyplot.title(title)
-        pyplot.subplot(2,3,n+4)
+        pyplot.subplot(2, 3, n + 4)
         im2 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
                             vmin=vmin2, vmax=vmax2)
         if bad is not None:
@@ -285,6 +299,7 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
         pyplot.savefig(plotFileName)
     else:
         pyplot.show()
+
 
 @inTestCase
 def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_info.epsilon, relTo=None,
@@ -372,6 +387,7 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
                 for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
                     msg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
     testCase.assertFalse(failed, msg="\n".join(msg))
+
 
 @inTestCase
 def assertNotClose(testCase, lhs, rhs, **kwds):
