@@ -62,11 +62,16 @@ def run(suite, exit=True):
         return status
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-        
+
 class MemoryTestCase(unittest.TestCase):
     """!Check for memory leaks since memId0 was allocated"""
     def setUp(self):
         pass
+
+    @classmethod
+    def tearDownClass(cls):
+        """!Reset the leak counter when the tests have been completed"""
+        init()
 
     def testLeaks(self):
         """!Check for memory leaks in the preceding tests"""
