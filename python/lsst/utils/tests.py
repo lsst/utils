@@ -21,6 +21,7 @@
 #
 
 """Support code for running unit tests"""
+from __future__ import print_function
 
 from contextlib import contextmanager
 import gc
@@ -80,15 +81,15 @@ class MemoryTestCase(unittest.TestCase):
             global memId0, nleakPrintMax
             nleak = dafBase.Citizen_census(0, memId0)
             if nleak != 0:
-                print "\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0)
+                print("\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0))
 
                 if nleak <= nleakPrintMax:
-                    print dafBase.Citizen_census(dafBase.cout, memId0)
+                    print(dafBase.Citizen_census(dafBase.cout, memId0))
                 else:
                     census = dafBase.Citizen_census()
-                    print "..."
+                    print("...")
                     for i in range(nleakPrintMax - 1, -1, -1):
-                        print census[i].repr()
+                        print(census[i].repr())
 
                 self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
 
@@ -117,7 +118,7 @@ def findFileFromRoot(ifile):
 
         file = dirname
 
-    raise IOError, "Can't find %s" % ifile
+    raise IOError("Can't find %s" % ifile)
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -175,9 +176,9 @@ def getTempFilePath(ext):
         try:
             os.remove(outPath)
         except OSError as e:
-            print "Warning: could not remove file %r: %s" % (outPath, e)
+            print("Warning: could not remove file %r: %s" % (outPath, e))
     else:
-        print "Warning: could not find file %r" % (outPath,)
+        print("Warning: could not find file %r" % (outPath,))
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 

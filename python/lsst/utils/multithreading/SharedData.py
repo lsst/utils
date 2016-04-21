@@ -89,7 +89,7 @@ class SharedData(object):
     def __exit__(self, *exc_info):  return self._cond.__exit__(*exc_info);
     
     def __getattribute__(self, name):
-        if name == "_d" or len(self._d) == 0 or not self._d.has_key(name):
+        if name == "_d" or len(self._d) == 0 or name not in self._d:
             return object.__getattribute__(self, name)
         
         if self._lockOnRead and not self._is_owned():

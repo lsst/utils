@@ -79,7 +79,7 @@ class ShareDataTestCase(unittest.TestCase):
         try:
             self.sd.name
             self.fail("AttributeError not raised for reading w/o lock ")
-        except AttributeError, e:
+        except AttributeError as e:
             pass
         self.sd.dir()
 
@@ -157,7 +157,7 @@ class ReadableShareDataTestCase(unittest.TestCase):
         try:
             self.sd.goob
             self.fail("AttributeError not raised for accessing non-existent")
-        except AttributeError, e:
+        except AttributeError as e:
             pass
 
     def testInit(self):
