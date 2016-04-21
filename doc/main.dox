@@ -8,8 +8,8 @@ namespace lsst { namespace utils {
 This is a collection of miscellaneous utility functions, classes and macros, including:
 - lsst/p_lsstSwig.i useful macros for SWIG interface files
 - \ref lsst.utils.tests utilties to aid in unit testing
-- \ref lsst::utils::eups::productDir provides C++ code access to the eups productDir function
-    (Python code simply import eups for to access this function)
+- \ref lsst::utils::getPackageDir and lsst.utils.getPackageDir provide an equivalent
+  to the eups productDir function
 */
 
-}} // namespace lsst::skymap
+}} // namespace lsst::utils
