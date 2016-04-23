@@ -27,6 +27,7 @@ from contextlib import contextmanager
 import gc
 import inspect
 import os
+import subprocess
 import sys
 import unittest
 import warnings
@@ -99,6 +100,131 @@ class MemoryTestCase(unittest.TestCase):
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+
+class ExecutablesTestCase(unittest.TestCase):
+    """!Test that executables can be run and return good status.
+
+    The test methods are dynamically created. Callers
+    must subclass this class in their own test file and invoke
+    the discover_tests() class method to register the tests.
+    """
+
+    def assertExecutable(self, executable, root_dir=None, args=None, msg=None):
+        """!Check an executable runs and returns good status.
+
+        @param executable: Path to an executable. root_dir is not used
+        if this is an absolute path.
+
+        @param root_dir: Directory containing exe. Ignored if None.
+
+        @param args: List or tuple of arguments to be provided to the
+        executable.
+
+        @param msg: Message to use when the test fails. Can be None for
+        default message.
+
+        Prints output to standard out. On bad exit status the test
+        fails. If the executable can not be located the test is skipped.
+        """
+
+        if root_dir is not None and not os.path.isabs(executable):
+            executable = os.path.join(root_dir, executable)
+
+        # Form the argument list for subprocess
+        sp_args = [executable]
+        argstr = "no arguments"
+        if args is not None:
+            sp_args.extend(args)
+            argstr = 'arguments "' + " ".join(args) + '"'
+
+        print("Running executable '{}' with {}...".format(executable, argstr))
+        if not os.path.exists(executable):
+            self.skipTest("Executable {} is unexpectedly missing".format(executable))
+        failmsg = None
+        try:
+            output = subprocess.check_output(sp_args)
+        except subprocess.CalledProcessError as e:
+            output = e.output
+            failmsg = "Bad exit status from '{}': {}".format(executable, e.returncode)
+        print(output.decode('utf-8'))
+        if failmsg:
+            if msg is None:
+                msg = failmsg
+            self.fail(msg)
+
+    @classmethod
+    def _build_test_method(cls, executable, root_dir):
+        """!Build a test method and attach to class.
+
+        The method is built for the supplied excutable located
+        in the supplied root directory.
+
+        cls._build_test_method(root_dir, executable)
+
+        @param cls The class in which to create the tests.
+
+        @param executable Name of executable. Can be absolute path.
+
+        @param root_dir Path to executable. Not used if executable path is absolute.
+        """
+        if not os.path.isabs(executable):
+            executable = os.path.abspath(os.path.join(root_dir, executable))
+
+        # Create the test name from the executable path.
+        test_name = "test_exe_" + executable.replace("/", "_")
+
+        # This is the function that will become the test method
+        def test_executable_runs(*args):
+            self = args[0]
+            self.assertExecutable(executable)
+
+        # Give it a name and attach it to the class
+        test_executable_runs.__name__ = test_name
+        setattr(cls, test_name, test_executable_runs)
+
+    @classmethod
+    def create_executable_tests(cls, ref_file, executables=None):
+        """!Discover executables to test and create corresponding test methods.
+
+        Scans the directory containing the supplied reference file
+        (usually __file__ supplied from the test class) and look for
+        executables. If executables are found a test method is created
+        for each one. That test method will run the executable and
+        check the returned value.
+
+        Executable scripts with a .py extension and shared libraries
+        are ignored by the scanner.
+
+        This class method must be called before test discovery.
+
+        cls.discover_tests(__file__)
+
+        The list of executables can be overridden by passing in a
+        sequence of explicit executables that should be tested.
+        If an item in the sequence can not be found the
+        test will be configured to skip rather than fail.
+        """
+
+        # Get the search directory from the reference file
+        ref_dir = os.path.abspath(os.path.dirname(ref_file))
+
+        if executables is None:
+            # Look for executables to test by walking the tree
+            executables = []
+            for root, dirs, files in os.walk(ref_dir):
+                for f in files:
+                    # Skip Python files. Shared libraries are exectuable.
+                    if not f.endswith(".py") and not f.endswith(".so"):
+                        full_path = os.path.join(root, f)
+                        if os.access(full_path, os.X_OK):
+                            executables.append(full_path)
+
+        # Create the test functions and attach them to the class
+        for e in executables:
+            cls._build_test_method(e, ref_dir)
+
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 def findFileFromRoot(ifile):
     """!Find file which is specified as a path relative to the toplevel directory;
