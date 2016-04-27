@@ -31,8 +31,13 @@ import subprocess
 import sys
 import unittest
 import warnings
-
 import numpy
+
+# File descriptor leak test will be skipped if psutil can not be imported
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 try:
     import lsst.daf.base as dafBase
@@ -45,11 +50,24 @@ except NameError:
     memId0 = 0                          # ignore leaked blocks with IDs before memId0
     nleakPrintMax = 20                  # maximum number of leaked blocks to print
 
+# Initialize the list of open files to an empty set
+open_files = set()
+
+
+def _get_open_files():
+    """Return a set containing the list of open files."""
+    if psutil is None:
+        return set()
+    return set(p.path for p in psutil.Process().open_files())
+
 
 def init():
     global memId0
+    global open_files
     if dafBase:
         memId0 = dafBase.Citizen_getNextMemId()  # used by MemoryTestCase
+    # Reset the list of open files
+    open_files = _get_open_files()
 
 
 def run(suite, exit=True):
@@ -97,6 +115,22 @@ class MemoryTestCase(unittest.TestCase):
                         print(census[i].repr())
 
                 self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
+
+    def testFileDescriptorLeaks(self):
+        if psutil is None:
+            self.skipTest("Unable to test file descriptor leaks. psutil unavailable.")
+        gc.collect()
+        global open_files
+        now_open = _get_open_files()
+
+        # Some files are opened out of the control of the stack.
+        now_open = set(f for f in now_open if not f.endswith(".car"))
+
+        diff = now_open.difference(open_files)
+        if diff:
+            for f in diff:
+                print("File open: %s" % f)
+            self.fail("Failed to close %d files" % len(diff))
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
