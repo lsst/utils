@@ -10,6 +10,7 @@ config.log
 *_wrap.cc
 *Lib.py
 doc/html
+doc/xml
 doc/*.tag
 doc/*.inc
 doc/doxygen.conf
@@ -17,3 +18,4 @@ tests/.tests
 version.py
 tests/ieee
 examples/demangle
+_build.*
