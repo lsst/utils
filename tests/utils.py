@@ -37,6 +37,10 @@ import numpy
 
 import lsst.utils.tests as utilsTests
 
+
+def setup_module(module):
+    utilsTests.init()
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
@@ -87,6 +91,9 @@ class UtilsTestCase(utilsTests.TestCase):
             # should see failures on the center row of the 5x5 image, but not the very center point
             self.assertClose(a, b, rtol=1E-6, plotOnFailure=True)
 
+
+class TestMemory(utilsTests.MemoryTestCase):
+    pass
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
