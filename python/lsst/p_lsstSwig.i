@@ -49,7 +49,7 @@
 %include "std_set.i"
 %include "std_vector.i"
 %include "std_iostream.i"
-%include "boost_shared_ptr.i"
+%include "std_shared_ptr.i"
 %include "carrays.i"
 %include "typemaps.i"
 
@@ -274,8 +274,8 @@ namespace boost {
 //
 %define %castShared(DERIVED, BASE)
     %extend DERIVED {
-        static boost::shared_ptr< DERIVED > cast(boost::shared_ptr< BASE > p) {
-            return boost::dynamic_pointer_cast< DERIVED >(p);
+        static std::shared_ptr< DERIVED > cast(std::shared_ptr< BASE > p) {
+            return std::dynamic_pointer_cast< DERIVED >(p);
         }
     }
 %enddef
