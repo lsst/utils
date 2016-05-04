@@ -2,6 +2,7 @@ setupRequired(base)
 setupRequired(pex_exceptions)
 setupRequired(boost)
 setupRequired(numpy)
+setupRequired(python_psutil)
 
 envPrepend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
 envPrepend(DYLD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
