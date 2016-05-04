@@ -15,6 +15,7 @@ doc/*.tag
 doc/*.inc
 doc/doxygen.conf
 tests/.tests
+tests/.cache
 version.py
 tests/ieee
 examples/demangle
