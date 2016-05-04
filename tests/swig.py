@@ -38,7 +38,12 @@ import numpy
 import lsst.utils.tests as utilsTests
 import testLib
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+def setup_module(module):
+    utilsTests.init()
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 class SwigTestCase(unittest.TestCase):
     """A test case for SWIG utilities in p_lsstSwig.i"""
@@ -74,8 +79,8 @@ class SwigTestCase(unittest.TestCase):
     def testEqualityComparison(self):
         self.assertNotEqual(self.example, testLib.Example("bar"))
         self.assertEqual(self.example, testLib.Example("foo"))
-        self.assertNotEqual(self.example, [3,4,5]) # should not throw
-        self.assertNotEqual([3,4,5], self.example) # should not throw
+        self.assertNotEqual(self.example, [3, 4, 5])  # should not throw
+        self.assertNotEqual([3, 4, 5], self.example)  # should not throw
 
     def assertAccepts(self, function, value, msg):
         try:
@@ -126,21 +131,11 @@ class SwigTestCase(unittest.TestCase):
         self.assertEqual(testLib.getName(float(1)), "double")
 
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+class TestMemory(utilsTests.MemoryTestCase):
+    pass
 
-def suite():
-    """Returns a suite containing all the test cases in this module."""
-
-    utilsTests.init()
-
-    suites = []
-    suites += unittest.makeSuite(SwigTestCase)
-    suites += unittest.makeSuite(utilsTests.MemoryTestCase)
-    return unittest.TestSuite(suites)
-
-def run(exit=False):
-    """Run the tests"""
-    utilsTests.run(suite(), exit)
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 if __name__ == "__main__":
-    run(True)
+    utilsTests.init()
+    unittest.main()

@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,28 +9,35 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
 """Support code for running unit tests"""
+from __future__ import print_function
 
 from contextlib import contextmanager
 import gc
 import inspect
 import os
+import subprocess
 import sys
 import unittest
 import warnings
-
 import numpy
+
+# File descriptor leak test will be skipped if psutil can not be imported
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 try:
     import lsst.daf.base as dafBase
@@ -43,10 +50,25 @@ except NameError:
     memId0 = 0                          # ignore leaked blocks with IDs before memId0
     nleakPrintMax = 20                  # maximum number of leaked blocks to print
 
+# Initialize the list of open files to an empty set
+open_files = set()
+
+
+def _get_open_files():
+    """Return a set containing the list of open files."""
+    if psutil is None:
+        return set()
+    return set(p.path for p in psutil.Process().open_files())
+
+
 def init():
     global memId0
+    global open_files
     if dafBase:
-        memId0 = dafBase.Citizen_getNextMemId() # used by MemoryTestCase
+        memId0 = dafBase.Citizen_getNextMemId()  # used by MemoryTestCase
+    # Reset the list of open files
+    open_files = _get_open_files()
+
 
 def run(suite, exit=True):
     """!Exit with the status code resulting from running the provided test suite"""
@@ -61,12 +83,19 @@ def run(suite, exit=True):
     else:
         return status
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-        
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
 class MemoryTestCase(unittest.TestCase):
     """!Check for memory leaks since memId0 was allocated"""
+
     def setUp(self):
         pass
+
+    @classmethod
+    def tearDownClass(cls):
+        """!Reset the leak counter when the tests have been completed"""
+        init()
 
     def testLeaks(self):
         """!Check for memory leaks in the preceding tests"""
@@ -75,26 +104,168 @@ class MemoryTestCase(unittest.TestCase):
             global memId0, nleakPrintMax
             nleak = dafBase.Citizen_census(0, memId0)
             if nleak != 0:
-                print "\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0)
+                print("\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0))
 
                 if nleak <= nleakPrintMax:
-                    print dafBase.Citizen_census(dafBase.cout, memId0)
+                    print(dafBase.Citizen_census(dafBase.cout, memId0))
                 else:
                     census = dafBase.Citizen_census()
-                    print "..."
+                    print("...")
                     for i in range(nleakPrintMax - 1, -1, -1):
-                        print census[i].repr()
+                        print(census[i].repr())
 
                 self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    def testFileDescriptorLeaks(self):
+        if psutil is None:
+            self.skipTest("Unable to test file descriptor leaks. psutil unavailable.")
+        gc.collect()
+        global open_files
+        now_open = _get_open_files()
+
+        # Some files are opened out of the control of the stack.
+        now_open = set(f for f in now_open if not f.endswith(".car"))
+
+        diff = now_open.difference(open_files)
+        if diff:
+            for f in diff:
+                print("File open: %s" % f)
+            self.fail("Failed to close %d files" % len(diff))
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+class ExecutablesTestCase(unittest.TestCase):
+    """!Test that executables can be run and return good status.
+
+    The test methods are dynamically created. Callers
+    must subclass this class in their own test file and invoke
+    the discover_tests() class method to register the tests.
+    """
+
+    def assertExecutable(self, executable, root_dir=None, args=None, msg=None):
+        """!Check an executable runs and returns good status.
+
+        @param executable: Path to an executable. root_dir is not used
+        if this is an absolute path.
+
+        @param root_dir: Directory containing exe. Ignored if None.
+
+        @param args: List or tuple of arguments to be provided to the
+        executable.
+
+        @param msg: Message to use when the test fails. Can be None for
+        default message.
+
+        Prints output to standard out. On bad exit status the test
+        fails. If the executable can not be located the test is skipped.
+        """
+
+        if root_dir is not None and not os.path.isabs(executable):
+            executable = os.path.join(root_dir, executable)
+
+        # Form the argument list for subprocess
+        sp_args = [executable]
+        argstr = "no arguments"
+        if args is not None:
+            sp_args.extend(args)
+            argstr = 'arguments "' + " ".join(args) + '"'
+
+        print("Running executable '{}' with {}...".format(executable, argstr))
+        if not os.path.exists(executable):
+            self.skipTest("Executable {} is unexpectedly missing".format(executable))
+        failmsg = None
+        try:
+            output = subprocess.check_output(sp_args)
+        except subprocess.CalledProcessError as e:
+            output = e.output
+            failmsg = "Bad exit status from '{}': {}".format(executable, e.returncode)
+        print(output.decode('utf-8'))
+        if failmsg:
+            if msg is None:
+                msg = failmsg
+            self.fail(msg)
+
+    @classmethod
+    def _build_test_method(cls, executable, root_dir):
+        """!Build a test method and attach to class.
+
+        The method is built for the supplied excutable located
+        in the supplied root directory.
+
+        cls._build_test_method(root_dir, executable)
+
+        @param cls The class in which to create the tests.
+
+        @param executable Name of executable. Can be absolute path.
+
+        @param root_dir Path to executable. Not used if executable path is absolute.
+        """
+        if not os.path.isabs(executable):
+            executable = os.path.abspath(os.path.join(root_dir, executable))
+
+        # Create the test name from the executable path.
+        test_name = "test_exe_" + executable.replace("/", "_")
+
+        # This is the function that will become the test method
+        def test_executable_runs(*args):
+            self = args[0]
+            self.assertExecutable(executable)
+
+        # Give it a name and attach it to the class
+        test_executable_runs.__name__ = test_name
+        setattr(cls, test_name, test_executable_runs)
+
+    @classmethod
+    def create_executable_tests(cls, ref_file, executables=None):
+        """!Discover executables to test and create corresponding test methods.
+
+        Scans the directory containing the supplied reference file
+        (usually __file__ supplied from the test class) and look for
+        executables. If executables are found a test method is created
+        for each one. That test method will run the executable and
+        check the returned value.
+
+        Executable scripts with a .py extension and shared libraries
+        are ignored by the scanner.
+
+        This class method must be called before test discovery.
+
+        cls.discover_tests(__file__)
+
+        The list of executables can be overridden by passing in a
+        sequence of explicit executables that should be tested.
+        If an item in the sequence can not be found the
+        test will be configured to skip rather than fail.
+        """
+
+        # Get the search directory from the reference file
+        ref_dir = os.path.abspath(os.path.dirname(ref_file))
+
+        if executables is None:
+            # Look for executables to test by walking the tree
+            executables = []
+            for root, dirs, files in os.walk(ref_dir):
+                for f in files:
+                    # Skip Python files. Shared libraries are exectuable.
+                    if not f.endswith(".py") and not f.endswith(".so"):
+                        full_path = os.path.join(root, f)
+                        if os.access(full_path, os.X_OK):
+                            executables.append(full_path)
+
+        # Create the test functions and attach them to the class
+        for e in executables:
+            cls._build_test_method(e, ref_dir)
+
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 def findFileFromRoot(ifile):
     """!Find file which is specified as a path relative to the toplevel directory;
     we start in $cwd and walk up until we find the file (or throw IOError if it doesn't exist)
 
     This is useful for running tests that may be run from _dir_/tests or _dir_"""
-    
+
     if os.path.isfile(ifile):
         return ifile
 
@@ -112,9 +283,10 @@ def findFileFromRoot(ifile):
 
         file = dirname
 
-    raise IOError, "Can't find %s" % ifile
+    raise IOError("Can't find %s" % ifile)
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 @contextmanager
 def getTempFilePath(ext):
@@ -148,7 +320,7 @@ def getTempFilePath(ext):
     stack = inspect.stack()
     # get name of first function in the file
     for i in range(2, len(stack)):
-        frameInfo = inspect.getframeinfo(stack[i][0]) 
+        frameInfo = inspect.getframeinfo(stack[i][0])
         if i == 2:
             callerFilePath = frameInfo.filename
             callerFuncName = frameInfo.function
@@ -170,16 +342,18 @@ def getTempFilePath(ext):
         try:
             os.remove(outPath)
         except OSError as e:
-            print "Warning: could not remove file %r: %s" % (outPath, e)
+            print("Warning: could not remove file %r: %s" % (outPath, e))
     else:
-        print "Warning: could not find file %r" % (outPath,)
+        print("Warning: could not find file %r" % (outPath,))
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 class TestCase(unittest.TestCase):
     """!Subclass of unittest.TestCase that adds some custom assertions for
     convenience.
     """
+
 
 def inTestCase(func):
     """!A decorator to add a free function to our custom TestCase class, while also
@@ -188,7 +362,8 @@ def inTestCase(func):
     setattr(TestCase, func.__name__, func)
     return func
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 @inTestCase
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
@@ -196,9 +371,11 @@ def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
                   DeprecationWarning)
     return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import functools
+
+
 def debugger(*exceptions):
     """!Decorator to enter the debugger when there's an uncaught exception
 
@@ -213,18 +390,21 @@ def debugger(*exceptions):
     """
     if not exceptions:
         exceptions = (AssertionError, )
+
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
             try:
                 return f(*args, **kwargs)
             except exceptions:
-                import sys, pdb
+                import sys
+                import pdb
                 pdb.post_mortem(sys.exc_info()[2])
         return wrapper
     return decorator
 
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 
 def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
     """!Plot the comparison of two 2-d NumPy arrays.
@@ -247,23 +427,23 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
     if bad is not None:
         # make an rgba image that's red and transparent where not bad
         badImage = numpy.zeros(bad.shape + (4,), dtype=numpy.uint8)
-        badImage[:,:,0] = 255
-        badImage[:,:,1] = 0
-        badImage[:,:,2] = 0
-        badImage[:,:,3] = 255*bad
+        badImage[:, :, 0] = 255
+        badImage[:, :, 1] = 0
+        badImage[:, :, 2] = 0
+        badImage[:, :, 3] = 255*bad
     vmin1 = numpy.minimum(numpy.min(lhs), numpy.min(rhs))
     vmax1 = numpy.maximum(numpy.max(lhs), numpy.max(rhs))
     vmin2 = numpy.min(diff)
     vmax2 = numpy.max(diff)
     for n, (image, title) in enumerate([(lhs, "lhs"), (rhs, "rhs"), (diff, "diff")]):
-        pyplot.subplot(2,3,n+1)
+        pyplot.subplot(2, 3, n + 1)
         im1 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
                             vmin=vmin1, vmax=vmax1)
         if bad is not None:
             pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
         pyplot.axis("off")
         pyplot.title(title)
-        pyplot.subplot(2,3,n+4)
+        pyplot.subplot(2, 3, n + 4)
         im2 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
                             vmin=vmin2, vmax=vmax2)
         if bad is not None:
@@ -279,6 +459,7 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
         pyplot.savefig(plotFileName)
     else:
         pyplot.show()
+
 
 @inTestCase
 def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_info.epsilon, relTo=None,
@@ -366,6 +547,7 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
                 for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
                     msg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
     testCase.assertFalse(failed, msg="\n".join(msg))
+
 
 @inTestCase
 def assertNotClose(testCase, lhs, rhs, **kwds):

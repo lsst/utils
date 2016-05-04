@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,31 +9,32 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
 """
 classes used to protect method from simultaneous access by different
-threads.  The primary class is LockProtected.  
+threads.  The primary class is LockProtected.
 """
 import threading
 
 SharedLock = threading.RLock
+
 
 class LockProtected(object):
     """
     a class that assists in keeping methods thread-safe.
 
     This class is intended to be enlisted as a base class to the class being
-    protected.  A method that is to be protected from simultaneous access 
+    protected.  A method that is to be protected from simultaneous access
     would include (at its beginning) a call to _checkLocked():
 
     class MyClass(BaseClass, LockProtected):
@@ -45,7 +46,7 @@ class LockProtected(object):
             self._checkLocked()
             ...
 
-    Doing so will require that the protected class be "locked" before a 
+    Doing so will require that the protected class be "locked" before a
     protected method can be called or else an UnsafeAccessError will be
     raised.  Locking is done via the with statement:
 
@@ -66,7 +67,7 @@ class LockProtected(object):
     access to any protected method across multiple class instances.  To
     accomplish this, each class to be protected should accept a lock as
     a constructor argument.  Then the same lock is passed into all of the
-    constructors that need protection together. 
+    constructors that need protection together.
     """
 
     def __init__(self, lock=None):
@@ -91,13 +92,14 @@ class LockProtected(object):
         if self._lp_lock and not self._lp_lock._is_owned():
             raise UnsafeAccessError()
 
+
 class UnsafeAccessError(Exception):
     """
     an exception that is raised when one attempts to access a protected
     method without first acquiring the lock on its class.
     """
+
     def __init__(self, msg=None):
         if not msg:
             msg = "Programmer Error: failed to obtain lock via with statement"
         Exception.__init__(self, msg)
-
