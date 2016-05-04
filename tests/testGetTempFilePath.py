@@ -5,6 +5,10 @@ import os.path
 import lsst.utils.tests
 
 
+def setup_module(module):
+    lsst.utils.tests.init()
+
+
 class GetTempFilePathTestCase(unittest.TestCase):
     """Test case for getTempFilePath"""
 
@@ -45,22 +49,10 @@ class GetTempFilePathTestCase(unittest.TestCase):
         self.runLevel2(funcName)
 
 
-def suite():
-    """
-    Returns a suite containing all the test cases in this module.
-    """
-    lsst.utils.tests.init()
+class TestMemory(lsst.utils.tests.MemoryTestCase):
+    pass
 
-    suites = []
-    suites += unittest.makeSuite(GetTempFilePathTestCase)
-    suites += unittest.makeSuite(lsst.utils.tests.MemoryTestCase)
-
-    return unittest.TestSuite(suites)
-
-
-def run(shouldExit=False):
-    """Run the tests"""
-    lsst.utils.tests.run(suite(), shouldExit)
 
 if __name__ == "__main__":
-    run(True)
+    lsst.utils.tests.init()
+    unittest.main()

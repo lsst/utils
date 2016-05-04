@@ -30,6 +30,10 @@ import unittest
 import lsst.utils.tests as utilsTests
 import lsst.utils as lsstutils
 
+
+def setup_module(module):
+    utilsTests.init()
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
@@ -151,22 +155,11 @@ class RaDecToStrTestCase(unittest.TestCase):
             self.assertAlmostEqual(lsstutils.decStrToDeg(decStr), decDeg, 3)
 
 
+class TestMemory(utilsTests.MemoryTestCase):
+    pass
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-def suite():
-    """Returns a suite containing all the test cases in this module."""
-
-    utilsTests.init()
-
-    suites = []
-    suites += unittest.makeSuite(RaDecToStrTestCase)
-    suites += unittest.makeSuite(utilsTests.MemoryTestCase)
-    return unittest.TestSuite(suites)
-
-
-def run(exit=False):
-    """Run the tests"""
-    utilsTests.run(suite(), exit)
-
 if __name__ == "__main__":
-    run(True)
+    utilsTests.init()
+    unittest.main()
