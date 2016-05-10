@@ -104,7 +104,8 @@ class MemoryTestCase(unittest.TestCase):
             global memId0, nleakPrintMax
             nleak = dafBase.Citizen_census(0, memId0)
             if nleak != 0:
-                print("\n%d Objects leaked:" % dafBase.Citizen_census(0, memId0))
+                plural = "s" if nleak != 1 else ""
+                print("\n%d Object%s leaked:" % (nleak, plural))
 
                 if nleak <= nleakPrintMax:
                     print(dafBase.Citizen_census(dafBase.cout, memId0))
@@ -114,7 +115,7 @@ class MemoryTestCase(unittest.TestCase):
                     for i in range(nleakPrintMax - 1, -1, -1):
                         print(census[i].repr())
 
-                self.fail("Leaked %d blocks" % dafBase.Citizen_census(0, memId0))
+                self.fail("Leaked %d block%s" % (nleak, plural))
 
     def testFileDescriptorLeaks(self):
         if psutil is None:
@@ -130,7 +131,7 @@ class MemoryTestCase(unittest.TestCase):
         if diff:
             for f in diff:
                 print("File open: %s" % f)
-            self.fail("Failed to close %d files" % len(diff))
+            self.fail("Failed to close %d file%s" % (len(diff), "s" if len(diff) != 1 else ""))
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
