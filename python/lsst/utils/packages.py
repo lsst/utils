@@ -91,7 +91,10 @@ def getPythonPackages():
             pass  # It's not available, so don't care
 
     packages = {"python": sys.version}
-    for name, module in sys.modules.iteritems():
+    # Not iterating with sys.modules.iteritems() because it's not atomic and subject to race conditions
+    moduleNames = sys.modules.keys()
+    for name in moduleNames:
+        module = sys.modules[name]
         try:
             ver = getVersionFromPythonModule(module)
         except:
