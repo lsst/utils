@@ -143,6 +143,22 @@ class ExecutablesTestCase(unittest.TestCase):
     must subclass this class in their own test file and invoke
     the discover_tests() class method to register the tests.
     """
+    TESTS_DISCOVERED = -1
+
+    @classmethod
+    def setUpClass(cls):
+        """Abort testing if automated test creation was enabled and
+        yet not tests were found."""
+
+        if cls.TESTS_DISCOVERED == 0:
+            raise Exception("No executables discovered.")
+
+    def testSanity(self):
+        """This test exists to ensure that there is at least one test to be
+        executed. This allows the test runner to trigger the class set up
+        machinery to test whether there are some executables to test."""
+        pass
+
 
     def assertExecutable(self, executable, root_dir=None, args=None, msg=None):
         """!Check an executable runs and returns good status.
@@ -253,6 +269,13 @@ class ExecutablesTestCase(unittest.TestCase):
                         full_path = os.path.join(root, f)
                         if os.access(full_path, os.X_OK):
                             executables.append(full_path)
+
+        # Store the number of tests found for later assessment.
+        # Do not raise an exception if we have no executables as this would
+        # cause the testing to abort before the test runner could properly
+        # integrate it into the failure report.
+        cls.TESTS_DISCOVERED = len(executables)
+
 
         # Create the test functions and attach them to the class
         for e in executables:
