@@ -1,8 +1,8 @@
 import unittest
-import lsst.utils.tests as utilsTests
+import lsst.utils.tests
 
 
-class UtilsBinaryTester(utilsTests.ExecutablesTestCase):
+class UtilsBinaryTester(lsst.utils.tests.ExecutablesTestCase):
     pass
 
 EXECUTABLES = None

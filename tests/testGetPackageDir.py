@@ -24,12 +24,12 @@
 import os
 import unittest
 
-import lsst.utils.tests as utilsTests
+import lsst.utils.tests
 from lsst.utils import getPackageDir
 
 
 def setup_module(module):
-    utilsTests.init()
+    lsst.utils.tests.init()
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -44,11 +44,11 @@ class GetPackageDirTestCase(unittest.TestCase):
         self.assertRaises(Exception, getPackageDir, "nameOfNonexistendPackage2234q?#!")
 
 
-class TestMemory(utilsTests.MemoryTestCase):
+class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 if __name__ == "__main__":
-    utilsTests.init()
+    lsst.utils.tests.init()
     unittest.main()
