@@ -20,6 +20,7 @@
  * see <http://www.lsstcorp.org/LegalNotices/>.
  */
  
+#include <string>
 
 #include "lsst/utils/RaDecStr.h"
 
@@ -172,9 +173,9 @@ double ut::raStrToDeg(std::string raStr, std::string delimiter) {
        
 
     //Convert strings to doubles. Again, errors thrown on failure
-    double hours = boost::lexical_cast<double>(string(what[1].first, what[1].second));
-    double mins = boost::lexical_cast<double>(string(what[2].first, what[2].second));
-    double secs = boost::lexical_cast<double>(string(what[3].first, what[3].second));
+    double hours = std::stod(string(what[1].first, what[1].second));
+    double mins = std::stod(string(what[2].first, what[2].second));
+    double secs = std::stod(string(what[3].first, what[3].second));
     
     double raDeg = secs/3600.;
     raDeg += mins/60.;
@@ -211,9 +212,9 @@ double ut::decStrToDeg(std::string decStr, std::string delimiter) {
     }  
 
     //Convert strings to doubles. Automatically pass the exception up the stack
-    double degrees = boost::lexical_cast<double>(string(what[1].first, what[1].second));
-    double mins = boost::lexical_cast<double>(string(what[2].first, what[2].second));
-    double secs = boost::lexical_cast<double>(string(what[3].first, what[3].second));
+    double degrees = std::stod(string(what[1].first, what[1].second));
+    double mins = std::stod(string(what[2].first, what[2].second));
+    double secs = std::stod(string(what[3].first, what[3].second));
     
     degrees += ((secs/60.) +mins)/60.;
     

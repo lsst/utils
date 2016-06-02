@@ -29,7 +29,6 @@
 
 #include "boost/format.hpp"
 #include "boost/regex.hpp"
-#include "boost/lexical_cast.hpp"
 
 #include "lsst/pex/exceptions/Runtime.h"
 
