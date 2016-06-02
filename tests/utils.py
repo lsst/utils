@@ -35,16 +35,16 @@ or
 import unittest
 import numpy
 
-import lsst.utils.tests as utilsTests
+import lsst.utils.tests
 
 
 def setup_module(module):
-    utilsTests.init()
+    lsst.utils.tests.init()
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
-class UtilsTestCase(utilsTests.TestCase):
+class UtilsTestCase(lsst.utils.tests.TestCase):
     """A test case for Utils"""
 
     def testCompareArrays(self):
@@ -92,11 +92,11 @@ class UtilsTestCase(utilsTests.TestCase):
             self.assertClose(a, b, rtol=1E-6, plotOnFailure=True)
 
 
-class TestMemory(utilsTests.MemoryTestCase):
+class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 if __name__ == "__main__":
-    utilsTests.init()
+    lsst.utils.tests.init()
     unittest.main()

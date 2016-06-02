@@ -27,12 +27,12 @@ import math
 import pdb  # we may want to say pdb.set_trace()
 import unittest
 
-import lsst.utils.tests as utilsTests
+import lsst.utils.tests
 import lsst.utils as lsstutils
 
 
 def setup_module(module):
-    utilsTests.init()
+    lsst.utils.tests.init()
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -155,11 +155,11 @@ class RaDecToStrTestCase(unittest.TestCase):
             self.assertAlmostEqual(lsstutils.decStrToDeg(decStr), decDeg, 3)
 
 
-class TestMemory(utilsTests.MemoryTestCase):
+class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 if __name__ == "__main__":
-    utilsTests.init()
+    lsst.utils.tests.init()
     unittest.main()
