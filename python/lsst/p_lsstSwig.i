@@ -279,3 +279,13 @@ namespace boost {
         }
     }
 %enddef
+
+
+%{
+#include <typeinfo>
+%}
+
+%nodefaultctor std::type_info;
+class std::type_info {};
+
+%useValueEquality(std::type_info)
