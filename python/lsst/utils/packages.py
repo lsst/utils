@@ -42,7 +42,7 @@ import subprocess
 import pickle as pickle
 from collections import Mapping
 
-from .baseLib import getRuntimeVersions
+from ._versions import getRuntimeVersions
 
 __all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages", "Packages"]
 
