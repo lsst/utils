@@ -83,6 +83,40 @@ def run(suite, exit=True):
     else:
         return status
 
+
+def sort_tests(tests):
+    """!Go through the supplied sequence of test suites and sort them to ensure that
+    MemoryTestCases are at the end of the test list. Returns a combined
+    TestSuite."""
+
+    suite = unittest.TestSuite()
+    memtests = []
+    for test_suite in tests:
+        try:
+            # Just test the first test method in the suite for MemoryTestCase
+            method = next(iter(test_suite))
+            bases = inspect.getmro(method.__class__)
+            if MemoryTestCase in bases:
+                memtests.append(test_suite)
+            else:
+                suite.addTests(test_suite)
+        except TypeError:
+            if isinstance(test_suite, MemoryTestCase):
+                memtests.append(test_suite)
+            else:
+                suite.addTest(test_suite)
+    suite.addTests(memtests)
+    return suite
+
+
+def suiteClassWrapper(tests):
+    return unittest.TestSuite(sort_tests(tests))
+
+# Replace the suiteClass callable in the defaultTestLoader
+# so that we can reorder the test ordering. This will have
+# no effect if no memory test cases are found.
+unittest.defaultTestLoader.suiteClass = suiteClassWrapper
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
