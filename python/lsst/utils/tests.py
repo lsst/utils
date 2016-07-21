@@ -193,7 +193,6 @@ class ExecutablesTestCase(unittest.TestCase):
         machinery to test whether there are some executables to test."""
         pass
 
-
     def assertExecutable(self, executable, root_dir=None, args=None, msg=None):
         """!Check an executable runs and returns good status.
 
@@ -309,7 +308,6 @@ class ExecutablesTestCase(unittest.TestCase):
         # cause the testing to abort before the test runner could properly
         # integrate it into the failure report.
         cls.TESTS_DISCOVERED = len(executables)
-
 
         # Create the test functions and attach them to the class
         for e in executables:
