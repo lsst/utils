@@ -94,9 +94,14 @@ def sort_tests(tests):
     for test_suite in tests:
         try:
             # Just test the first test method in the suite for MemoryTestCase
-            method = next(iter(test_suite))
-            bases = inspect.getmro(method.__class__)
-            if MemoryTestCase in bases:
+            # Use loop rather than next as it is possible for a test class
+            # to not have any test methods and the Python community prefers
+            # for loops over catching a StopIteration exception.
+            bases = None
+            for method in test_suite:
+                bases = inspect.getmro(method.__class__)
+                break
+            if bases is not None and MemoryTestCase in bases:
                 memtests.append(test_suite)
             else:
                 suite.addTests(test_suite)
