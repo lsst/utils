@@ -167,7 +167,7 @@ def getEnvironmentPackages():
             diffCmd = ["git", "--no-pager", "--git-dir=" + gitDir, "--work-tree=" + prod.dir, "diff",
                        "--patch"]
             try:
-                rev = subprocess.check_output(revCmd).strip()
+                rev = subprocess.check_output(revCmd).decode().strip()
                 diff = subprocess.check_output(diffCmd)
             except:
                 ver += "@GIT_ERROR"
