@@ -22,6 +22,9 @@
 
 #
 from __future__ import with_statement
+from builtins import str
+from builtins import object
+
 import threading
 
 
