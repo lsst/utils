@@ -28,9 +28,6 @@ import lsst.utils.tests
 from lsst.utils import getPackageDir
 
 
-def setup_module(module):
-    lsst.utils.tests.init()
-
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
@@ -48,6 +45,10 @@ class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+def setup_module(module):
+    lsst.utils.tests.init()
 
 if __name__ == "__main__":
     lsst.utils.tests.init()

@@ -83,6 +83,45 @@ def run(suite, exit=True):
     else:
         return status
 
+
+def sort_tests(tests):
+    """!Go through the supplied sequence of test suites and sort them to ensure that
+    MemoryTestCases are at the end of the test list. Returns a combined
+    TestSuite."""
+
+    suite = unittest.TestSuite()
+    memtests = []
+    for test_suite in tests:
+        try:
+            # Just test the first test method in the suite for MemoryTestCase
+            # Use loop rather than next as it is possible for a test class
+            # to not have any test methods and the Python community prefers
+            # for loops over catching a StopIteration exception.
+            bases = None
+            for method in test_suite:
+                bases = inspect.getmro(method.__class__)
+                break
+            if bases is not None and MemoryTestCase in bases:
+                memtests.append(test_suite)
+            else:
+                suite.addTests(test_suite)
+        except TypeError:
+            if isinstance(test_suite, MemoryTestCase):
+                memtests.append(test_suite)
+            else:
+                suite.addTest(test_suite)
+    suite.addTests(memtests)
+    return suite
+
+
+def suiteClassWrapper(tests):
+    return unittest.TestSuite(sort_tests(tests))
+
+# Replace the suiteClass callable in the defaultTestLoader
+# so that we can reorder the test ordering. This will have
+# no effect if no memory test cases are found.
+unittest.defaultTestLoader.suiteClass = suiteClassWrapper
+
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
@@ -158,7 +197,6 @@ class ExecutablesTestCase(unittest.TestCase):
         executed. This allows the test runner to trigger the class set up
         machinery to test whether there are some executables to test."""
         pass
-
 
     def assertExecutable(self, executable, root_dir=None, args=None, msg=None):
         """!Check an executable runs and returns good status.
@@ -275,7 +313,6 @@ class ExecutablesTestCase(unittest.TestCase):
         # cause the testing to abort before the test runner could properly
         # integrate it into the failure report.
         cls.TESTS_DISCOVERED = len(executables)
-
 
         # Create the test functions and attach them to the class
         for e in executables:

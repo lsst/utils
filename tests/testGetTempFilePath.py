@@ -5,10 +5,6 @@ import os.path
 import lsst.utils.tests
 
 
-def setup_module(module):
-    lsst.utils.tests.init()
-
-
 class GetTempFilePathTestCase(unittest.TestCase):
     """Test case for getTempFilePath"""
 
@@ -16,7 +12,7 @@ class GetTempFilePathTestCase(unittest.TestCase):
         with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
             baseName = os.path.basename(tmpFile)
             self.assertEqual(baseName, "testGetTempFilePath_testBasics.txt")
-            f = file(tmpFile, "w")
+            f = open(tmpFile, "w")
             f.write("foo\n")
             f.close()
         self.assertFalse(os.path.exists(tmpFile))
@@ -52,6 +48,9 @@ class GetTempFilePathTestCase(unittest.TestCase):
 class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
 
+
+def setup_module(module):
+    lsst.utils.tests.init()
 
 if __name__ == "__main__":
     lsst.utils.tests.init()
