@@ -30,13 +30,16 @@ Example usage:
     old.update(pkgs)  # Include any new packages in the old
     old.write("/path/to/packages.pickle")
 """
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 
 import os
 import sys
 import hashlib
 import importlib
 import subprocess
-import cPickle as pickle
+import pickle as pickle
 from collections import Mapping
 
 from .baseLib import getRuntimeVersions
@@ -69,7 +72,7 @@ def getVersionFromPythonModule(module):
     if hasattr(module, "__dependency_versions__"):
         # Add build-time dependencies
         deps = module.__dependency_versions__
-        buildtime = BUILDTIME & set(deps.iterkeys())
+        buildtime = BUILDTIME & set(deps.keys())
         if buildtime:
             version += " with " + " ".join("%s=%s" % (pkg, deps[pkg]) for pkg in buildtime)
     return version
@@ -92,7 +95,7 @@ def getPythonPackages():
 
     packages = {"python": sys.version}
     # Not iterating with sys.modules.iteritems() because it's not atomic and subject to race conditions
-    moduleNames = sys.modules.keys()
+    moduleNames = list(sys.modules.keys())
     for name in moduleNames:
         module = sys.modules[name]
         try:
@@ -192,7 +195,7 @@ class Packages(object):
         """
         assert isinstance(packages, Mapping)
         self._packages = packages
-        self._names = set(packages.iterkeys())
+        self._names = set(packages.keys())
 
     @classmethod
     def fromSystem(cls):
