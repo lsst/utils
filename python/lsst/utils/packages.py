@@ -213,12 +213,12 @@ class Packages(object):
     @classmethod
     def read(cls, filename):
         """Read packages from filename"""
-        with open(filename, "r") as ff:
+        with open(filename, "rb") as ff:
             return pickle.load(ff)
 
     def write(self, filename):
         """Write packages to file"""
-        with open(filename, "w") as ff:
+        with open(filename, "wb") as ff:
             pickle.dump(self, ff)
 
     def __len__(self):
