@@ -26,6 +26,7 @@
 Tests of the SharedData class
 """
 from __future__ import with_statement
+from builtins import str
 
 import pdb                              # we may want to say pdb.set_trace()
 import unittest

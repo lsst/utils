@@ -31,6 +31,8 @@ or
    python
    >>> import swig; swig.run()
 """
+from builtins import str
+from past.builtins import long
 
 import unittest
 import numpy
