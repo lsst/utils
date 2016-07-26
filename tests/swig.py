@@ -57,16 +57,16 @@ class SwigTestCase(unittest.TestCase):
 
     def testReturnNone(self):
         result = self.example.get1()
-        self.assert_(result is None)
+        self.assertIsNone(result)
 
     def testReturnSelf(self):
         result = self.example.get2()
-        self.assert_(result is self.example)
+        self.assertIs(result, self.example)
 
     def testReturnCopy(self):
         result = self.example.get3()
-        self.assert_(result is not self.example)
-        self.assert_(type(result) == testLib.Example)
+        self.assertIsNot(result, self.example)
+        self.assertTrue(type(result) == testLib.Example)
         result.setValue("bar")
         self.assertEqual(self.example.getValue(), "foo")
 
