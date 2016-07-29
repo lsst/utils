@@ -77,6 +77,7 @@ def getVersionFromPythonModule(module):
             version += " with " + " ".join("%s=%s" % (pkg, deps[pkg]) for pkg in buildtime)
     return version
 
+
 def getPythonPackages():
     """Return a dict of imported python packages and their versions
 
@@ -124,6 +125,7 @@ def getPythonPackages():
         packages[name] = ver
 
     return packages
+
 
 _eups = None  # Singleton Eups object
 def getEnvironmentPackages():
