@@ -53,6 +53,11 @@
 %include "carrays.i"
 %include "typemaps.i"
 
+// Allow Python2 to accept unicode strings
+%begin %{
+#define SWIG_PYTHON_2_UNICODE
+%}
+
 %include "lsst/base.h"
 
 %include "lsst/lsstNumPy.i"

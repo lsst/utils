@@ -40,6 +40,10 @@ class GetPackageDirTestCase(unittest.TestCase):
 
         self.assertRaises(Exception, getPackageDir, "nameOfNonexistendPackage2234q?#!")
 
+    def testUnicodeBasics(self):
+        utilsPath = getPackageDir(u"utils")
+        self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "testGetPackageDir.py")))
+
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
