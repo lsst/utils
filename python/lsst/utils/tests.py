@@ -22,6 +22,9 @@
 
 """Support code for running unit tests"""
 from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
 
 from contextlib import contextmanager
 import gc

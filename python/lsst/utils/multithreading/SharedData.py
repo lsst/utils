@@ -22,6 +22,9 @@
 
 #
 from __future__ import with_statement
+from builtins import str
+from builtins import object
+
 import threading
 
 
@@ -93,7 +96,7 @@ class SharedData(object):
         return self._cond.__exit__(*exc_info)
 
     def __getattribute__(self, name):
-        if name == "_d" or len(self._d) == 0 or name not in self._d:
+        if name == "_d" or not self._d or name not in self._d:
             return object.__getattribute__(self, name)
 
         if self._lockOnRead and not self._is_owned():
@@ -101,7 +104,7 @@ class SharedData(object):
         return self._d[name]
 
     def __setattr__(self, name, value):
-        if name == "_d" or len(self._d) == 0 or name in self.__dict__.keys():
+        if name == "_d" or not self._d or name in self.__dict__:
             object.__setattr__(self, name, value)
             return
 
@@ -123,20 +126,16 @@ class SharedData(object):
                       an existing function or internal attribute name.
         """
         with self._cond:
-            bad = []
-            realattrs = self.__dict__.keys()
-            for key in data.keys():
-                if key in realattrs:
-                    bad.append(key)
+            bad = set(data.keys()).intersection(set(self.__dict__.keys()))
             if len(bad) > 0:
                 raise ValueError("Names cause conflicts with functions or " +
                                  "internal data: " + str(bad))
 
-            for key in data.keys():
+            for key in data:
                 self._d[key] = data[key]
 
-            if len(self._d) == 0:
+            if not self._d:
                 self._d["__"] = True
 
     def dir(self):
-        return filter(lambda k: k != "__", self._d.keys())
+        return [k for k in self._d if k != "__"]

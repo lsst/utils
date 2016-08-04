@@ -24,6 +24,7 @@
 classes used to protect method from simultaneous access by different
 threads.  The primary class is LockProtected.
 """
+from builtins import object
 import threading
 
 SharedLock = threading.RLock
