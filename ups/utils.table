@@ -1,6 +1,7 @@
 setupRequired(base)
 setupRequired(pex_exceptions)
 setupRequired(boost)
+setupRequired(log)
 setupRequired(numpy)
 setupRequired(python_psutil)
 setupRequired(python_future)
