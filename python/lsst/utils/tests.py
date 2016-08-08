@@ -35,6 +35,7 @@ import sys
 import unittest
 import warnings
 import numpy
+import lsst.log
 
 # File descriptor leak test will be skipped if psutil can not be imported
 try:
@@ -65,12 +66,21 @@ def _get_open_files():
 
 
 def init():
+    """Initialize the memory tester and configure a default log."""
     global memId0
     global open_files
     if dafBase:
         memId0 = dafBase.Citizen_getNextMemId()  # used by MemoryTestCase
     # Reset the list of open files
     open_files = _get_open_files()
+    # Setup a default configuration for log used in the test framework
+    lsst.log.configure_prop("""
+log4j.rootLogger=INFO, A1
+log4j.appender.A1=ConsoleAppender
+log4j.appender.A1.Target=System.err
+log4j.appender.A1.layout=PatternLayout
+log4j.appender.A1.layout.ConversionPattern=%-5p %c: %m%n
+""")
 
 
 def run(suite, exit=True):
