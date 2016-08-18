@@ -537,8 +537,10 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
 
 
 @inTestCase
-def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_info.epsilon, relTo=None,
-                printFailures=True, plotOnFailure=False, plotFileName=None, invert=False):
+def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
+                            atol=sys.float_info.epsilon, relTo=None,
+                            printFailures=True, plotOnFailure=False,
+                            plotFileName=None, invert=False, msg=None):
     """!Highly-configurable floating point comparisons for scalars and arrays.
 
     The test assertion will fail if all elements lhs and rhs are not equal to within the tolerances
@@ -553,8 +555,8 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
     is expected.
 
     @param[in]  testCase       unittest.TestCase instance the test is part of
-    @param[in]  lhs            LHS value(s) to compare; may be a scalar or a numpy array of any dimension
-    @param[in]  rhs            RHS value(s) to compare; may be a scalar or a numpy array of any dimension
+    @param[in]  lhs            LHS value(s) to compare; may be a scalar or array-like of any dimension
+    @param[in]  rhs            RHS value(s) to compare; may be a scalar or array-like of any dimension
     @param[in]  rtol           Relative tolerance for comparison; defaults to double-precision epsilon.
     @param[in]  atol           Absolute tolerance for comparison; defaults to double-precision epsilon.
     @param[in]  relTo          Value to which comparison with rtol is relative.
@@ -564,8 +566,9 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
     @param[in]  plotFileName   Filename to save the plot to.  If None, the plot will be displayed in a
                                a window.
     @param[in]  invert         If True, invert the comparison and fail only if any elements *are* equal.
-                               Used to implement assertNotClose, which should generally be used instead
+                               Used to implement assertFloatsNotEqual, which should generally be used instead
                                for clarity.
+    @param[in] msg             String to append to the error message when assert fails.
     """
     if not numpy.isfinite(lhs).all():
         testCase.fail("Non-finite values in lhs")
@@ -594,21 +597,21 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
     else:
         cmpStr = "!="
         failStr = "differ"
-    msg = []
+    errMsg = []
     if failed:
         if numpy.isscalar(bad):
-            msg = ["%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
-                   % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol, atol)]
+            errMsg = ["%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
+                      % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol, atol)]
         else:
-            msg = ["%d/%d elements %s with rtol=%s, atol=%s"
-                   % (bad.sum(), bad.size, failStr, rtol, atol)]
+            errMsg = ["%d/%d elements %s with rtol=%s, atol=%s"
+                      % (bad.sum(), bad.size, failStr, rtol, atol)]
             if plotOnFailure:
                 if len(lhs.shape) != 2 or len(rhs.shape) != 2:
                     raise ValueError("plotOnFailure is only valid for 2-d arrays")
                 try:
                     plotImageDiff(lhs, rhs, bad, diff=diff, plotFileName=plotFileName)
                 except ImportError:
-                    msg.append("Failure plot requested but matplotlib could not be imported.")
+                    errMsg.append("Failure plot requested but matplotlib could not be imported.")
             if printFailures:
                 # Make sure everything is an array if any of them are, so we can treat
                 # them the same (diff and absDiff are arrays if either rhs or lhs is),
@@ -620,14 +623,42 @@ def assertClose(testCase, lhs, rhs, rtol=sys.float_info.epsilon, atol=sys.float_
                 if numpy.isscalar(rhs):
                     rhs = numpy.ones(bad.shape, dtype=float) * rhs
                 for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
-                    msg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
-    testCase.assertFalse(failed, msg="\n".join(msg))
+                    errMsg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
+
+    if msg is not None:
+        errMsg.append(msg)
+    testCase.assertFalse(failed, msg="\n".join(errMsg))
 
 
 @inTestCase
-def assertNotClose(testCase, lhs, rhs, **kwds):
-    """!Fail a test if the given floating point values are completely equal to within the given tolerances.
+def assertFloatsNotEqual(testCase, lhs, rhs, **kwds):
+    """
+    Fail a test if the given floating point values are equal to within the given tolerances.
 
     See assertClose for more information.
     """
-    return assertClose(testCase, lhs, rhs, invert=True, **kwds)
+    return assertFloatsAlmostEqual(testCase, lhs, rhs, invert=True, **kwds)
+
+
+@inTestCase
+def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
+    """
+    Assert that lhs == rhs (both numeric types, whether scalar or array).
+
+    See assertClose (called with rtol=atol=0) for more information.
+    """
+    return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
+
+
+@inTestCase
+def assertClose(*args, **kwargs):
+    warnings.warn("assertClose is deprecated; please use TestCase.assertFloatsAlmostEqual",
+                  DeprecationWarning)
+    return assertFloatsAlmostEqual(*args, **kwargs)
+
+
+@inTestCase
+def assertNotClose(*args, **kwargs):
+    warnings.warn("assertNotClose is deprecated; please use TestCase.assertFloatsNotEqual",
+                  DeprecationWarning)
+    return assertFloatsNotEqual(*args, **kwargs)
