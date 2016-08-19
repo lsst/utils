@@ -600,8 +600,15 @@ def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
     errMsg = []
     if failed:
         if numpy.isscalar(bad):
-            errMsg = ["%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
-                      % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol, atol)]
+            if rtol is None:
+                errMsg = ["%s %s %s; diff=%s with atol=%s"
+                          % (lhs, cmpStr, rhs, absDiff, atol)]
+            elif atol is None:
+                errMsg = ["%s %s %s; diff=%s/%s=%s with rtol=%s"
+                          % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol)]
+            else:
+                errMsg = ["%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
+                          % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol, atol)]
         else:
             errMsg = ["%d/%d elements %s with rtol=%s, atol=%s"
                       % (bad.sum(), bad.size, failStr, rtol, atol)]
@@ -622,8 +629,12 @@ def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
                     lhs = numpy.ones(bad.shape, dtype=float) * lhs
                 if numpy.isscalar(rhs):
                     rhs = numpy.ones(bad.shape, dtype=float) * rhs
-                for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
-                    errMsg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
+                if rtol is None:
+                    for a, b, diff in zip(lhs[bad], rhs[bad], absDiff[bad]):
+                        errMsg.append("%s %s %s (diff=%s)" % (a, cmpStr, b, diff))
+                else:
+                    for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
+                        errMsg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
 
     if msg is not None:
         errMsg.append(msg)
