@@ -91,6 +91,53 @@ class UtilsTestCase(lsst.utils.tests.TestCase):
         self.assertFloatsAlmostEqual(self.larges, self.largesOneOff, atol=1e-7)
         self.assertFloatsAlmostEqual(self.ranges, self.rangesEpsilon, rtol=1E-3, atol=1E-4)
 
+        # Test that it raises appropriately
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.large, 0.)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.large, 0., rtol=1E-2)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.large, 0., rtol=1E-2, atol=None)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.large, 0., atol=1e-2)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.large, 0., atol=1e-2, rtol=None)
+
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, 0.)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, 0., rtol=1E-2)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, 0., rtol=1E-2, atol=None)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, 0., atol=1e-2)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, 0., atol=1e-2, rtol=None)
+
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(0., self.larges)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(0., self.larges, rtol=1E-2)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(0., self.larges, rtol=1E-2, atol=None)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(0., self.larges, atol=1e-2)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(0., self.larges, atol=1e-2, rtol=None)
+
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, self.largesEpsilon, rtol=1E-16)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, self.largesEpsilon, rtol=1E-16, atol=None)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, self.largesEpsilon, rtol=1E-16, relTo=100.0)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, self.largesOneOff, atol=1e-16)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.larges, self.largesOneOff, atol=1e-16, rtol=None)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsAlmostEqual(self.ranges, self.rangesEpsilon, rtol=1E-15, atol=1E-4)
+
         if display:
             # should see failures on the center row of the 5x5 image, but not the very center point
             nonzeroCenter = self.zeros.copy()
