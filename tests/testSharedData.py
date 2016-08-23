@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-
 #
 # LSST Data Management System
-# Copyright 2008, 2009, 2010 LSST Corporation.
+# Copyright 2008-2016 LSST Corporation.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,17 +19,13 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
-
-"""
-Tests of the SharedData class
-"""
 from __future__ import with_statement
 from builtins import str
 
-import pdb                              # we may want to say pdb.set_trace()
 import unittest
 import threading
 
+import lsst.utils.tests
 from lsst.utils.multithreading import SharedData
 
 
@@ -39,12 +33,6 @@ class ShareDataTestCase(unittest.TestCase):
 
     def setUp(self):
         self.sd = SharedData()
-
-    def tearDown(self):
-        pass
-
-    def testCtor(self):
-        pass
 
     def testAcquire(self):
         self.assertFalse(self.sd._is_owned(), "lock without acquire")
@@ -127,9 +115,6 @@ class ReadableShareDataTestCase(unittest.TestCase):
     def setUp(self):
         self.sd = SharedData(False)
 
-    def tearDown(self):
-        pass
-
     def testAcquire(self):
         self.assertFalse(self.sd._is_owned(), "lock without acquire")
         self.sd.acquire()
@@ -154,11 +139,8 @@ class ReadableShareDataTestCase(unittest.TestCase):
         self._initData()
         self.sd.name
         self.sd.dir()
-        try:
+        with self.assertRaises(AttributeError):
             self.sd.goob
-            self.fail("AttributeError not raised for accessing non-existent")
-        except AttributeError:
-            pass
 
     def testInit(self):
         self._initData()
@@ -204,9 +186,6 @@ class MultiThreadTestCase(unittest.TestCase):
     def setUp(self):
         self.sd = SharedData(False, {"c": 0})
 
-    def tearDown(self):
-        pass
-
     def testThreads(self):
         t = TstThread(self.sd)
         # pdb.set_trace()
@@ -251,7 +230,14 @@ class TstThread(threading.Thread):
             self.data.notifyAll()
 
 
-__all__ = "SharedDataTestCase ReadableShareDataTestCase MultiThreadTestCase".split()
+class TestMemory(lsst.utils.tests.MemoryTestCase):
+    pass
+
+
+def setup_module(module):
+    lsst.utils.tests.init()
+
 
 if __name__ == "__main__":
+    lsst.utils.tests.init()
     unittest.main()

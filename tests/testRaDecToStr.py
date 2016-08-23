@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-
 #
 # LSST Data Management System
-# Copyright 2008, 2009, 2010 LSST Corporation.
+# Copyright 2008-2016 LSST Corporation.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,21 +19,16 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
-
 from builtins import range
 
 import math
-import pdb  # we may want to say pdb.set_trace()
 import unittest
 
 import lsst.utils.tests
 import lsst.utils as lsstutils
 
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-
-class RaDecToStrTestCase(unittest.TestCase):
+class RaDecToStrTestCase(lsst.utils.tests.TestCase):
     """Convert angles to strings"""
 
     def setUp(self):
@@ -69,16 +62,9 @@ class RaDecToStrTestCase(unittest.TestCase):
         self.decStrCol = 3
         self.num = len(self.goodData)
 
-    def tearDown(self):
-        pass
-
-    #
     # Testing numbers to strings
-    #
 
     def testRaRadToStr(self):
-        """"""
-
         for i in range(self.num):
             raDeg = self.goodData[i][self.raDegCol]
             raRad = raDeg*math.pi/180.
@@ -86,16 +72,12 @@ class RaDecToStrTestCase(unittest.TestCase):
             self.assertEqual(lsstutils.raRadToStr(raRad), raStr)
 
     def testRaDegToStr(self):
-        """"""
-
         for i in range(self.num):
             raDeg = self.goodData[i][self.raDegCol]
             raStr = self.goodData[i][self.raStrCol]
             self.assertEqual(lsstutils.raDegToStr(raDeg), raStr)
 
     def testDecRadToStr(self):
-        """"""
-
         for i in range(self.num):
             decDeg = self.goodData[i][self.decDegCol]
             decRad = decDeg*math.pi/180.
@@ -104,8 +86,6 @@ class RaDecToStrTestCase(unittest.TestCase):
             self.assertEqual(lsstutils.decRadToStr(decRad), decStr)
 
     def testDecDegToStr(self):
-        """"""
-
         for i in range(self.num):
             decDeg = self.goodData[i][self.decDegCol]
             decStr = self.goodData[i][self.decStrCol]
@@ -122,9 +102,7 @@ class RaDecToStrTestCase(unittest.TestCase):
         self.assertEqual(lsstutils.decDegToStr(14.999999), "+14:59:59.99")
         self.assertEqual(lsstutils.decDegToStr(14.9999999), "+15:00:00.00")
 
-    #
     # Testing strings to numbers
-    #
 
     def testRaStrToRad(self):
         for i in range(self.num):
@@ -155,8 +133,6 @@ class RaDecToStrTestCase(unittest.TestCase):
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 def setup_module(module):

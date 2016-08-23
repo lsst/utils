@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-
 #
 # LSST Data Management System
-# Copyright 2008, 2009, 2010 LSST Corporation.
+# Copyright 2008-2016 LSST Corporation.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,22 +19,18 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
-
-"""
-Tests of the SharedData class
-"""
 from __future__ import with_statement
 
-import pdb                              # we may want to say pdb.set_trace()
 import unittest
 
-from lsst.utils.multithreading import *
+import lsst.utils.tests
+from lsst.utils import multithreading
 
 
-class MyClass(LockProtected):
+class MyClass(multithreading.LockProtected):
 
     def __init__(self, lock=None):
-        LockProtected.__init__(self, lock)
+        multithreading.LockProtected.__init__(self, lock)
 
     def danger(self):
         self._checkLocked()
@@ -46,38 +40,48 @@ class MyClass(LockProtected):
         raise RuntimeError()
 
 
-class LockProtectedTestCase(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
+class LockProtectedTestCase(lsst.utils.tests.TestCase):
     def testNoLock(self):
         mc = MyClass()
         mc.danger()
-        with mc:
-            mc.danger()
+        try:
+            with mc:
+                mc.danger()
+        except multithreading.UnsafeAccessError:
+            self.fail("Raised multithreading.UnsafeAccessError inside of context manager!")
 
     def testSharedLock(self):
-        mc = MyClass(SharedLock())
-        self.assertRaises(UnsafeAccessError, mc.danger)
-        with mc:
-            mc.danger()
+        mc = MyClass(multithreading.SharedLock())
+        self.assertRaises(multithreading.UnsafeAccessError, mc.danger)
+        try:
+            with mc:
+                mc.danger()
+        except multithreading.UnsafeAccessError:
+            self.fail("Raised multithreading.UnsafeAccessError inside of context manager!")
 
     def testSharedData(self):
-        mc = MyClass(SharedData())
-        self.assertRaises(UnsafeAccessError, mc.danger)
-        with mc:
-            mc.danger()
+        mc = MyClass(multithreading.SharedData())
+        self.assertRaises(multithreading.UnsafeAccessError, mc.danger)
+        try:
+            with mc:
+                mc.danger()
+        except multithreading.UnsafeAccessError:
+            self.fail("Raised multithreading.UnsafeAccessError inside of context manager!")
 
     def testExitViaException(self):
-        mc = MyClass(SharedLock())
+        mc = MyClass(multithreading.SharedLock())
         with mc:
             self.assertRaises(RuntimeError, mc.fail)
 
-__all__ = "LockProtectedTestCase".split()
+
+class TestMemory(lsst.utils.tests.MemoryTestCase):
+    pass
+
+
+def setup_module(module):
+    lsst.utils.tests.init()
+
 
 if __name__ == "__main__":
+    lsst.utils.tests.init()
     unittest.main()

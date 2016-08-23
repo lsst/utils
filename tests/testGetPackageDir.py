@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-
 #
 # LSST Data Management System
-# Copyright 2015 LSST Corporation.
+# Copyright 2015-2016 LSST Corporation.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -28,12 +26,7 @@ import lsst.utils.tests
 from lsst.utils import getPackageDir
 
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-
 class GetPackageDirTestCase(unittest.TestCase):
-    """Test getPackageDir"""
-
     def testBasics(self):
         utilsPath = getPackageDir("utils")
         self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "testGetPackageDir.py")))
@@ -47,8 +40,6 @@ class GetPackageDirTestCase(unittest.TestCase):
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 def setup_module(module):
