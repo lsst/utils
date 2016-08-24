@@ -22,6 +22,7 @@
 from builtins import str
 from past.builtins import long
 
+import sys
 import unittest
 import numpy
 
@@ -121,5 +122,5 @@ def setup_module(module):
     lsst.utils.tests.init()
 
 if __name__ == "__main__":
-    lsst.utils.tests.init()
+    setup_module(sys.modules[__name__])
     unittest.main()

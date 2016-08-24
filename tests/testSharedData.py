@@ -22,6 +22,7 @@
 from __future__ import with_statement
 from builtins import str
 
+import sys
 import unittest
 import threading
 
@@ -239,5 +240,5 @@ def setup_module(module):
 
 
 if __name__ == "__main__":
-    lsst.utils.tests.init()
+    setup_module(sys.modules[__name__])
     unittest.main()

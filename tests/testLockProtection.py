@@ -21,6 +21,7 @@
 #
 from __future__ import with_statement
 
+import sys
 import unittest
 
 import lsst.utils.tests
@@ -83,5 +84,5 @@ def setup_module(module):
 
 
 if __name__ == "__main__":
-    lsst.utils.tests.init()
+    setup_module(sys.modules[__name__])
     unittest.main()
