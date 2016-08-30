@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-
 #
 # LSST Data Management System
-# Copyright 2008-2015 LSST/AURA
+# Copyright 2008-2016 LSST/AURA
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -21,19 +19,10 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
-
-"""
-Tests for SWIG utilities
-
-Run with:
-   python swig.py
-or
-   python
-   >>> import swig; swig.run()
-"""
 from builtins import str
 from past.builtins import long
 
+import sys
 import unittest
 import numpy
 
@@ -41,10 +30,7 @@ import lsst.utils.tests
 import testLib
 
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-
-class SwigTestCase(unittest.TestCase):
+class SwigTestCase(lsst.utils.tests.TestCase):
     """A test case for SWIG utilities in p_lsstSwig.i"""
 
     def setUp(self):
@@ -66,7 +52,7 @@ class SwigTestCase(unittest.TestCase):
     def testReturnCopy(self):
         result = self.example.get3()
         self.assertIsNot(result, self.example)
-        self.assertTrue(type(result) == testLib.Example)
+        self.assertIsInstance(result, testLib.Example)
         result.setValue("bar")
         self.assertEqual(self.example.getValue(), "foo")
 
@@ -105,15 +91,13 @@ class SwigTestCase(unittest.TestCase):
         self.assertAccepts(function, float(3.5), "Failure passing float to %s" % function.__name__)
 
     def checkIntegerTypemap(self, function, size):
-        # if we pass an integer that doesn't fit in the C++ argument type, we should raise
-        # OverflowError
+        """If we pass an integer that doesn't fit in the C++ argument type, we should raise OverflowError"""
         self.checkNumericTypemap(function)
         tooBig = 2**(size + 1)
         self.assertRaises(OverflowError, function, tooBig)
 
     def testNumericTypemaps(self):
-        """Test our customized numeric scalar typemaps, including support for NumPy scalars.
-        """
+        """Test our customized numeric scalar typemaps, including support for NumPy scalars."""
         self.checkFloatingTypemap(testLib.accept_float32)
         self.checkFloatingTypemap(testLib.accept_cref_float32)
         self.checkFloatingTypemap(testLib.accept_cref_float64)
@@ -133,12 +117,10 @@ class SwigTestCase(unittest.TestCase):
 class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
 
 def setup_module(module):
     lsst.utils.tests.init()
 
 if __name__ == "__main__":
-    lsst.utils.tests.init()
+    setup_module(sys.modules[__name__])
     unittest.main()
