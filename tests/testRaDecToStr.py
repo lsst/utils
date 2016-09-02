@@ -34,7 +34,7 @@ class RaDecToStrTestCase(lsst.utils.tests.TestCase):
 
     def setUp(self):
         self.goodData = [
-            # Ra (deg)      Dec (deg)   Ra (rad)    Dec (rad)   Ra (str)       Dec (str)
+            # Ra (deg)      Dec (deg)      Ra (str)       Dec (str)
             [0.00000000, 0.00000000,   "00:00:00.00", "+00:00:00.00"],
             [0.00027778, 0.00000000,   "00:00:00.07", "+00:00:00.00"],
             [0.00416667, 0.00000000,   "00:00:01.00", "+00:00:00.00"],
