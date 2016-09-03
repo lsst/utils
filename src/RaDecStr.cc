@@ -146,14 +146,18 @@ std::string ut::raDecDegToStr(double raDeg, double decDeg) {
 // Converting strings to numbers
 //
 
-double ut::raStrToRad(std::string raStr, std::string delimiter) {
-    return degToRad( raStrToDeg(raStr, delimiter) );
-}
-
-
-double ut::raStrToDeg(std::string raStr, std::string delimiter) {
-
-    //Regex the hours, minutes and seconds
+/**
+ * @brief Convert a sexagesimal string to a decimal double.
+ *
+ * Helper function to parse sexagesimal string in either hours:minutes:seconds or
+ * degrees:minutes:seconds, and then convert this to a decimal double.  Note that no conversion
+ * between hours and degrees is performed.
+ */
+double sexagesimalStrToDecimal(
+    std::string inStr,          ///< String to parse and convert
+    std::string delimiter       ///< Delimiter separating minutes and seconds from hours or degrees.
+) {
+    // Regex the hh:mm:ss or dd:mm:ss with delimiter.
     std::string regexStr = "(\\d+)";
     regexStr.append(delimiter);
     regexStr.append("(\\d+)");
@@ -164,26 +168,42 @@ double ut::raStrToDeg(std::string raStr, std::string delimiter) {
     boost::cmatch what;
     //This throws an exception of failure. I could catch it,
     //but I'd only throw it again
-    if(! boost::regex_match(raStr.c_str(), what, re)) {
-        std::string msg= boost::str(boost::format("Failed to parse %s as a right ascension with regex %s")
-                                    % raStr % regexStr);
+    if(! boost::regex_search(inStr.c_str(), what, re)) {
+        std::string msg= boost::str(boost::format(
+            "Failed to parse %s as a right ascension or declination with regex %s")
+            % inStr % regexStr);
         throw LSST_EXCEPT(except::RuntimeError, msg);
     }
 
-
     //Convert strings to doubles. Again, errors thrown on failure
-    double hours = std::stod(std::string(what[1].first, what[1].second));
-    double mins = std::stod(std::string(what[2].first, what[2].second));
-    double secs = std::stod(std::string(what[3].first, what[3].second));
+    double hh_or_dd = std::stod(std::string(what[1].first, what[1].second));
+    double mm = std::stod(std::string(what[2].first, what[2].second));
+    double ss = std::stod(std::string(what[3].first, what[3].second));
 
-    double raDeg = secs/3600.;
-    raDeg += mins/60.;
-    raDeg += hours;
-    raDeg *= 360./24.;
+    hh_or_dd += (mm + ss/60.0)/60.0;
 
-    //printf("%g %g %g --> %g\n", hours, mins, secs, raDeg);
-    return raDeg;
+    //Search for leading - sign.
+    std::string pmStr = "^-";
+    static const boost::regex pm(pmStr);
+    if(boost::regex_search(inStr, pm))
+        hh_or_dd *= -1;
+    return hh_or_dd;
+}
 
+
+double ut::raStrToRad(std::string raStr, std::string delimiter) {
+    return degToRad( raStrToDeg(raStr, delimiter) );
+}
+
+
+double ut::raStrToDeg(std::string raStr, std::string delimiter) {
+    double ra_hours = sexagesimalStrToDecimal(raStr, delimiter);
+    if (ra_hours < 0) {
+      std::string msg= boost::str(boost::format("Right ascension %s is negative!") % raStr);
+      throw LSST_EXCEPT(except::RuntimeError, msg);
+    }
+
+    return ra_hours * (360.0/24.0);  // hours to degrees
 }
 
 
@@ -193,39 +213,7 @@ double ut::decStrToRad(std::string decStr, std::string delimiter) {
 
 
 double ut::decStrToDeg(std::string decStr, std::string delimiter) {
-
-    //Regex the degrees, minutes and seconds
-    std::string regexStr = "(\\d+)";
-    regexStr.append(delimiter);
-    regexStr.append("(\\d+)");
-    regexStr.append(delimiter);
-    regexStr.append("([\\d\\.]+)");
-
-     //http://www.boost.org/doc/libs/1_40_0/libs/regex/doc/html/boost_regex/captures.html
-    const boost::regex re(regexStr);
-    boost::cmatch what;
-
-    if(! boost::regex_search(decStr.c_str(), what, re)) {
-        std::string msg= boost::str(boost::format("Failed to parse %s as a declination with regex %s")
-                                    % decStr % regexStr);
-        throw LSST_EXCEPT(except::RuntimeError, msg);
-    }
-
-    //Convert strings to doubles. Automatically pass the exception up the stack
-    double degrees = std::stod(std::string(what[1].first, what[1].second));
-    double mins = std::stod(std::string(what[2].first, what[2].second));
-    double secs = std::stod(std::string(what[3].first, what[3].second));
-
-    degrees += ((secs/60.) +mins)/60.;
-
-    //Search for the presence of a minus sign. This approach catches the case of -0 degrees
-    std::string pmStr = "^-";
-    static const boost::regex pm(pmStr);
-    if(boost::regex_search(decStr, pm)) {
-        degrees *= -1;
-    }
-
-    return degrees;
+    return sexagesimalStrToDecimal(decStr, delimiter);
 }
 
 /*@}*/
