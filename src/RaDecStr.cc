@@ -147,7 +147,7 @@ std::string ut::raDecDegToStr(double raDeg, double decDeg) {
 //
 
 double ut::raStrToRad(std::string raStr, std::string delimiter) {
-    return degToRad( raStrToDeg(raStr) );
+    return degToRad( raStrToDeg(raStr, delimiter) );
 }
 
 
@@ -160,12 +160,13 @@ double ut::raStrToDeg(std::string raStr, std::string delimiter) {
     regexStr.append(delimiter);
     regexStr.append("([\\d\\.]+)");
 
-         static const boost::regex re(regexStr);
+    const boost::regex re(regexStr);
     boost::cmatch what;
     //This throws an exception of failure. I could catch it,
     //but I'd only throw it again
     if(! boost::regex_match(raStr.c_str(), what, re)) {
-        std::string msg= boost::str(boost::format("Failed to parse %s as a declination") % raStr);
+        std::string msg= boost::str(boost::format("Failed to parse %s as a right ascension with regex %s")
+                                    % raStr % regexStr);
         throw LSST_EXCEPT(except::RuntimeError, msg);
     }
 
@@ -187,25 +188,26 @@ double ut::raStrToDeg(std::string raStr, std::string delimiter) {
 
 
 double ut::decStrToRad(std::string decStr, std::string delimiter) {
-    return degToRad( decStrToDeg(decStr) );
+    return degToRad( decStrToDeg(decStr, delimiter) );
 }
 
 
 double ut::decStrToDeg(std::string decStr, std::string delimiter) {
 
     //Regex the degrees, minutes and seconds
-    std::string regexStr = "([\\d]+)";
+    std::string regexStr = "(\\d+)";
     regexStr.append(delimiter);
     regexStr.append("(\\d+)");
     regexStr.append(delimiter);
     regexStr.append("([\\d\\.]+)");
 
      //http://www.boost.org/doc/libs/1_40_0/libs/regex/doc/html/boost_regex/captures.html
-    static const boost::regex re(regexStr);
+    const boost::regex re(regexStr);
     boost::cmatch what;
 
     if(! boost::regex_search(decStr.c_str(), what, re)) {
-        std::string msg= boost::str(boost::format("Failed to parse %s as a declination") % decStr);
+        std::string msg= boost::str(boost::format("Failed to parse %s as a declination with regex %s")
+                                    % decStr % regexStr);
         throw LSST_EXCEPT(except::RuntimeError, msg);
     }
 
