@@ -151,7 +151,7 @@ class MemoryTestCase(unittest.TestCase):
                 print("\n%d Object%s leaked:" % (nleak, plural))
 
                 if nleak <= nleakPrintMax:
-                    print(dafBase.Citizen_census(dafBase.cout, memId0))
+                    print(dafBase.Citizen_census(memId0))
                 else:
                     census = dafBase.Citizen_census()
                     print("...")
