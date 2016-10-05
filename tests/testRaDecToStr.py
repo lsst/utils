@@ -19,8 +19,6 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
-from builtins import range
-
 import sys
 import math
 import unittest
@@ -34,7 +32,7 @@ class RaDecToStrTestCase(lsst.utils.tests.TestCase):
 
     def setUp(self):
         self.goodData = [
-            # Ra (deg)      Dec (deg)   Ra (rad)    Dec (rad)   Ra (str)       Dec (str)
+            # Ra (deg)      Dec (deg)      Ra (str)       Dec (str)
             [0.00000000, 0.00000000,   "00:00:00.00", "+00:00:00.00"],
             [0.00027778, 0.00000000,   "00:00:00.07", "+00:00:00.00"],
             [0.00416667, 0.00000000,   "00:00:01.00", "+00:00:00.00"],
@@ -57,45 +55,22 @@ class RaDecToStrTestCase(lsst.utils.tests.TestCase):
             [120,        -90,          "08:00:00.00", "-90:00:00.00"],
         ]
 
-        self.raDegCol = 0
-        self.decDegCol = 1
-        self.raStrCol = 2
-        self.decStrCol = 3
-        self.num = len(self.goodData)
-
     # Testing numbers to strings
 
-    def testRaRadToStr(self):
-        for i in range(self.num):
-            raDeg = self.goodData[i][self.raDegCol]
+    def testRadToStr(self):
+        for raDeg, decDeg, raStr, decStr in self.goodData:
             raRad = raDeg*math.pi/180.
-            raStr = self.goodData[i][self.raStrCol]
-            self.assertEqual(lsstutils.raRadToStr(raRad), raStr)
-
-    def testRaDegToStr(self):
-        for i in range(self.num):
-            raDeg = self.goodData[i][self.raDegCol]
-            raStr = self.goodData[i][self.raStrCol]
-            self.assertEqual(lsstutils.raDegToStr(raDeg), raStr)
-
-    def testDecRadToStr(self):
-        for i in range(self.num):
-            decDeg = self.goodData[i][self.decDegCol]
             decRad = decDeg*math.pi/180.
-            decStr = self.goodData[i][self.decStrCol]
-
+            self.assertEqual(lsstutils.raRadToStr(raRad), raStr)
             self.assertEqual(lsstutils.decRadToStr(decRad), decStr)
 
-    def testDecDegToStr(self):
-        for i in range(self.num):
-            decDeg = self.goodData[i][self.decDegCol]
-            decStr = self.goodData[i][self.decStrCol]
+    def testDegToStr(self):
+        for raDeg, decDeg, raStr, decStr in self.goodData:
+            self.assertEqual(lsstutils.raDegToStr(raDeg), raStr)
             self.assertEqual(lsstutils.decDegToStr(decDeg), decStr)
 
     def testRoundingDec(self):
-
         self.assertEqual(lsstutils.decDegToStr(15.0), "+15:00:00.00")
-        self.assertEqual(lsstutils.decDegToStr(15.00000001), "+15:00:00.00")
         self.assertEqual(lsstutils.decDegToStr(15.00000001), "+15:00:00.00")
 
         self.assertEqual(lsstutils.decDegToStr(14.9999), "+14:59:59.64")
@@ -105,31 +80,35 @@ class RaDecToStrTestCase(lsst.utils.tests.TestCase):
 
     # Testing strings to numbers
 
-    def testRaStrToRad(self):
-        for i in range(self.num):
-            raDeg = self.goodData[i][self.raDegCol]
+    def testStrToRad(self):
+        for raDeg, decDeg, raStr, decStr in self.goodData:
             raRad = raDeg*math.pi/180.
-            raStr = self.goodData[i][self.raStrCol]
+            decRad = decDeg*math.pi/180.
             self.assertAlmostEqual(lsstutils.raStrToRad(raStr), raRad, 6)
+            self.assertAlmostEqual(lsstutils.decStrToRad(decStr), decRad, 6)
 
-    def testRaStrToDeg(self):
-        for i in range(self.num):
-            raDeg = self.goodData[i][self.raDegCol]
-            raStr = self.goodData[i][self.raStrCol]
+    def testStrToDeg(self):
+        for raDeg, decDeg, raStr, decStr in self.goodData:
             self.assertAlmostEqual(lsstutils.raStrToDeg(raStr), raDeg, 4)
-
-    def testDecStrToRad(self):
-        for i in range(self.num):
-            decDeg = self.goodData[i][self.decDegCol]
-            decRad = decDeg*math.pi/180
-            decStr = self.goodData[i][self.decStrCol]
-            self.assertAlmostEqual(lsstutils.decStrToRad(decStr), decRad, 4)
-
-    def testDecStrToDeg(self):
-        for i in range(self.num):
-            decDeg = self.goodData[i][self.decDegCol]
-            decStr = self.goodData[i][self.decStrCol]
             self.assertAlmostEqual(lsstutils.decStrToDeg(decStr), decDeg, 3)
+
+    def testStrToRadDelim(self):
+        for raDeg, decDeg, raStr, decStr in self.goodData:
+            raRad = raDeg*math.pi/180.
+            decRad = decDeg*math.pi/180.
+            for delim in ['_', ' ']:
+                self.assertAlmostEqual(
+                    lsstutils.raStrToRad(raStr.replace(':', delim), delim), raRad, 6)
+                self.assertAlmostEqual(
+                    lsstutils.decStrToRad(decStr.replace(':', delim), delim), decRad, 6)
+
+    def testStrToDegDelim(self):
+        for raDeg, decDeg, raStr, decStr in self.goodData:
+            for delim in ['_', ' ']:
+                self.assertAlmostEqual(
+                    lsstutils.raStrToDeg(raStr.replace(':', delim), delim), raDeg, 4)
+                self.assertAlmostEqual(
+                    lsstutils.decStrToDeg(decStr.replace(':', delim), delim), decDeg, 3)
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
