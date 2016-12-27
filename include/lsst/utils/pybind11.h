@@ -40,6 +40,19 @@ namespace utils {
 
 /**
 Add `__eq__` and `__ne__` methods based on two std::shared_ptr<T> pointing to the same address
+
+@tparam T  The type to which the std::shared_ptr points.
+@tparam PyClass  The pybind11 class_ type; this can be automatically deduced.
+
+Example:
+
+lsst::afw::table records are considered equal if two `std::shared_ptr<record>` point to the same record.
+This is wrapped as follows for `lsst::afw::table::BaseRecord`, where `cls` is an instance of
+`py::class_<BaseRecord, std::shared_ptr<BaseRecord>>)`:
+
+    utils::addSharedPtrEquality<BaseRecord>(cls);
+
+Note that all record sublasses inherit this behavior without needing to call this function.
 */
 template<typename T, typename PyClass>
 inline void addSharedPtrEquality(PyClass & cls) {
@@ -53,19 +66,23 @@ inline void addSharedPtrEquality(PyClass & cls) {
 
 /**
 Compute a C++ index from a Python index (negative values count from the end) and range-check.
+
+@param[in] size  Number of elements in the collection.
+@param[in] i  Index into the collection; negative values count from the end
+@return index in the range [0, size - 1]
+
+@throw lsst::pex::exceptions::OutOfRangeError if i not in range [-size, size - 1]
 */
-template<typename Sequence>
-inline std::size_t cppIndex(Sequence const & seq, std::ptrdiff_t i) {
+inline std::size_t cppIndex(std::ptrdiff_t size, std::ptrdiff_t i) {
     auto const i_orig = i;
-    auto const size = seq.size();
     if (i < 0) {
         // index backwards from the end
         i += size;
     }
     if (i < 0 || static_cast<std::size_t>(i) >= size) {
         std::ostringstream os;
-        os << "Index " << i_orig << " out of range; sequence has " << size << " elements";
-        throw LSST_EXCEPT(lsst::pex::exceptions::InvalidParameterError, os.str());
+        os << "Index " << i_orig << " not in range [" << -size << ", " << size - 1 << "]";
+        throw LSST_EXCEPT(lsst::pex::exceptions::OutOfRangeError, os.str());
     }
     return static_cast<std::size_t>(i);
 }
