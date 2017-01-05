@@ -66,3 +66,46 @@ def continueClass(cls):
             setattr(orig, name, attr)
     return orig
 
+
+def inClass(cls, name=None):
+    """Add the decorated function to the given class as a method.
+
+    For example,
+    ::
+        class Foo:
+            pass
+
+        @inClass(Foo)
+        def run(self):
+            return None
+
+    is equivalent to::
+
+        class Foo:
+            def run(self):
+                return None
+
+    Standard decorators like ``classmethod``, ``staticmethod``, and
+    ``property`` may be used *after* this decorator.  Custom decorators
+    may only be used if they return an object with a ``__name__`` attribute
+    or the ``name`` optional argument is provided.
+    """
+    def decorate(func):
+        if name is not None:
+            if hasattr(func, "__name__"):
+                name = func.__name__
+            else:
+                if hasattr(func, "__func__"):
+                    # classmethod and staticmethod have __func__ but no __name__
+                    name = func.__func__.__name__
+                elif hasattr(func, "fget"):
+                    # property has fget but no __name__
+                    name = func.fget.__name__
+                else:
+                    raise ValueError(
+                        "Could not guess attribute name for '{}'.".format(func)
+                    )
+        setattr(cls, name, func)
+        return func
+    return decorate
+
