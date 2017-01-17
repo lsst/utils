@@ -28,6 +28,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <utility>
 
 #include <pybind11/pybind11.h>
 
@@ -79,12 +80,37 @@ inline std::size_t cppIndex(std::ptrdiff_t size, std::ptrdiff_t i) {
         // index backwards from the end
         i += size;
     }
-    if (i < 0 || static_cast<std::size_t>(i) >= size) {
+    if (i < 0 || i >= size) {
         std::ostringstream os;
         os << "Index " << i_orig << " not in range [" << -size << ", " << size - 1 << "]";
         throw LSST_EXCEPT(lsst::pex::exceptions::OutOfRangeError, os.str());
     }
     return static_cast<std::size_t>(i);
+}
+
+/**
+Compute a pair of C++ indices from a pair of Python indices (negative values count from the end)
+and range-check.
+
+@param[in] size_i  Number of elements along the first axis.
+@param[in] size_j  Number of elements along the second axis.
+@param[in] i  Index along first axis; negative values count from the end
+@param[in] j  Index along second axis; negative values count from the end
+@return a std::pair of indices, each in the range [0, size - 1]
+
+@throw lsst::pex::exceptions::OutOfRangeError if either input index not in range [-size, size - 1]
+*/
+inline std::pair<std::size_t, std::size_t> cppIndex(std::ptrdiff_t size_i, std::ptrdiff_t size_j,
+                                                    std::ptrdiff_t i, std::ptrdiff_t j) {
+    try {
+        return {cppIndex(size_i, i), cppIndex(size_j, j)};
+    } catch (lsst::pex::exceptions::OutOfRangeError) {
+        std::ostringstream os;
+        os << "Index (" << i << ", " << j << ") not in range ["
+           << -size_i << ", " << size_i - 1 << "], ["
+           << -size_j << ", " << size_j - 1 << "]";
+        throw LSST_EXCEPT(lsst::pex::exceptions::OutOfRangeError, os.str());
+    }
 }
 
 }}  // namespace lsst::utils
