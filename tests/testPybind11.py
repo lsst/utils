@@ -31,7 +31,7 @@ import _example
 
 
 class Pybind11TestCase(lsst.utils.tests.TestCase):
-    """A test case for SWIG utilities in p_lsstPybind11.i"""
+    """A test case basic pybind11 wrapping"""
 
     def setUp(self):
         self.example = _example.Example("foo")
