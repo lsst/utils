@@ -27,35 +27,32 @@ import unittest
 import numpy
 
 import lsst.utils.tests
-import _example
+import testLib
 
 
-class Pybind11TestCase(lsst.utils.tests.TestCase):
-    """A test case basic pybind11 wrapping"""
+class SwigTestCase(lsst.utils.tests.TestCase):
+    """A test case for SWIG utilities in p_lsstSwig.i"""
 
     def setUp(self):
-        self.example = _example.Example("foo")
+        self.example = testLib.Example("foo")
 
     def testConstructors(self):
         self.assertEqual(self.example.getValue(), "foo")
-        self.assertRaises(Exception, _example.Example, [5])
-        self.assertEqual(_example.Example("bar").getValue(), "bar")
+        self.assertRaises(Exception, testLib.Example, [5])
+        self.assertEqual(testLib.Example("bar").getValue(), "bar")
 
-    @unittest.skip("it is questionable that this is desirable with pybind11")
     def testReturnNone(self):
         result = self.example.get1()
         self.assertIsNone(result)
 
-    @unittest.skip("it is questionable that this is desirable with pybind11")
     def testReturnSelf(self):
         result = self.example.get2()
         self.assertIs(result, self.example)
 
-    @unittest.skip("it is questionable that this is desirable with pybind11")
     def testReturnCopy(self):
         result = self.example.get3()
         self.assertIsNot(result, self.example)
-        self.assertIsInstance(result, _example.Example)
+        self.assertIsInstance(result, testLib.Example)
         result.setValue("bar")
         self.assertEqual(self.example.getValue(), "foo")
 
@@ -65,11 +62,8 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
         self.assertEqual(repr(self.example), s)
 
     def testEqualityComparison(self):
-        self.assertNotEqual(self.example, _example.Example("bar"))
-        self.assertEqual(self.example, _example.Example("foo"))
-
-    @unittest.skip("it is questionable that this is desirable with pybind11")
-    def testListEqualityComparison(self):
+        self.assertNotEqual(self.example, testLib.Example("bar"))
+        self.assertEqual(self.example, testLib.Example("foo"))
         self.assertNotEqual(self.example, [3, 4, 5])  # should not throw
         self.assertNotEqual([3, 4, 5], self.example)  # should not throw
 
@@ -79,7 +73,7 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
         except TypeError:
             self.fail(msg)
 
-    def checkNumeric(self, function):
+    def checkNumericTypemap(self, function):
         self.assertAccepts(function, int(1), msg="Failure passing int to %s" % function.__name__)
         self.assertAccepts(function, long(1), msg="Failure passing long to %s" % function.__name__)
         self.assertRaises((TypeError, NotImplementedError),
@@ -92,37 +86,32 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
                 self.assertAccepts(function, array[0],
                                    msg="Failure passing numpy.%s to %s" % (name, function.__name__))
 
-    def checkFloating(self, function):
-        self.checkNumeric(function)
+    def checkFloatingTypemap(self, function):
+        self.checkNumericTypemap(function)
         self.assertAccepts(function, float(3.5), "Failure passing float to %s" % function.__name__)
 
-    def checkInteger(self, function, size):
+    def checkIntegerTypemap(self, function, size):
         """If we pass an integer that doesn't fit in the C++ argument type, we should raise OverflowError"""
-        self.checkNumeric(function)
+        self.checkNumericTypemap(function)
         tooBig = 2**(size + 1)
         self.assertRaises(OverflowError, function, tooBig)
 
-    def testFloatingPoints(self):
+    def testNumericTypemaps(self):
         """Test our customized numeric scalar typemaps, including support for NumPy scalars."""
-        self.checkFloating(_example.accept_float32)
-        self.checkFloating(_example.accept_cref_float32)
-        self.checkFloating(_example.accept_cref_float64)
-
-    @unittest.skip("pybind11 does not (yet) support numpy scalar types")
-    def testExtendedIntegers(self):
+        self.checkFloatingTypemap(testLib.accept_float32)
+        self.checkFloatingTypemap(testLib.accept_cref_float32)
+        self.checkFloatingTypemap(testLib.accept_cref_float64)
         for size in (8, 16, 32, 64):
-            self.checkInteger(getattr(_example, "accept_int%d" % size), size)
-            self.checkInteger(getattr(_example, "accept_uint%d" % size), size)
-            self.checkInteger(getattr(_example, "accept_cref_int%d" % size), size)
-            self.checkInteger(getattr(_example, "accept_cref_uint%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_int%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_uint%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_cref_int%d" % size), size)
+            self.checkIntegerTypemap(getattr(testLib, "accept_cref_uint%d" % size), size)
         # Test that we choose the floating point overload when we pass a float,
         # and we get the integer overload when we pass an int.
         # We can't ever distinguish between different kinds of ints or different
-        # kinds of floats in an overloading context, but that's a Pybind11 limitation.
-
-    def testOverloads(self):
-        self.assertEqual(_example.getName(int(1)), "int")
-        self.assertEqual(_example.getName(float(1)), "double")
+        # kinds of floats in an overloading context, but that's a Swig limitation.
+        self.assertEqual(testLib.getName(int(1)), "int")
+        self.assertEqual(testLib.getName(float(1)), "double")
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):

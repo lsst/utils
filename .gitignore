@@ -7,6 +7,8 @@ config.log
 *.so
 *.cfgc
 *.pyc
+*_wrap.cc
+*Lib.py
 doc/html
 doc/xml
 doc/*.tag
@@ -14,7 +16,6 @@ doc/*.inc
 doc/doxygen.conf
 tests/.tests
 tests/.cache
-tests/testPybind11
 version.py
 tests/ieee
 examples/demangle
