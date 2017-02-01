@@ -7,6 +7,86 @@ import unittest
 import lsst.utils.tests
 
 
+class MockClass:   # continued class needs to be at module scope
+
+    def method1(self):
+        return self
+
+    @classmethod
+    def method2(cls):
+        return cls
+
+    @staticmethod
+    def method3():
+        return True
+
+    @property
+    def property1(self):
+        return False
+
+
+class DecoratorsTestCase(lsst.utils.tests.TestCase):
+
+    def setUp(self):
+        @lsst.utils.continueClass
+        class MockClass:
+
+            def method1a(self):
+                return self
+
+            @classmethod
+            def method2a(cls):
+                return cls
+
+            @staticmethod
+            def method3a():
+                return True
+
+            @property
+            def property1a(self):
+                return False
+
+        @lsst.utils.inClass(MockClass)
+        def method1b(self):
+            return self
+
+        @lsst.utils.inClass(MockClass)
+        @classmethod
+        def method2b(cls):
+            return cls
+
+        @lsst.utils.inClass(MockClass)
+        @staticmethod
+        def method3b():
+            return True
+
+        @lsst.utils.inClass(MockClass)
+        @property
+        def property1b(self):
+            return False
+
+    def testAttributeCopying(self):
+        x = MockClass()
+        self.assertIs(x.method1(), x)
+        self.assertIs(x.method1a(), x)
+        self.assertIs(x.method1b(), x)
+        self.assertIs(x.method2(), MockClass)
+        self.assertIs(x.method2a(), MockClass)
+        self.assertIs(x.method2b(), MockClass)
+        self.assertIs(MockClass.method2(), MockClass)
+        self.assertIs(MockClass.method2a(), MockClass)
+        self.assertIs(MockClass.method2b(), MockClass)
+        self.assertTrue(x.method3())
+        self.assertTrue(x.method3a())
+        self.assertTrue(x.method3b())
+        self.assertTrue(MockClass.method3())
+        self.assertTrue(MockClass.method3a())
+        self.assertTrue(MockClass.method3b())
+        self.assertFalse(x.property1)
+        self.assertFalse(x.property1a)
+        self.assertFalse(x.property1b)
+
+
 class TemplateMetaTestCase(lsst.utils.tests.TestCase):
 
     def setUp(self):
