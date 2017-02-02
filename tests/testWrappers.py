@@ -5,6 +5,7 @@ from future.utils import with_metaclass
 import numpy as np
 import unittest
 import lsst.utils.tests
+import lsst.utils
 
 
 class MockClass:   # continued class needs to be at module scope
@@ -87,11 +88,14 @@ class DecoratorsTestCase(lsst.utils.tests.TestCase):
         self.assertFalse(x.property1b)
 
 
-class TemplateMetaTestCase(lsst.utils.tests.TestCase):
+class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
+    """Test TemplateMeta on a mockup of a template with a single dtype
+    template parameter.
+    """
 
     def setUp(self):
 
-        class Base(with_metaclass(lsst.utils.TemplateMeta, object)):
+        class Example(with_metaclass(lsst.utils.TemplateMeta, object)):
 
             def method1(self):
                 return self
@@ -108,97 +112,103 @@ class TemplateMetaTestCase(lsst.utils.tests.TestCase):
             def property1(self):
                 return False
 
-        class DerivedF:
+        class ExampleF:
             pass
 
-        class DerivedD:
+        class ExampleD:
             pass
 
-        self.Base = Base
-        self.DerivedF = DerivedF
-        self.DerivedD = DerivedD
+        self.Example = Example
+        self.ExampleF = ExampleF
+        self.ExampleD = ExampleD
 
     def register(self):
-        self.Base.register(np.float32, self.DerivedF)
-        self.Base.register(np.float64, self.DerivedD)
+        self.Example.register(np.float32, self.ExampleF)
+        self.Example.register(np.float64, self.ExampleD)
 
     def alias(self):
-        self.Base.alias("F", self.DerivedF)
-        self.Base.alias("D", self.DerivedD)
+        self.Example.alias("F", self.ExampleF)
+        self.Example.alias("D", self.ExampleD)
 
     def testCorrectRegistration(self):
         self.register()
-        self.assertEqual(self.DerivedF.dtype, np.float32)
-        self.assertEqual(self.DerivedD.dtype, np.float64)
-        self.assertIn(np.float32, self.Base)
-        self.assertIn(np.float64, self.Base)
-        self.assertEqual(self.Base[np.float32], self.DerivedF)
-        self.assertEqual(self.Base[np.float64], self.DerivedD)
+        self.assertEqual(self.ExampleF.dtype, np.float32)
+        self.assertEqual(self.ExampleD.dtype, np.float64)
+        self.assertIn(np.float32, self.Example)
+        self.assertIn(np.float64, self.Example)
+        self.assertEqual(self.Example[np.float32], self.ExampleF)
+        self.assertEqual(self.Example[np.float64], self.ExampleD)
 
     def testAliases(self):
         self.register()
         self.alias()
-        self.assertEqual(self.DerivedF.dtype, np.float32)
-        self.assertEqual(self.DerivedD.dtype, np.float64)
-        self.assertIn("F", self.Base)
-        self.assertIn("D", self.Base)
-        self.assertEqual(self.Base["F"], self.DerivedF)
-        self.assertEqual(self.Base["D"], self.DerivedD)
+        self.assertEqual(self.ExampleF.dtype, np.float32)
+        self.assertEqual(self.ExampleD.dtype, np.float64)
+        self.assertIn("F", self.Example)
+        self.assertIn("D", self.Example)
+        self.assertEqual(self.Example["F"], self.ExampleF)
+        self.assertEqual(self.Example["D"], self.ExampleD)
+        self.assertEqual(self.Example["F"], self.Example[np.float32])
+        self.assertEqual(self.Example["D"], self.Example[np.float64])
 
     def testInheritanceHooks(self):
         self.register()
-        self.assertTrue(issubclass(self.DerivedF, self.Base))
-        self.assertTrue(issubclass(self.DerivedD, self.Base))
-        f = self.DerivedF()
-        d = self.DerivedD()
-        self.assertIsInstance(f, self.Base)
-        self.assertIsInstance(d, self.Base)
-        self.assertEqual(set(self.Base.__subclasses__()), set([self.DerivedF, self.DerivedD]))
+        self.assertTrue(issubclass(self.ExampleF, self.Example))
+        self.assertTrue(issubclass(self.ExampleD, self.Example))
+        f = self.ExampleF()
+        d = self.ExampleD()
+        self.assertIsInstance(f, self.Example)
+        self.assertIsInstance(d, self.Example)
+        self.assertEqual(set(self.Example.__subclasses__()), set([self.ExampleF, self.ExampleD]))
 
     def testConstruction(self):
         self.register()
-        f = self.Base(dtype=np.float32)
-        self.assertIsInstance(f, self.Base)
-        self.assertIsInstance(f, self.DerivedF)
+        f = self.Example(dtype=np.float32)
+        self.assertIsInstance(f, self.Example)
+        self.assertIsInstance(f, self.ExampleF)
+        self.assertNotIsInstance(f, self.ExampleD)
         with self.assertRaises(TypeError):
-            self.Base()
+            self.Example()
         with self.assertRaises(TypeError):
-            self.Base(dtype=np.int32)
+            self.Example(dtype=np.int32)
 
     def testAttributeCopying(self):
         self.register()
-        f = self.DerivedF()
-        d = self.DerivedD()
+        f = self.ExampleF()
+        d = self.ExampleD()
         self.assertIs(f.method1(), f)
         self.assertIs(d.method1(), d)
-        self.assertIs(f.method2(), self.DerivedF)
-        self.assertIs(d.method2(), self.DerivedD)
-        self.assertIs(self.DerivedF.method2(), self.DerivedF)
-        self.assertIs(self.DerivedD.method2(), self.DerivedD)
+        self.assertIs(f.method2(), self.ExampleF)
+        self.assertIs(d.method2(), self.ExampleD)
+        self.assertIs(self.ExampleF.method2(), self.ExampleF)
+        self.assertIs(self.ExampleD.method2(), self.ExampleD)
         self.assertTrue(f.method3())
         self.assertTrue(d.method3())
-        self.assertTrue(self.DerivedF.method3())
-        self.assertTrue(self.DerivedD.method3())
+        self.assertTrue(self.ExampleF.method3())
+        self.assertTrue(self.ExampleD.method3())
         self.assertFalse(f.property1)
         self.assertFalse(d.property1)
 
     def testDictBehavior(self):
         self.register()
-        self.assertIn(np.float32, self.Base)
-        self.assertEqual(self.Base[np.float32], self.DerivedF)
-        self.assertEqual(set(self.Base.keys()), set([np.float32, np.float64]))
-        self.assertEqual(set(self.Base.values()), set([self.DerivedF, self.DerivedD]))
-        self.assertEqual(set(self.Base.items()), set([(np.float32, self.DerivedF),
-                                                      (np.float64, self.DerivedD)]))
-        self.assertEqual(len(self.Base), 2)
-        self.assertEqual(set(iter(self.Base)), set([np.float32, np.float64]))
-        self.assertEqual(self.Base.get(np.float64), self.DerivedD)
-        self.assertEqual(self.Base.get(np.int32, False), False)
+        self.assertIn(np.float32, self.Example)
+        self.assertEqual(self.Example[np.float32], self.ExampleF)
+        self.assertEqual(set(self.Example.keys()),
+                         set([np.float32, np.float64]))
+        self.assertEqual(set(self.Example.values()),
+                         set([self.ExampleF, self.ExampleD]))
+        self.assertEqual(set(self.Example.items()),
+                         set([(np.float32, self.ExampleF),
+                              (np.float64, self.ExampleD)]))
+        self.assertEqual(len(self.Example), 2)
+        self.assertEqual(set(iter(self.Example)), set([np.float32, np.float64]))
+        self.assertEqual(self.Example.get(np.float64), self.ExampleD)
+        self.assertEqual(self.Example.get(np.int32, False), False)
 
     def testNoInheritedDictBehavior(self):
         self.register()
-        f = self.DerivedF()
-        with self.assertRaises(TypeError):
+        f = self.ExampleF()
+        with self.assertRaises(Exception): # Py2:AttributeError, Py3:TypeError
             len(f)
         with self.assertRaises(TypeError):
             f["F"]
@@ -206,34 +216,172 @@ class TemplateMetaTestCase(lsst.utils.tests.TestCase):
             for x in f:
                 pass
         with self.assertRaises(TypeError):
-            len(self.DerivedF)
+            len(self.ExampleF)
         with self.assertRaises(TypeError):
-            self.DerivedF["F"]
+            self.ExampleF["F"]
         with self.assertRaises(TypeError):
-            for x in self.DerivedF:
+            for x in self.ExampleF:
                 pass
 
     def testAliasUnregistered(self):
         with self.assertRaises(ValueError):
-            self.Base.alias("F", self.DerivedF)
-        self.assertEqual(len(self.Base), 0)
-        with self.assertRaises(ValueError):
-            self.DerivedF.dtype = "D"
-            self.Base.alias("F", self.DerivedF)
-        self.assertEqual(len(self.Base), 0)
+            self.Example.alias("F", self.ExampleF)
+        self.assertEqual(len(self.Example), 0)
+        self.assertEqual(len(self.Example), 0)
 
     def testRegisterDTypeTwice(self):
         with self.assertRaises(KeyError):
-            self.Base.register("F", self.DerivedF)
-            self.Base.register("F", self.DerivedD)
-        self.assertEqual(len(self.Base), 1)
+            self.Example.register("F", self.ExampleF)
+            self.Example.register("F", self.ExampleD)
+        self.assertEqual(len(self.Example), 1)
 
     def testRegisterTemplateTwice(self):
         with self.assertRaises(ValueError):
-            self.Base.register("F", self.DerivedF)
-            self.Base.register("D", self.DerivedF)
-        self.assertEqual(len(self.Base), 1)
+            self.Example.register("F", self.ExampleF)
+            self.Example.register("D", self.ExampleF)
+        self.assertEqual(len(self.Example), 1)
 
+
+class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
+    """Test TemplateMeta with a mockup of a template with multiple
+    template parameters.
+    """
+
+    def setUp(self):
+
+        class Example(with_metaclass(lsst.utils.TemplateMeta, object)):
+
+            TEMPLATE_PARAMS = ("d", "u")
+            TEMPLATE_DEFAULTS = (2, None)
+
+        class Example2F:
+            pass
+
+        class Example2D:
+            pass
+
+        class Example3F:
+            pass
+
+        class Example3D:
+            pass
+
+        self.Example = Example
+        self.Example2F = Example2F
+        self.Example2D = Example2D
+        self.Example3F = Example3F
+        self.Example3D = Example3D
+
+    def register(self):
+        self.Example.register((2, np.float32), self.Example2F)
+        self.Example.register((2, np.float64), self.Example2D)
+        self.Example.register((3, np.float32), self.Example3F)
+        self.Example.register((3, np.float64), self.Example3D)
+
+    def alias(self):
+        self.Example.alias("2F", self.Example2F)
+        self.Example.alias("2D", self.Example2D)
+        self.Example.alias("3F", self.Example3F)
+        self.Example.alias("3D", self.Example3D)
+
+    def testCorrectRegistration(self):
+        self.register()
+        self.assertEqual(self.Example2F.d, 2)
+        self.assertEqual(self.Example2F.u, np.float32)
+        self.assertEqual(self.Example2D.d, 2)
+        self.assertEqual(self.Example2D.u, np.float64)
+        self.assertEqual(self.Example3F.d, 3)
+        self.assertEqual(self.Example3F.u, np.float32)
+        self.assertEqual(self.Example3D.d, 3)
+        self.assertEqual(self.Example3D.u, np.float64)
+        self.assertIn((2, np.float32), self.Example)
+        self.assertIn((2, np.float64), self.Example)
+        self.assertIn((3, np.float32), self.Example)
+        self.assertIn((3, np.float64), self.Example)
+        self.assertEqual(self.Example[2, np.float32], self.Example2F)
+        self.assertEqual(self.Example[2, np.float64], self.Example2D)
+        self.assertEqual(self.Example[3, np.float32], self.Example3F)
+        self.assertEqual(self.Example[3, np.float64], self.Example3D)
+
+    def testAliases(self):
+        self.register()
+        self.alias()
+        self.assertEqual(self.Example2F.d, 2)
+        self.assertEqual(self.Example2F.u, np.float32)
+        self.assertEqual(self.Example2D.d, 2)
+        self.assertEqual(self.Example2D.u, np.float64)
+        self.assertEqual(self.Example3F.d, 3)
+        self.assertEqual(self.Example3F.u, np.float32)
+        self.assertEqual(self.Example3D.d, 3)
+        self.assertEqual(self.Example3D.u, np.float64)
+        self.assertIn("2F", self.Example)
+        self.assertIn("2D", self.Example)
+        self.assertIn("3F", self.Example)
+        self.assertIn("3D", self.Example)
+        self.assertEqual(self.Example["2F"], self.Example2F)
+        self.assertEqual(self.Example["2D"], self.Example2D)
+        self.assertEqual(self.Example["3F"], self.Example3F)
+        self.assertEqual(self.Example["3D"], self.Example3D)
+
+    def testInheritanceHooks(self):
+        self.register()
+        self.assertTrue(issubclass(self.Example2F, self.Example))
+        self.assertTrue(issubclass(self.Example3D, self.Example))
+        f = self.Example2F()
+        d = self.Example3D()
+        self.assertIsInstance(f, self.Example)
+        self.assertIsInstance(d, self.Example)
+        self.assertEqual(set(self.Example.__subclasses__()),
+                         set([self.Example2F, self.Example2D,
+                              self.Example3F, self.Example3D]))
+
+    def testConstruction(self):
+        self.register()
+        f = self.Example(u=np.float32)
+        self.assertIsInstance(f, self.Example)
+        self.assertIsInstance(f, self.Example2F)
+        with self.assertRaises(TypeError):
+            self.Example()
+        with self.assertRaises(TypeError):
+            self.Example(u=np.int32, d=1)
+
+    def testDictBehavior(self):
+        self.register()
+        self.assertIn((2, np.float32), self.Example)
+        self.assertEqual(self.Example[2, np.float32], self.Example2F)
+        self.assertEqual(set(self.Example.keys()),
+                         set([(2, np.float32), (2, np.float64),
+                              (3, np.float32), (3, np.float64)]))
+        self.assertEqual(set(self.Example.values()),
+                         set([self.Example2F, self.Example2D,
+                              self.Example3F, self.Example3D]))
+        self.assertEqual(set(self.Example.items()),
+                         set([((2, np.float32), self.Example2F),
+                              ((2, np.float64), self.Example2D),
+                              ((3, np.float32), self.Example3F),
+                              ((3, np.float64), self.Example3D)]))
+        self.assertEqual(len(self.Example), 4)
+        self.assertEqual(set(iter(self.Example)),
+                         set([(2, np.float32), (2, np.float64),
+                              (3, np.float32), (3, np.float64)]))
+        self.assertEqual(self.Example.get((3, np.float64)), self.Example3D)
+        self.assertEqual(self.Example.get((2, np.int32), False), False)
+
+    def testRegisterBadKey(self):
+        with self.assertRaises(ValueError):
+            self.Example.register("F", self.Example2F)
+
+    def testRegisterDTypeTwice(self):
+        with self.assertRaises(KeyError):
+            self.Example.register((2, "F"), self.Example2F)
+            self.Example.register((2, "F"), self.Example2D)
+        self.assertEqual(len(self.Example), 1)
+
+    def testRegisterTemplateTwice(self):
+        with self.assertRaises(ValueError):
+            self.Example.register((2, "F"), self.Example2F)
+            self.Example.register((2, "D"), self.Example2F)
+        self.assertEqual(len(self.Example), 1)
 
 if __name__ == "__main__":
     unittest.main()
