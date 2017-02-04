@@ -53,7 +53,7 @@ This is wrapped as follows for `lsst::afw::table::BaseRecord`, where `cls` is an
 
     utils::addSharedPtrEquality<BaseRecord>(cls);
 
-Note that all record sublasses inherit this behavior without needing to call this function.
+Note that all record subclasses inherit this behavior without needing to call this function.
 */
 template<typename T, typename PyClass>
 inline void addSharedPtrEquality(PyClass & cls) {
