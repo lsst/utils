@@ -210,7 +210,7 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
         f = self.ExampleF()
         with self.assertRaises(Exception): # Py2:AttributeError, Py3:TypeError
             len(f)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(Exception): # Py2:AttributeError, Py3:TypeError
             f["F"]
         with self.assertRaises(TypeError):
             for x in f:
