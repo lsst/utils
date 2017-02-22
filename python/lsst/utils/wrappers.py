@@ -14,6 +14,7 @@ INTRINSIC_SPECIAL_ATTRIBUTES = frozenset((
     "__class__",
     "__subclasshook__",
     "__name__",
+    "__doc__",
 ))
 
 
