@@ -21,8 +21,10 @@
  * see <http://www.lsstcorp.org/LegalNotices/>.
  */
 
-#ifndef LSST_UTILS_PYBIND11_H
-#define LSST_UTILS_PYBIND11_H
+#ifndef LSST_UTILS_PYTHON_H
+#define LSST_UTILS_PYTHON_H
+
+#include "pybind11/pybind11.h"
 
 #include <cstddef>
 #include <memory>
@@ -30,14 +32,13 @@
 #include <sstream>
 #include <utility>
 
-#include <pybind11/pybind11.h>
-
 #include "lsst/pex/exceptions.h"
-
-namespace py = pybind11;
 
 namespace lsst {
 namespace utils {
+namespace python {
+
+namespace py = pybind11;
 
 /**
 Add `__eq__` and `__ne__` methods based on two std::shared_ptr<T> pointing to the same address
@@ -113,7 +114,7 @@ inline std::pair<std::size_t, std::size_t> cppIndex(std::ptrdiff_t size_i, std::
     }
 }
 
-}}  // namespace lsst::utils
+}}}  // namespace lsst::utils::python
 
 #endif
 

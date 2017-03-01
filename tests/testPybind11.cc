@@ -33,9 +33,9 @@
 #include "boost/test/unit_test.hpp"
 
 #include "lsst/pex/exceptions.h"
-#include "lsst/utils/pybind11.h"
+#include "lsst/utils/python.h"
 
-using lsst::utils::cppIndex;
+using lsst::utils::python::cppIndex;
 using OutOfRangeError = lsst::pex::exceptions::OutOfRangeError;
 using sizet_pair = std::pair<std::size_t, std::size_t>;
 
