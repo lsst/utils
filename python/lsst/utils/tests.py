@@ -69,7 +69,7 @@ def init():
     global memId0
     global open_files
     if dafBase:
-        memId0 = dafBase.Citizen_getNextMemId()  # used by MemoryTestCase
+        memId0 = dafBase.Citizen.getNextMemId()  # used by MemoryTestCase
     # Reset the list of open files
     open_files = _get_open_files()
 
@@ -145,15 +145,15 @@ class MemoryTestCase(unittest.TestCase):
         if dafBase:
             gc.collect()
             global memId0, nleakPrintMax
-            nleak = dafBase.Citizen_census(0, memId0)
+            nleak = dafBase.Citizen.census(0, memId0)
             if nleak != 0:
                 plural = "s" if nleak != 1 else ""
                 print("\n%d Object%s leaked:" % (nleak, plural))
 
                 if nleak <= nleakPrintMax:
-                    print(dafBase.Citizen_census(memId0))
+                    print(dafBase.Citizen.census(memId0))
                 else:
-                    census = dafBase.Citizen_census()
+                    census = dafBase.Citizen.census()
                     print("...")
                     for i in range(nleakPrintMax - 1, -1, -1):
                         print(census[i].repr())
