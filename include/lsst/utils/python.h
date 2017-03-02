@@ -38,8 +38,6 @@ namespace lsst {
 namespace utils {
 namespace python {
 
-namespace py = pybind11;
-
 /**
 Add `__eq__` and `__ne__` methods based on two std::shared_ptr<T> pointing to the same address
 
@@ -50,7 +48,7 @@ Example:
 
 lsst::afw::table records are considered equal if two `std::shared_ptr<record>` point to the same record.
 This is wrapped as follows for `lsst::afw::table::BaseRecord`, where `cls` is an instance of
-`py::class_<BaseRecord, std::shared_ptr<BaseRecord>>)`:
+`pybind11::class_<BaseRecord, std::shared_ptr<BaseRecord>>)`:
 
     utils::addSharedPtrEquality<BaseRecord>(cls);
 
@@ -60,10 +58,10 @@ template<typename T, typename PyClass>
 inline void addSharedPtrEquality(PyClass & cls) {
     cls.def("__eq__",
             [](std::shared_ptr<T> self, std::shared_ptr<T> other) { return self.get() == other.get(); },
-            py::is_operator());
+            pybind11::is_operator());
     cls.def("__ne__",
             [](std::shared_ptr<T> self, std::shared_ptr<T> other) { return self.get() != other.get(); },
-            py::is_operator());
+            pybind11::is_operator());
 }
 
 /**
