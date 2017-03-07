@@ -71,7 +71,10 @@ Compute a C++ index from a Python index (negative values count from the end) and
 @param[in] i  Index into the collection; negative values count from the end
 @return index in the range [0, size - 1]
 
-@throw lsst::pex::exceptions::OutOfRangeError if i not in range [-size, size - 1]
+@note the size argument has type std::ptrdiff_t instead of std::size_t
+in order to to match the allowed range for the i argument.
+
+@throw Python IndexError if i not in range [-size, size - 1]
 */
 inline std::size_t cppIndex(std::ptrdiff_t size, std::ptrdiff_t i) {
     auto const i_orig = i;
@@ -82,7 +85,7 @@ inline std::size_t cppIndex(std::ptrdiff_t size, std::ptrdiff_t i) {
     if (i < 0 || i >= size) {
         std::ostringstream os;
         os << "Index " << i_orig << " not in range [" << -size << ", " << size - 1 << "]";
-        throw LSST_EXCEPT(lsst::pex::exceptions::OutOfRangeError, os.str());
+        throw pybind11::index_error(os.str());
     }
     return static_cast<std::size_t>(i);
 }
@@ -97,7 +100,7 @@ and range-check.
 @param[in] j  Index along second axis; negative values count from the end
 @return a std::pair of indices, each in the range [0, size - 1]
 
-@throw lsst::pex::exceptions::OutOfRangeError if either input index not in range [-size, size - 1]
+@throw Python IndexError if either input index not in range [-size, size - 1]
 */
 inline std::pair<std::size_t, std::size_t> cppIndex(std::ptrdiff_t size_i, std::ptrdiff_t size_j,
                                                     std::ptrdiff_t i, std::ptrdiff_t j) {
@@ -108,7 +111,7 @@ inline std::pair<std::size_t, std::size_t> cppIndex(std::ptrdiff_t size_i, std::
         os << "Index (" << i << ", " << j << ") not in range ["
            << -size_i << ", " << size_i - 1 << "], ["
            << -size_j << ", " << size_j - 1 << "]";
-        throw LSST_EXCEPT(lsst::pex::exceptions::OutOfRangeError, os.str());
+        throw pybind11::index_error(os.str());
     }
 }
 

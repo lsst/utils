@@ -27,6 +27,7 @@ import unittest
 import numpy
 
 import lsst.utils.tests
+from lsst.utils import cppIndex
 import _example
 
 
@@ -123,6 +124,72 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
     def testOverloads(self):
         self.assertEqual(_example.getName(int(1)), "int")
         self.assertEqual(_example.getName(float(1)), "double")
+
+    def testCppIndex1Axis(self):
+        """Test the 1-axis (2 argument) version of cppIndex
+        """
+        # loop over various sizes
+        # note that when size == 0 no indices are valid, but the "invalid indices" tests still run
+        for size in range(4):
+            # loop over all valid indices
+            for ind in range(size):
+                # the negative index that points to the same element as ind
+                # for example if size = 3 and ind = 2 then negind = -1
+                negind = ind - size
+
+                self.assertEqual(cppIndex(size, ind), ind)
+                self.assertEqual(cppIndex(size, negind), ind)
+
+            # invalid indices (the two closest to zero)
+            with self.assertRaises(IndexError):
+                cppIndex(size, size)
+            with self.assertRaises(IndexError):
+                cppIndex(size, -size - 1)
+
+    def testCppIndex2Axis(self):
+        """Test the 2-axis (4 argument) version of cppindex
+        """
+        # loop over various sizes
+        # if either size is 0 then no pairs of indices are valid,
+        # but the "both indices invalid" tests still run
+        for size0 in range(4):
+            for size1 in range(4):
+                # the first (closest to 0) invalid negative indices
+                negbad0 = -size0 - 1
+                negbad1 = -size1 - 1
+
+                # loop over all valid indices
+                for ind0 in range(size0):
+                    for ind1 in range(size1):
+                        # negative indices that point to the same element as the positive index
+                        negind0 = ind0 - size0
+                        negind1 = ind1 - size1
+
+                        # both indeces valid
+                        self.assertEqual(cppIndex(size0, size1, ind0, ind1), (ind0, ind1))
+                        self.assertEqual(cppIndex(size0, size1, ind0, negind1), (ind0, ind1))
+                        self.assertEqual(cppIndex(size0, size1, negind0, ind1), (ind0, ind1))
+                        self.assertEqual(cppIndex(size0, size1, negind0, negind1), (ind0, ind1))
+
+                        # one index invalid
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, ind0, size1)
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, ind0, negbad1)
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, size0, ind1)
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, negbad0, ind1)
+
+                        # both indices invalid (just test the invalid indices closest to 0)
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, size0, size1)
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, size0, -size1 - 1)
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, negbad0, size1)
+                        with self.assertRaises(IndexError):
+                            cppIndex(size0, size1, negbad0, negbad1)
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):

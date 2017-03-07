@@ -26,5 +26,6 @@ from .raDecStr import *
 from .demangle import *
 from .utils import *
 from .get_caller_name import *
-from .version import *
 from .wrappers import *
+from .python import *
+from .version import *

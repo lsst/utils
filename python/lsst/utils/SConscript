@@ -1,4 +1,8 @@
 # -*- python -*-
 from lsst.sconsUtils import scripts
-scripts.BasicSConscript.pybind11(['raDecStr', 'demangle', 'utils'], addUnderscore=False)
-
+scripts.BasicSConscript.pybind11([
+    'python',
+    'raDecStr',
+    'demangle',
+    'utils',
+], addUnderscore=False)
