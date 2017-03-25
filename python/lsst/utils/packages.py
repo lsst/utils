@@ -42,7 +42,7 @@ import subprocess
 import pickle as pickle
 from collections import Mapping
 
-from ._versions import getRuntimeVersions
+from .versions import getRuntimeVersions
 
 __all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages", "Packages"]
 
@@ -107,13 +107,11 @@ def getPythonPackages():
 
         # Remove "foo.bar.version" in favor of "foo.bar"
         # This prevents duplication when the __init__.py includes "from .version import *"
-        found = False
         for ending in (".version", "._version"):
             if name.endswith(ending):
                 name = name[:-len(ending)]
                 if name in packages:
                     assert ver == packages[name]
-                    found = True
             elif name in packages:
                 assert ver == packages[name]
 
