@@ -32,7 +32,12 @@ class GetPackageDirTestCase(unittest.TestCase):
         utilsPath = getPackageDir("utils")
         self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "testGetPackageDir.py")))
 
-        self.assertRaises(Exception, getPackageDir, "nameOfNonexistendPackage2234q?#!")
+        # NOTE: one goal of this test is to confirm that the correct exception
+        # is raised even if we haven't explicitly imported pex.exceptions.
+        # Hence the odd structure of this assert block.
+        with self.assertRaises(Exception) as cm:
+            getPackageDir("nameOfNonexistendPackage2234q?#!")
+        self.assertIsInstance(cm.exception, lsst.pex.exceptions.NotFoundError)
 
     def testUnicodeBasics(self):
         utilsPath = getPackageDir(u"utils")
