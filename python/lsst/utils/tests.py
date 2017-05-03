@@ -170,7 +170,8 @@ class MemoryTestCase(unittest.TestCase):
         # Some files are opened out of the control of the stack.
         now_open = set(f for f in now_open if not f.endswith(".car") and
                        not f.endswith(".ttf") and
-                       f != "/var/lib/sss/mc/passwd")
+                       f != "/var/lib/sss/mc/passwd" and
+                       not f.endswith("astropy.log"))
 
         diff = now_open.difference(open_files)
         if diff:
