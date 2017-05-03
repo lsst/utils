@@ -55,7 +55,8 @@ def isAttributeSafeToTransfer(name, value):
 
 
 def continueClass(cls):
-    """Re-open the decorated class, adding any new definitions into the original.
+    """Re-open the decorated class, adding any new definitions into the
+    original.
 
     For example,
     ::
@@ -119,7 +120,8 @@ def inClass(cls, name=None):
                 name1 = func.__name__
             else:
                 if hasattr(func, "__func__"):
-                    # classmethod and staticmethod have __func__ but no __name__
+                    # classmethod and staticmethod have __func__ but no
+                    # __name__
                     name1 = func.__func__.__name__
                 elif hasattr(func, "fget"):
                     # property has fget but no __name__
@@ -262,8 +264,8 @@ class TemplateMeta(type):
     def __call__(self, *args, **kwds):
         # __call__ is invoked when someone tries to construct an instance of
         # the abstract base class.
-        # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those strings
-        # as the kwargs we should intercept to find the right type.
+        # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those
+        # strings as the kwargs we should intercept to find the right type.
         key = tuple(kwds.pop(p, d) for p, d in zip(self.TEMPLATE_PARAMS,
                                                    self.TEMPLATE_DEFAULTS))
         # indices are only tuples if there are multiple elements
@@ -364,7 +366,8 @@ class TemplateMeta(type):
             # indices are only tuples if there are multiple elements
             primaryKey = primaryKey[0]
         if self._registry.get(primaryKey, None) != subclass:
-            raise ValueError("Subclass is not registered with this base class.")
+            raise ValueError(
+                "Subclass is not registered with this base class.")
         self._registry[key] = subclass
 
     # Immutable mapping interface defined below.  We don't use collections
