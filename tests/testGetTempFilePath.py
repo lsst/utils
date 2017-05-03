@@ -46,7 +46,8 @@ class GetTempFilePathTestCase(unittest.TestCase):
     def runGetTempFile(self, funcName):
         with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
             baseName = os.path.basename(tmpFile)
-            self.assertEqual(baseName, "testGetTempFilePath_%s.fits" % (funcName,))
+            self.assertEqual(baseName,
+                             "testGetTempFilePath_%s.fits" % (funcName,))
             f = open(tmpFile, "w")
             f.write("foo\n")
             f.close()

@@ -30,7 +30,8 @@ from lsst.utils import getPackageDir
 class GetPackageDirTestCase(unittest.TestCase):
     def testBasics(self):
         utilsPath = getPackageDir("utils")
-        self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "testGetPackageDir.py")))
+        self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests",
+                                                    "testGetPackageDir.py")))
 
         # NOTE: one goal of this test is to confirm that the correct exception
         # is raised even if we haven't explicitly imported pex.exceptions.
@@ -41,7 +42,8 @@ class GetPackageDirTestCase(unittest.TestCase):
 
     def testUnicodeBasics(self):
         utilsPath = getPackageDir(u"utils")
-        self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "testGetPackageDir.py")))
+        self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests",
+                                                    "testGetPackageDir.py")))
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
