@@ -208,9 +208,9 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
     def testNoInheritedDictBehavior(self):
         self.register()
         f = self.ExampleF()
-        with self.assertRaises(Exception): # Py2:AttributeError, Py3:TypeError
+        with self.assertRaises(Exception):  # Py2:AttributeError, Py3:TypeError
             len(f)
-        with self.assertRaises(Exception): # Py2:AttributeError, Py3:TypeError
+        with self.assertRaises(Exception):  # Py2:AttributeError, Py3:TypeError
             f["F"]
         with self.assertRaises(TypeError):
             for x in f:
@@ -382,6 +382,7 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
             self.Example.register((2, "F"), self.Example2F)
             self.Example.register((2, "D"), self.Example2F)
         self.assertEqual(len(self.Example), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

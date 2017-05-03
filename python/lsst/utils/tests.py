@@ -1,8 +1,8 @@
-# 
+#
 # LSST Data Management System
 #
 # Copyright 2008-2017  AURA/LSST.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -10,14 +10,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
 """Support code for running unit tests"""
@@ -35,6 +35,7 @@ import sys
 import unittest
 import warnings
 import numpy
+import functools
 
 # File descriptor leak test will be skipped if psutil can not be imported
 try:
@@ -121,12 +122,11 @@ def sort_tests(tests):
 def suiteClassWrapper(tests):
     return unittest.TestSuite(sort_tests(tests))
 
+
 # Replace the suiteClass callable in the defaultTestLoader
 # so that we can reorder the test ordering. This will have
 # no effect if no memory test cases are found.
 unittest.defaultTestLoader.suiteClass = suiteClassWrapper
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 class MemoryTestCase(unittest.TestCase):
@@ -168,16 +168,15 @@ class MemoryTestCase(unittest.TestCase):
         now_open = _get_open_files()
 
         # Some files are opened out of the control of the stack.
-        now_open = set(f for f in now_open if not f.endswith(".car") and not f.endswith(".ttf")
-                                              and f != "/var/lib/sss/mc/passwd")
+        now_open = set(f for f in now_open if not f.endswith(".car") and
+                       not f.endswith(".ttf") and
+                       f != "/var/lib/sss/mc/passwd")
 
         diff = now_open.difference(open_files)
         if diff:
             for f in diff:
                 print("File open: %s" % f)
             self.fail("Failed to close %d file%s" % (len(diff), "s" if len(diff) != 1 else ""))
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 class ExecutablesTestCase(unittest.TestCase):
@@ -324,8 +323,6 @@ class ExecutablesTestCase(unittest.TestCase):
             cls._build_test_method(e, ref_dir)
 
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
 def findFileFromRoot(ifile):
     """!Find file which is specified as a path relative to the toplevel directory;
     we start in $cwd and walk up until we find the file (or throw IOError if it doesn't exist)
@@ -350,8 +347,6 @@ def findFileFromRoot(ifile):
         file = dirname
 
     raise IOError("Can't find %s" % ifile)
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 @contextmanager
@@ -412,8 +407,6 @@ def getTempFilePath(ext):
     else:
         print("Warning: could not find file %r" % (outPath,))
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
 
 class TestCase(unittest.TestCase):
     """!Subclass of unittest.TestCase that adds some custom assertions for
@@ -428,18 +421,12 @@ def inTestCase(func):
     setattr(TestCase, func.__name__, func)
     return func
 
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
 
 @inTestCase
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
     warnings.warn("assertRaisesLsstCpp is deprecated; please just use TestCase.assertRaises",
                   DeprecationWarning)
     return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-import functools
 
 
 def debugger(*exceptions):
@@ -468,8 +455,6 @@ def debugger(*exceptions):
                 pdb.post_mortem(sys.exc_info()[2])
         return wrapper
     return decorator
-
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):

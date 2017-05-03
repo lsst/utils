@@ -38,5 +38,6 @@ class TestCaseOrdering(lsst.utils.tests.TestCase):
         self.assertNotIsInstance(suite._tests[0], lsst.utils.tests.MemoryTestCase)
         self.assertIsInstance(suite._tests[-1], lsst.utils.tests.MemoryTestCase)
 
+
 if __name__ == "__main__":
     unittest.main()
