@@ -22,6 +22,8 @@
 #
 from __future__ import absolute_import
 
+import lsst.pex.exceptions
+
 from .raDecStr import *
 from .demangle import *
 from .utils import *
