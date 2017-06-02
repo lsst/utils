@@ -236,6 +236,12 @@ class Packages(object):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, repr(self._packages))
 
+    def __contains__(self, pkg):
+        return pkg in self._packages
+
+    def __iter__(self):
+        return iter(self._packages)
+
     def update(self, other):
         """Update packages using another set of packages
 
