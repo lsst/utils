@@ -5,4 +5,5 @@ scripts.BasicSConscript.pybind11([
     'raDecStr',
     'demangle',
     'utils',
+    'backtrace',
 ], addUnderscore=False)
