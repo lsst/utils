@@ -32,7 +32,7 @@
 #include <cxxabi.h>
 #include <execinfo.h>
 
-#include <regex>
+#include "boost/regex.hpp"
 
 #include "lsst/utils/Backtrace.h"
 
@@ -58,20 +58,35 @@ static constexpr size_t NAME_SIZE_ESTIMATE = 1024;
  * @return buffer (possibly reallocated) buffer for demangled name,
  *                caller should always free this.
  */
-char *demangleAndPrint(char *input, char *buffer, size_t *bufferSize) {
+char *demangleAndPrint(char *input, char *buffer, size_t *bufferSize) noexcept {
     int status = 1;
 
-    std::cmatch matches;
-    std::regex rgx(
-            "(.*[\\s|\\(])"  // before
-            "(_\\w+)"        // mangled name
-            "(.*\\+.*)"      // after
-            );
+    try {
+        boost::cmatch matches;
+        boost::regex rgx(
+                "(.*[\\s|\\(])"  // before
+                "(_\\w+)"        // mangled name
+                "(.*\\+.*)"      // after
+                );
 
-    if (std::regex_match(input, matches, rgx)) {
-        buffer = abi::__cxa_demangle(matches.str(2).c_str(), buffer, bufferSize, &status);
-        fprintf(stderr, "%s%s%s\n", matches.str(1).c_str(), buffer, matches.str(3).c_str());
+        if (boost::regex_match(input, matches, rgx)) {
+            buffer = abi::__cxa_demangle(matches.str(2).c_str(), buffer, bufferSize, &status);
+            fprintf(stderr, "%s%s%s\n", matches.str(1).c_str(), buffer, matches.str(3).c_str());
+        }
+    } catch(const boost::bad_expression &e) {
+        fprintf(stderr, "[demangleAndPrint] %s\n", e.what());
+        status = 1;
+    } catch(const std::runtime_error &e) {
+        fprintf(stderr, "[demangleAndPrint] %s\n", e.what());
+        status = 1;
+    } catch(const std::exception &e) {
+        fprintf(stderr, "[demangleAndPrint] %s\n", e.what());
+        status = 1;
+    } catch(...) {
+        fprintf(stderr, "[demangleAndPrint] unknown error occurred in demangling\n");
+        status = 1;
     }
+
     if (status != 0) {
         // no name found to demangle or name demangling failed
         fprintf(stderr, "%s\n", input);
@@ -96,7 +111,7 @@ void raiseWithDefaultHandler(int signum) noexcept {
  *
  * @param[in] signum signal number to handle.
  */
-void signalHandler(int signum) {
+void signalHandler(int signum) noexcept {
     fprintf(stderr, "Caught signal %d, backtrace follows:\n", signum);
 
     // retrieve current stack addresses
