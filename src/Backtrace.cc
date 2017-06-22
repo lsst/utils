@@ -32,7 +32,7 @@
 #include <cxxabi.h>
 #include <execinfo.h>
 
-#include <regex>
+#include "boost/regex.hpp"
 
 #include "lsst/utils/Backtrace.h"
 
@@ -61,14 +61,14 @@ static constexpr size_t NAME_SIZE_ESTIMATE = 1024;
 char *demangleAndPrint(char *input, char *buffer, size_t *bufferSize) {
     int status = 1;
 
-    std::cmatch matches;
-    std::regex rgx(
+    boost::cmatch matches;
+    boost::regex rgx(
             "(.*[\\s|\\(])"  // before
             "(_\\w+)"        // mangled name
             "(.*\\+.*)"      // after
             );
 
-    if (std::regex_match(input, matches, rgx)) {
+    if (boost::regex_match(input, matches, rgx)) {
         buffer = abi::__cxa_demangle(matches.str(2).c_str(), buffer, bufferSize, &status);
         fprintf(stderr, "%s%s%s\n", matches.str(1).c_str(), buffer, matches.str(3).c_str());
     }
