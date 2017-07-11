@@ -214,6 +214,11 @@ class TemplateMeta(type):
         with the same name, and subclasses cannot delegate to base class
         implementations of these methods.
 
+    The ABC generally acts as ``dict`` of classes, except that calling the ABC
+    instantiates the default template type. Static methods on the default
+    template type can be called on the ABC by declaring them in the
+    ``STATIC_METHODS`` class attribute.
+
     Finally, abstract base classes that use ``TemplateMeta`` define a dict-
     like interface for accessing their registered subclasses, providing
     something like the C++ syntax for templates::
@@ -246,6 +251,8 @@ class TemplateMeta(type):
         attrs["TEMPLATE_DEFAULTS"] = \
             attrs["_inherited"].pop("TEMPLATE_DEFAULTS",
                                     (None,)*len(attrs["TEMPLATE_PARAMS"]))
+        attrs["STATIC_METHODS"] = \
+            set(attrs["_inherited"].pop("STATIC_METHODS", []))
         attrs["_registry"] = dict()
         self = type.__new__(cls, name, bases, attrs)
 
@@ -381,6 +388,14 @@ class TemplateMeta(type):
 
     def __contains__(self, key):
         return key in self._registry
+
+    def __getattr__(self, name):
+        """Look for declared static method in default class"""
+        if name in self.STATIC_METHODS and self.TEMPLATE_DEFAULTS:
+            key = self.TEMPLATE_DEFAULTS[0] if len(self.TEMPLATE_DEFAULTS) == 1 else self.TEMPLATE_DEFAULTS
+            return getattr(self._registry.get(key), name)
+        raise AttributeError("Abstract Base Class '%s' has no attribute '%s'" %
+                             (self.__class__, name))
 
     def keys(self):
         """Return an iterable containing all keys (including aliases).
