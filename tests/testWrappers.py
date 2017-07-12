@@ -384,5 +384,66 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
         self.assertEqual(len(self.Example), 1)
 
 
+class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
+    """ Test to determine if static and class methods from a class which is
+    registered as a default type in a type ABC are properly copied.
+    """
+    def setUp(self):
+        class Example(with_metaclass(lsst.utils.TemplateMeta, object)):
+
+            TEMPLATE_PARAMS = ("dtype",)
+            TEMPLATE_DEFAULTS = (np.float32,)
+
+        class ExampleF:
+            @staticmethod
+            def staticCall():
+                return 6
+
+            @classmethod
+            def classCall(cls):
+                return cls
+
+            def regularCall(self):
+                return self
+
+        class ExampleI:
+            @staticmethod
+            def notTransferedStaticCall():
+                return 8
+
+            @classmethod
+            def notTransferedClassCall(cls):
+                return cls
+
+        # Add in a built in function to ExampleF to mimic how pybind11 treats
+        # static methods from c++
+        setattr(ExampleF, 'pow', pow)
+
+        Example.register(np.float32, ExampleF)
+        Example.register(np.int32, ExampleI)
+        self.Example = Example
+        self.ExampleF = ExampleF
+        self.ExampleI = ExampleI
+
+    def testMethodCopyForDefaultType(self):
+        # Check that the methods for the default type were transfered and that
+        # the regular method was not
+        self.assertTrue(hasattr(self.Example, 'staticCall'))
+        self.assertTrue(hasattr(self.Example, 'pow'))
+        self.assertTrue(hasattr(self.Example, 'classCall'))
+        self.assertFalse(hasattr(self.Example, 'regularCall'))
+
+        # Verify the default static and class method defaults return the
+        # correct values
+        self.assertEqual(self.Example.staticCall(), 6)
+        self.assertEqual(self.Example.pow(2, 2), 4)
+        self.assertIs(self.Example.classCall(), self.ExampleF)
+
+        # Verify static and class methods for non default keys are not
+        # transfered
+        self.assertFalse(hasattr(self.Example, "notTransferedStaticCall"))
+        self.assertFalse(hasattr(self.Example, "notTransferedClassCall"))
+
+
 if __name__ == "__main__":
     unittest.main()
