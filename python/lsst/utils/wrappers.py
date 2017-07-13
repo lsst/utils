@@ -23,6 +23,7 @@
 from __future__ import absolute_import, division, print_function
 
 import sys
+import types
 
 __all__ = ("continueClass", "inClass", "TemplateMeta")
 
@@ -322,6 +323,40 @@ class TemplateMeta(type):
             raise KeyError(
                 "Another subclass is already registered with {}".format(d)
             )
+        # If the key used to register a class matches the default key,
+        # make the static methods available through the ABC
+        if self.TEMPLATE_DEFAULTS:
+            defaults = (self.TEMPLATE_DEFAULTS[0] if
+                        len(self.TEMPLATE_DEFAULTS) == 1 else
+                        self.TEMPLATE_DEFAULTS)
+            if key == defaults:
+                conflictStr = ("Base Class has an attribute with the same"
+                               "name as a {} method in the default subclass"
+                               ". Cannot link {} method to base class")
+                # In the following if statements, the explicit lookup in
+                # __dict__ must be done, as a call to getattr returns the
+                # bound method, which no longer reports as a static or class
+                # method. The static methods must be transfered to the ABC
+                # in this unbound state, so that python will still see them
+                # as static methods and not attempt to pass self. The class
+                # methods must be transfered to the ABC as a bound method
+                # so that the correct cls be called with the class method
+                for name in subclass.__dict__:
+                    if name == "__new__":
+                        continue
+                    obj = subclass.__dict__[name]
+                    # copy over the static methods
+                    isBuiltin = isinstance(obj, types.BuiltinFunctionType)
+                    isStatic = isinstance(obj, staticmethod)
+                    if isBuiltin or isStatic:
+                        if hasattr(self, name):
+                            raise AttributeError(conflictStr.format("static"))
+                        setattr(self, name, obj)
+                    # copy over the class methods
+                    elif isinstance(obj, classmethod):
+                        if hasattr(self, name):
+                            raise AttributeError(conflictStr.format("class"))
+                        setattr(self, name, getattr(subclass, name))
 
         def setattrSafe(name, value):
             try:
