@@ -98,17 +98,21 @@ class RaDecToStrTestCase(lsst.utils.tests.TestCase):
             decRad = decDeg*math.pi/180.
             for delim in ['_', ' ']:
                 self.assertAlmostEqual(
-                    lsstutils.raStrToRad(raStr.replace(':', delim), delim), raRad, 6)
+                    lsstutils.raStrToRad(raStr.replace(':', delim), delim),
+                    raRad, 6)
                 self.assertAlmostEqual(
-                    lsstutils.decStrToRad(decStr.replace(':', delim), delim), decRad, 6)
+                    lsstutils.decStrToRad(decStr.replace(':', delim), delim),
+                    decRad, 6)
 
     def testStrToDegDelim(self):
         for raDeg, decDeg, raStr, decStr in self.goodData:
             for delim in ['_', ' ']:
                 self.assertAlmostEqual(
-                    lsstutils.raStrToDeg(raStr.replace(':', delim), delim), raDeg, 4)
+                    lsstutils.raStrToDeg(raStr.replace(':', delim), delim),
+                    raDeg, 4)
                 self.assertAlmostEqual(
-                    lsstutils.decStrToDeg(decStr.replace(':', delim), delim), decDeg, 3)
+                    lsstutils.decStrToDeg(decStr.replace(':', delim), delim),
+                    decDeg, 3)
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):

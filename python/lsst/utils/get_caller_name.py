@@ -29,9 +29,10 @@ __all__ = ["get_caller_name"]
 def get_caller_name(skip=2):
     """Get the name of the caller as a string in the form module.class.method
 
-    Any item that cannot be determined (or is not relevant, e.g. a free function
-    function has no class) is silently omitted, along with an associated separator.
-    An empty string is returned if `skip` exceeds the stack height.
+    Any item that cannot be determined (or is not relevant, e.g. a free
+    function function has no class) is silently omitted, along with an
+    associated separator. An empty string is returned if `skip` exceeds the
+    stack height.
 
     Parameters
     ----------

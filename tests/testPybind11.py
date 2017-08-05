@@ -76,35 +76,46 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
 
     def assertAccepts(self, function, value, msg):
         try:
-            self.assertEqual(function(value), value, msg="%s: %r != %r" % (msg, function(value), value))
+            self.assertEqual(function(value), value,
+                             msg="%s: %r != %r" % (msg, function(value),
+                                                   value))
         except TypeError:
             self.fail(msg)
 
     def checkNumeric(self, function):
-        self.assertAccepts(function, int(1), msg="Failure passing int to %s" % function.__name__)
-        self.assertAccepts(function, long(1), msg="Failure passing long to %s" % function.__name__)
+        self.assertAccepts(function, int(1),
+                           msg="Failure passing int to %s" % function.__name__)
+        self.assertAccepts(function, long(1),
+                           msg="Failure passing long to %s" %
+                               function.__name__)
+        # should fail to convert even numeric strings
         self.assertRaises((TypeError, NotImplementedError),
-                          function, "5")  # should fail to convert even numeric strings
-        # We should be able to coerce integers with different signedness and size to any numeric
-        # type argument (as long as we don't trigger overflow)
+                          function, "5")
+        # We should be able to coerce integers with different signedness and
+        # size to any numeric type argument (as long as we don't trigger
+        # overflow)
         for size in (8, 16, 32, 64):
             for name in ("int%d" % size, "uint%d" % size):
                 array = numpy.ones(1, dtype=getattr(numpy, name))
                 self.assertAccepts(function, array[0],
-                                   msg="Failure passing numpy.%s to %s" % (name, function.__name__))
+                                   msg="Failure passing numpy.%s to %s" %
+                                       (name, function.__name__))
 
     def checkFloating(self, function):
         self.checkNumeric(function)
-        self.assertAccepts(function, float(3.5), "Failure passing float to %s" % function.__name__)
+        self.assertAccepts(function, float(3.5),
+                           "Failure passing float to %s" % function.__name__)
 
     def checkInteger(self, function, size):
-        """If we pass an integer that doesn't fit in the C++ argument type, we should raise OverflowError"""
+        """If we pass an integer that doesn't fit in the C++ argument type,
+        we should raise OverflowError"""
         self.checkNumeric(function)
         tooBig = 2**(size + 1)
         self.assertRaises(OverflowError, function, tooBig)
 
     def testFloatingPoints(self):
-        """Test our customized numeric scalar typemaps, including support for NumPy scalars."""
+        """Test our customized numeric scalar typemaps, including support
+        for NumPy scalars."""
         self.checkFloating(_example.accept_float32)
         self.checkFloating(_example.accept_cref_float32)
         self.checkFloating(_example.accept_cref_float64)
@@ -114,12 +125,15 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
         for size in (8, 16, 32, 64):
             self.checkInteger(getattr(_example, "accept_int%d" % size), size)
             self.checkInteger(getattr(_example, "accept_uint%d" % size), size)
-            self.checkInteger(getattr(_example, "accept_cref_int%d" % size), size)
-            self.checkInteger(getattr(_example, "accept_cref_uint%d" % size), size)
+            self.checkInteger(
+                getattr(_example, "accept_cref_int%d" % size), size)
+            self.checkInteger(
+                getattr(_example, "accept_cref_uint%d" % size), size)
         # Test that we choose the floating point overload when we pass a float,
         # and we get the integer overload when we pass an int.
-        # We can't ever distinguish between different kinds of ints or different
-        # kinds of floats in an overloading context, but that's a Pybind11 limitation.
+        # We can't ever distinguish between different kinds of ints or
+        # different kinds of floats in an overloading context, but that's a
+        # Pybind11 limitation.
 
     def testOverloads(self):
         self.assertEqual(_example.getName(int(1)), "int")
@@ -129,7 +143,8 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
         """Test the 1-axis (2 argument) version of cppIndex
         """
         # loop over various sizes
-        # note that when size == 0 no indices are valid, but the "invalid indices" tests still run
+        # note that when size == 0 no indices are valid, but the "invalid
+        # indices" tests still run
         for size in range(4):
             # loop over all valid indices
             for ind in range(size):
@@ -161,15 +176,21 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
                 # loop over all valid indices
                 for ind0 in range(size0):
                     for ind1 in range(size1):
-                        # negative indices that point to the same element as the positive index
+                        # negative indices that point to the same element as
+                        # the positive index
                         negind0 = ind0 - size0
                         negind1 = ind1 - size1
 
                         # both indeces valid
-                        self.assertEqual(cppIndex(size0, size1, ind0, ind1), (ind0, ind1))
-                        self.assertEqual(cppIndex(size0, size1, ind0, negind1), (ind0, ind1))
-                        self.assertEqual(cppIndex(size0, size1, negind0, ind1), (ind0, ind1))
-                        self.assertEqual(cppIndex(size0, size1, negind0, negind1), (ind0, ind1))
+                        self.assertEqual(cppIndex(size0, size1, ind0, ind1),
+                                         (ind0, ind1))
+                        self.assertEqual(cppIndex(size0, size1, ind0, negind1),
+                                         (ind0, ind1))
+                        self.assertEqual(cppIndex(size0, size1, negind0, ind1),
+                                         (ind0, ind1))
+                        self.assertEqual(cppIndex(size0, size1,
+                                                  negind0, negind1),
+                                         (ind0, ind1))
 
                         # one index invalid
                         with self.assertRaises(IndexError):
@@ -181,7 +202,8 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
                         with self.assertRaises(IndexError):
                             cppIndex(size0, size1, negbad0, ind1)
 
-                        # both indices invalid (just test the invalid indices closest to 0)
+                        # both indices invalid (just test the invalid indices
+                        # closest to 0)
                         with self.assertRaises(IndexError):
                             cppIndex(size0, size1, size0, size1)
                         with self.assertRaises(IndexError):

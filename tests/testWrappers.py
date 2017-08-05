@@ -159,7 +159,8 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
         d = self.ExampleD()
         self.assertIsInstance(f, self.Example)
         self.assertIsInstance(d, self.Example)
-        self.assertEqual(set(self.Example.__subclasses__()), set([self.ExampleF, self.ExampleD]))
+        self.assertEqual(set(self.Example.__subclasses__()),
+                         set([self.ExampleF, self.ExampleD]))
 
     def testConstruction(self):
         self.register()
@@ -201,7 +202,8 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
                          set([(np.float32, self.ExampleF),
                               (np.float64, self.ExampleD)]))
         self.assertEqual(len(self.Example), 2)
-        self.assertEqual(set(iter(self.Example)), set([np.float32, np.float64]))
+        self.assertEqual(set(iter(self.Example)),
+                         set([np.float32, np.float64]))
         self.assertEqual(self.Example.get(np.float64), self.ExampleD)
         self.assertEqual(self.Example.get(np.int32, False), False)
 

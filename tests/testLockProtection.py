@@ -49,7 +49,8 @@ class LockProtectedTestCase(lsst.utils.tests.TestCase):
             with mc:
                 mc.danger()
         except multithreading.UnsafeAccessError:
-            self.fail("Raised multithreading.UnsafeAccessError inside of context manager!")
+            self.fail("Raised multithreading.UnsafeAccessError"
+                      " inside of context manager!")
 
     def testSharedLock(self):
         mc = MyClass(multithreading.SharedLock())
@@ -58,7 +59,8 @@ class LockProtectedTestCase(lsst.utils.tests.TestCase):
             with mc:
                 mc.danger()
         except multithreading.UnsafeAccessError:
-            self.fail("Raised multithreading.UnsafeAccessError inside of context manager!")
+            self.fail("Raised multithreading.UnsafeAccessError"
+                      " inside of context manager!")
 
     def testSharedData(self):
         mc = MyClass(multithreading.SharedData())
@@ -67,7 +69,8 @@ class LockProtectedTestCase(lsst.utils.tests.TestCase):
             with mc:
                 mc.danger()
         except multithreading.UnsafeAccessError:
-            self.fail("Raised multithreading.UnsafeAccessError inside of context manager!")
+            self.fail("Raised multithreading.UnsafeAccessError"
+                      " inside of context manager!")
 
     def testExitViaException(self):
         mc = MyClass(multithreading.SharedLock())

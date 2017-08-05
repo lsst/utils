@@ -42,7 +42,8 @@ class ShareDataTestCase(unittest.TestCase):
         self.sd.acquire()
         self.assertTrue(self.sd._is_owned(), "lock not kept")
         self.sd.release()
-        self.assertTrue(self.sd._is_owned(), "lock not kept after partial release")
+        self.assertTrue(self.sd._is_owned(),
+                        "lock not kept after partial release")
         self.sd.release()
         self.assertFalse(self.sd._is_owned(), "lock not released")
 
@@ -107,7 +108,8 @@ class ShareDataTestCase(unittest.TestCase):
         with self.sd:
             self.sd.lname = "Plante"
             attrs = self.sd.dir()
-            self.assertEqual(len(attrs), 4, "Wrong number of items: " + str(attrs))
+            self.assertEqual(len(attrs), 4,
+                             "Wrong number of items: " + str(attrs))
             self.assertEqual(self.sd.lname, "Plante")
 
 
@@ -123,7 +125,8 @@ class ReadableShareDataTestCase(unittest.TestCase):
         self.sd.acquire()
         self.assertTrue(self.sd._is_owned(), "lock not kept")
         self.sd.release()
-        self.assertTrue(self.sd._is_owned(), "lock not kept after partial release")
+        self.assertTrue(self.sd._is_owned(),
+                        "lock not kept after partial release")
         self.sd.release()
         self.assertFalse(self.sd._is_owned(), "lock not released")
 
@@ -178,7 +181,8 @@ class ReadableShareDataTestCase(unittest.TestCase):
         with self.sd:
             self.sd.lname = "Plante"
             attrs = self.sd.dir()
-            self.assertEqual(len(attrs), 4, "Wrong number of items: " + str(attrs))
+            self.assertEqual(len(attrs), 4,
+                             "Wrong number of items: " + str(attrs))
             self.assertEqual(self.sd.lname, "Plante")
 
 
