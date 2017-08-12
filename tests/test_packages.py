@@ -20,14 +20,14 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from future import standard_library
-standard_library.install_aliases()
-
 import os
 import unittest
 import tempfile
 
 import lsst.base
+
+from future import standard_library
+standard_library.install_aliases()
 
 
 class PackagesTestCase(unittest.TestCase):
@@ -112,6 +112,7 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(packages.missing(new), {})
         self.assertDictEqual(packages.extra(new), {})
         self.assertEqual(len(packages), len(new))
+
 
 if __name__ == "__main__":
     unittest.main()

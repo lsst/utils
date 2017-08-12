@@ -30,8 +30,6 @@ Example usage:
     old.update(pkgs)  # Include any new packages in the old
     old.write("/path/to/packages.pickle")
 """
-from future import standard_library
-standard_library.install_aliases()
 from builtins import object
 
 import os
@@ -43,6 +41,9 @@ import pickle as pickle
 from collections import Mapping
 
 from .versions import getRuntimeVersions
+
+from future import standard_library
+standard_library.install_aliases()
 
 __all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages", "Packages"]
 
@@ -127,6 +128,8 @@ def getPythonPackages():
 
 
 _eups = None  # Singleton Eups object
+
+
 def getEnvironmentPackages():
     """Provide a dict of products and their versions from the environment
 
