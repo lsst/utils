@@ -39,7 +39,7 @@ class GetCallerNameTestCase(unittest.TestCase):
             return get_caller_name(1)
 
         result = test_func()
-        self.assertEquals(result, "{}.test_func".format(__name__))
+        self.assertEqual(result, "{}.test_func".format(__name__))
 
     def test_instance_method(self):
         class TestClass(object):
@@ -48,7 +48,7 @@ class GetCallerNameTestCase(unittest.TestCase):
 
         tc = TestClass()
         result = tc.run()
-        self.assertEquals(result, "{}.TestClass.run".format(__name__))
+        self.assertEqual(result, "{}.TestClass.run".format(__name__))
 
     def test_class_method(self):
         class TestClass(object):
@@ -58,17 +58,17 @@ class GetCallerNameTestCase(unittest.TestCase):
 
         tc = TestClass()
         result = tc.run()
-        self.assertEquals(result, "{}.TestClass.run".format(__name__))
+        self.assertEqual(result, "{}.TestClass.run".format(__name__))
 
     def test_skip(self):
         def test_func(skip):
             return get_caller_name(skip)
 
         result = test_func(2)
-        self.assertEquals(result, "{}.GetCallerNameTestCase.test_skip".format(__name__))
+        self.assertEqual(result, "{}.GetCallerNameTestCase.test_skip".format(__name__))
 
         result = test_func(2000000)  # use a large number to avoid details of how the test is run
-        self.assertEquals(result, "")
+        self.assertEqual(result, "")
 
 
 def setup_module(module):
