@@ -426,7 +426,7 @@ def inTestCase(func):
 @inTestCase
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
     warnings.warn("assertRaisesLsstCpp is deprecated; please just use TestCase.assertRaises",
-                  DeprecationWarning)
+                  DeprecationWarning, stacklevel=2)
     return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
 
 
@@ -641,12 +641,12 @@ def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
 @inTestCase
 def assertClose(*args, **kwargs):
     warnings.warn("assertClose is deprecated; please use TestCase.assertFloatsAlmostEqual",
-                  DeprecationWarning)
+                  DeprecationWarning, stacklevel=2)
     return assertFloatsAlmostEqual(*args, **kwargs)
 
 
 @inTestCase
 def assertNotClose(*args, **kwargs):
     warnings.warn("assertNotClose is deprecated; please use TestCase.assertFloatsNotEqual",
-                  DeprecationWarning)
+                  DeprecationWarning, stacklevel=2)
     return assertFloatsNotEqual(*args, **kwargs)

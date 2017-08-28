@@ -43,7 +43,7 @@ class UtilsTestCase(lsst.utils.tests.TestCase):
         self.largesEpsilon = np.zeros((5, 5), dtype=float) + self.large + self.epsilon
         self.ranges = np.arange(-12., 13.).reshape(5, 5)
         self.rangesEpsilon = self.ranges.copy()
-        self.rangesEpsilon += np.linspace(-1E-4, 1E-4, 5.)
+        self.rangesEpsilon += np.linspace(-1E-4, 1E-4, 5)
 
     def test_assertFloatsAlmostEqual(self):
         # zero scalar tests

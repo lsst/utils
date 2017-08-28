@@ -19,12 +19,15 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
+import os
 import sys
 import unittest
 import subprocess
 
 import lsst.utils.tests
 from lsst.utils import backtrace
+
+ROOT = os.path.abspath(os.path.dirname(__file__))
 
 
 class BacktraceTestCase(lsst.utils.tests.TestCase):
@@ -33,16 +36,13 @@ class BacktraceTestCase(lsst.utils.tests.TestCase):
 
     def test_segfault(self):
         if backtrace.isEnabled():
-            pipe = subprocess.Popen((sys.executable, "tests/backtrace.py"),
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
+            with self.assertRaises(subprocess.CalledProcessError) as cm:
+                subprocess.check_output([sys.executable, os.path.join(ROOT, "backtrace.py")],
+                                        stderr=subprocess.STDOUT)
 
-            found = False
-            for l in pipe.stderr:
-                if "backtrace follows" in str(l):
-                    found = True
-                    break
-            self.assertTrue(found)
+            output = cm.exception.output.decode()
+            print(output)
+            self.assertIn("backtrace follows", output)
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
