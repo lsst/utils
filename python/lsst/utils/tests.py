@@ -292,7 +292,7 @@ class ExecutablesTestCase(unittest.TestCase):
         This class method must be called before test discovery.
 
         Example:
-        
+
         cls.create_executable_tests(__file__)
 
         The list of executables can be overridden by passing in a
