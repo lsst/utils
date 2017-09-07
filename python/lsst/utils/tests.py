@@ -185,7 +185,7 @@ class ExecutablesTestCase(unittest.TestCase):
 
     The test methods are dynamically created. Callers
     must subclass this class in their own test file and invoke
-    the discover_tests() class method to register the tests.
+    the create_executable_tests() class method to register the tests.
     """
     TESTS_DISCOVERED = -1
 
@@ -281,7 +281,7 @@ class ExecutablesTestCase(unittest.TestCase):
         """!Discover executables to test and create corresponding test methods.
 
         Scans the directory containing the supplied reference file
-        (usually __file__ supplied from the test class) and look for
+        (usually __file__ supplied from the test class) to look for
         executables. If executables are found a test method is created
         for each one. That test method will run the executable and
         check the returned value.
@@ -291,7 +291,9 @@ class ExecutablesTestCase(unittest.TestCase):
 
         This class method must be called before test discovery.
 
-        cls.discover_tests(__file__)
+        Example:
+        
+        cls.create_executable_tests(__file__)
 
         The list of executables can be overridden by passing in a
         sequence of explicit executables that should be tested.
@@ -307,7 +309,7 @@ class ExecutablesTestCase(unittest.TestCase):
             executables = []
             for root, dirs, files in os.walk(ref_dir):
                 for f in files:
-                    # Skip Python files. Shared libraries are exectuable.
+                    # Skip Python files. Shared libraries are executable.
                     if not f.endswith(".py") and not f.endswith(".so"):
                         full_path = os.path.join(root, f)
                         if os.access(full_path, os.X_OK):
