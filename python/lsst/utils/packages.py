@@ -93,7 +93,7 @@ def getPythonPackages():
     for module in PYTHON:
         try:
             importlib.import_module(module)
-        except:
+        except Exception:
             pass  # It's not available, so don't care
 
     packages = {"python": sys.version}
@@ -103,7 +103,7 @@ def getPythonPackages():
         module = sys.modules[name]
         try:
             ver = getVersionFromPythonModule(module)
-        except:
+        except Exception:
             continue  # Can't get a version from it, don't care
 
         # Remove "foo.bar.version" in favor of "foo.bar"
@@ -140,7 +140,7 @@ def getEnvironmentPackages():
     try:
         from eups import Eups
         from eups.Product import Product
-    except:
+    except ImportError:
         from lsst.pex.logging import getDefaultLog
         getDefaultLog().warn("Unable to import eups, so cannot determine package versions from environment")
         return {}
@@ -173,7 +173,7 @@ def getEnvironmentPackages():
             try:
                 rev = subprocess.check_output(revCmd).decode().strip()
                 diff = subprocess.check_output(diffCmd)
-            except:
+            except Exception:
                 ver += "@GIT_ERROR"
             else:
                 ver += "@" + rev
