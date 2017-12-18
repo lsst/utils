@@ -22,6 +22,7 @@
 import sys
 import unittest
 import os.path
+import time
 
 import lsst.utils.tests
 
@@ -59,6 +60,42 @@ class GetTempFilePathTestCase(unittest.TestCase):
     def runLevel3(self, funcName):
         """Call runLevel2, which calls runGetTempFile"""
         self.runLevel2(funcName)
+
+
+class TestNameClash1(unittest.TestCase):
+    """The TestNameClashN classes are used to check that getTempFilePath
+    does not use the same name across different test classes in the same
+    file even if they have the same test methods."""
+
+    def testClash(self):
+        """Create the temp file and pause before trying to delete it."""
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
+            time.sleep(0.2)
+            self.assertTrue(os.path.exists(tmpFile))
+
+
+class TestNameClash2(unittest.TestCase):
+
+    def testClash(self):
+        """Pause a little before trying to create the temp file. The pause
+        time is less than the time that TestNameClash1 is pausing."""
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+            time.sleep(0.1)
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
+            self.assertTrue(os.path.exists(tmpFile))
+
+
+class TestNameClash3(unittest.TestCase):
+
+    def testClash(self):
+        """Create temp file and remove it without pauses."""
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
+            self.assertTrue(os.path.exists(tmpFile))
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
