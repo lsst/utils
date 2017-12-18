@@ -92,6 +92,35 @@ class TestNested(unittest.TestCase):
         self.assertFalse(os.path.exists(tmpFile1))
 
 
+class TestExpected(unittest.TestCase):
+    """Tests that we get files when we expect to get them and we get upset
+    when we don't get them."""
+
+    def testOutputExpected(self):
+        with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
+        self.assertFalse(os.path.exists(tmpFile))
+
+        with self.assertRaises(RuntimeError):
+            with lsst.utils.tests.getTempFilePath(".txt", expectOutput=True) as tmpFile:
+                pass
+
+        with self.assertRaises(RuntimeError):
+            with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
+                pass
+
+    def testOutputUnexpected(self):
+        with self.assertRaises(RuntimeError):
+            with lsst.utils.tests.getTempFilePath(".txt", expectOutput=False) as tmpFile:
+                with open(tmpFile, "w") as f:
+                    f.write("foo\n")
+
+        with lsst.utils.tests.getTempFilePath(".txt", expectOutput=False) as tmpFile:
+            pass
+        self.assertFalse(os.path.exists(tmpFile))
+
+
 class TestNameClash1(unittest.TestCase):
 
     def testClash(self):

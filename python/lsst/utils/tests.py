@@ -355,16 +355,22 @@ def findFileFromRoot(ifile):
 
 
 @contextmanager
-def getTempFilePath(ext):
+def getTempFilePath(ext, expectOutput=True):
     """!Return a path suitable for a temporary file and try to delete the file on success
 
     If the with block completes successfully then the file is deleted, if possible;
     failure results in a printed warning.
+    If a file is remains when it should not, a RuntimeError exception is raised. This
+    exception is also raised if a file is not present on context manager exit when one
+    is expected to exist.
     If the block exits with an exception the file if left on disk so it can be examined.
     The file name has a random component such that nested context managers can be used
     with the same file suffix.
 
     @param[in] ext  file name extension, e.g. ".fits"
+    @param[in] expectOutput If true, a file should be created within the context manager.
+                            If false, a file should not be present when the context manager
+                            is exited.
     @return path for a temporary file. The path is a combination of the caller's file path
     and the name of the top-level function, as per this simple example:
     @code
@@ -405,14 +411,32 @@ def getTempFilePath(ext):
         outDir = ""
     prefix = "%s_%s-" % (callerFileName, callerFuncName)
     outPath = tempfile.mktemp(dir=outDir, suffix=ext, prefix=prefix)
+    if os.path.exists(outPath):
+        # There should not be a file there given the randomizer. Warn and remove.
+        # Use stacklevel 3 so that the warning is reported from the end of the with block
+        warnings.warn("Unexpectedly found pre-existing tempfile named %r" % (outPath,),
+                      stacklevel=3)
+        try:
+            os.remove(outPath)
+        except OSError:
+            pass
+
     yield outPath
-    if os.path.isfile(outPath):
+
+    fileExists = os.path.exists(outPath)
+    if expectOutput:
+        if not fileExists:
+            raise RuntimeError("Temp file expected named {} but none found".format(outPath))
+    else:
+        if fileExists:
+            raise RuntimeError("Unexpectedly discovered temp file named {}".format(outPath))
+    # Try to clean up the file regardless
+    if fileExists:
         try:
             os.remove(outPath)
         except OSError as e:
-            print("Warning: could not remove file %r: %s" % (outPath, e))
-    else:
-        print("Warning: could not find file %r" % (outPath,))
+            # Use stacklevel 3 so that the warning is reported from the end of the with block
+            warnings.warn("Warning: could not remove file %r: %s" % (outPath, e), stacklevel=3)
 
 
 class TestCase(unittest.TestCase):
