@@ -27,6 +27,18 @@ import time
 import lsst.utils.tests
 
 
+"""
+This file contains tests for lsst.utils.tests.getTempFilePath.
+
+The TestNameClashN classes are used to check that getTempFilePath
+does not use the same name across different test classes in the same
+file even if they have the same test methods. They are distinct classes
+with the same test method in an attempt to trigger a race condition
+whereby context managers use the same name and race to delete the file.
+The sleeps are there to ensure the race condition occurs in older versions
+of this package. This should not happen as of DM-13046."""
+
+
 class GetTempFilePathTestCase(unittest.TestCase):
     def testBasics(self):
         with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
@@ -81,9 +93,6 @@ class TestNested(unittest.TestCase):
 
 
 class TestNameClash1(unittest.TestCase):
-    """The TestNameClashN classes are used to check that getTempFilePath
-    does not use the same name across different test classes in the same
-    file even if they have the same test methods."""
 
     def testClash(self):
         """Create the temp file and pause before trying to delete it."""
