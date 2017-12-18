@@ -22,15 +22,29 @@
 import sys
 import unittest
 import os.path
+import time
 
 import lsst.utils.tests
+
+
+"""
+This file contains tests for lsst.utils.tests.getTempFilePath.
+
+The TestNameClashN classes are used to check that getTempFilePath
+does not use the same name across different test classes in the same
+file even if they have the same test methods. They are distinct classes
+with the same test method in an attempt to trigger a race condition
+whereby context managers use the same name and race to delete the file.
+The sleeps are there to ensure the race condition occurs in older versions
+of this package. This should not happen as of DM-13046."""
 
 
 class GetTempFilePathTestCase(unittest.TestCase):
     def testBasics(self):
         with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
-            baseName = os.path.basename(tmpFile)
-            self.assertEqual(baseName, "test_getTempFilePath_testBasics.txt")
+            # Path will have unique component so do not test full equality
+            self.assertIn("test_getTempFilePath_testBasics", tmpFile)
+            self.assertTrue(tmpFile.endswith(".txt"))
             f = open(tmpFile, "w")
             f.write("foo\n")
             f.close()
@@ -45,8 +59,9 @@ class GetTempFilePathTestCase(unittest.TestCase):
 
     def runGetTempFile(self, funcName):
         with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
-            baseName = os.path.basename(tmpFile)
-            self.assertEqual(baseName, "test_getTempFilePath_%s.fits" % (funcName,))
+            # Path will have unique component so do not test full equality
+            self.assertIn("test_getTempFilePath_%s" % (funcName,), tmpFile)
+            self.assertTrue(tmpFile.endswith(".fits"))
             f = open(tmpFile, "w")
             f.write("foo\n")
             f.close()
@@ -59,6 +74,55 @@ class GetTempFilePathTestCase(unittest.TestCase):
     def runLevel3(self, funcName):
         """Call runLevel2, which calls runGetTempFile"""
         self.runLevel2(funcName)
+
+
+class TestNested(unittest.TestCase):
+    """Tests of the use of getTempFilePath in nested context managers."""
+
+    def testNested(self):
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile1:
+            with lsst.utils.tests.getTempFilePath(".fits") as tmpFile2:
+                self.assertNotEqual(tmpFile1, tmpFile2)
+                with open(tmpFile1, "w") as f1:
+                    f1.write("foo\n")
+                with open(tmpFile2, "w") as f2:
+                    f2.write("foo\n")
+            self.assertTrue(os.path.exists(tmpFile1))
+            self.assertFalse(os.path.exists(tmpFile2))
+        self.assertFalse(os.path.exists(tmpFile1))
+
+
+class TestNameClash1(unittest.TestCase):
+
+    def testClash(self):
+        """Create the temp file and pause before trying to delete it."""
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
+            time.sleep(0.2)
+            self.assertTrue(os.path.exists(tmpFile))
+
+
+class TestNameClash2(unittest.TestCase):
+
+    def testClash(self):
+        """Pause a little before trying to create the temp file. The pause
+        time is less than the time that TestNameClash1 is pausing."""
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+            time.sleep(0.1)
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
+            self.assertTrue(os.path.exists(tmpFile))
+
+
+class TestNameClash3(unittest.TestCase):
+
+    def testClash(self):
+        """Create temp file and remove it without pauses."""
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
+            self.assertTrue(os.path.exists(tmpFile))
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):

@@ -36,6 +36,7 @@ import unittest
 import warnings
 import numpy
 import functools
+import tempfile
 
 # File descriptor leak test will be skipped if psutil can not be imported
 try:
@@ -360,6 +361,8 @@ def getTempFilePath(ext):
     If the with block completes successfully then the file is deleted, if possible;
     failure results in a printed warning.
     If the block exits with an exception the file if left on disk so it can be examined.
+    The file name has a random component such that nested context managers can be used
+    with the same file suffix.
 
     @param[in] ext  file name extension, e.g. ".fits"
     @return path for a temporary file. The path is a combination of the caller's file path
@@ -400,8 +403,8 @@ def getTempFilePath(ext):
     outDir = os.path.join(callerDir, ".tests")
     if not os.path.isdir(outDir):
         outDir = ""
-    outName = "%s_%s%s" % (callerFileName, callerFuncName, ext)
-    outPath = os.path.join(outDir, outName)
+    prefix = "%s_%s-" % (callerFileName, callerFuncName)
+    outPath = tempfile.mktemp(dir=outDir, suffix=ext, prefix=prefix)
     yield outPath
     if os.path.isfile(outPath):
         try:
