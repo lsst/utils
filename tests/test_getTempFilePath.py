@@ -64,6 +64,22 @@ class GetTempFilePathTestCase(unittest.TestCase):
         self.runLevel2(funcName)
 
 
+class TestNested(unittest.TestCase):
+    """Tests of the use of getTempFilePath in nested context managers."""
+
+    def testNested(self):
+        with lsst.utils.tests.getTempFilePath(".fits") as tmpFile1:
+            with lsst.utils.tests.getTempFilePath(".fits") as tmpFile2:
+                self.assertNotEqual(tmpFile1, tmpFile2)
+                with open(tmpFile1, "w") as f1:
+                    f1.write("foo\n")
+                with open(tmpFile2, "w") as f2:
+                    f2.write("foo\n")
+            self.assertTrue(os.path.exists(tmpFile1))
+            self.assertFalse(os.path.exists(tmpFile2))
+        self.assertFalse(os.path.exists(tmpFile1))
+
+
 class TestNameClash1(unittest.TestCase):
     """The TestNameClashN classes are used to check that getTempFilePath
     does not use the same name across different test classes in the same
