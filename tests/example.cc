@@ -27,6 +27,8 @@
 #include "pybind11/operators.h"
 #include "pybind11/numpy.h"
 
+#include "lsst/utils/python.h"
+
 namespace py = pybind11;
 
 class Example {
@@ -98,8 +100,8 @@ PYBIND11_PLUGIN(_example) {
     cls.def(py::self == py::self);
     cls.def(py::self != py::self);
 
-    cls.def("__str__", [](Example &e){std::ostringstream os; os << e; return os.str();});
-    cls.def("__repr__", [](Example &e){std::ostringstream os; os << e; return os.str();});
+    lsst::utils::python::addOutputOp(cls, "__str__");
+    lsst::utils::python::addOutputOp(cls, "__repr__");
 
     mod.def("accept_float32", [](float val){return acceptNumber(val);});
     mod.def("accept_float64", [](double val){return acceptNumber(val);});

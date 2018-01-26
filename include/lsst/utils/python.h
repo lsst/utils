@@ -65,6 +65,29 @@ inline void addSharedPtrEquality(PyClass & cls) {
 }
 
 /**
+ * Add `__str__` or `__repr__` method implemented by `operator<<`.
+ *
+ * For flexibility, this method can be used to define one or both of
+ * `__str__` and `__repr__`. It can also be used to define any Python method
+ * that takes no arguments and returns a string, regardless of name.
+ *
+ * @tparam PyClass The pybind11 class_ type. The wrapped class must
+ *                 support << as a stream output operator.
+ *
+ * @param cls The `PyClass` object to which to add a wrapper.
+ * @param method The name of the method to implement. Should be `"__str__"` or
+ *               `"__repr__"`.
+ */
+template <class PyClass>
+void addOutputOp(PyClass &cls, std::string const &method) {
+    cls.def(method.c_str(), [](typename PyClass::type const &self) {
+        std::ostringstream os;
+        os << self;
+        return os.str();
+    });
+}
+
+/**
 Compute a C++ index from a Python index (negative values count from the end) and range-check.
 
 @param[in] size  Number of elements in the collection.
