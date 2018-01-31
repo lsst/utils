@@ -88,6 +88,23 @@ void addOutputOp(PyClass &cls, std::string const &method) {
 }
 
 /**
+ * Add `__hash__` method implemented by `std::hash`.
+ *
+ * @tparam PyClass The pybind11 class_ type. The wrapped class must
+ *                 have an enabled specialization of `std::hash`.
+ *
+ * @param cls The `PyClass` object to which to add a wrapper.
+ */
+template <class PyClass>
+void addHash(PyClass &cls) {
+    using Class = typename PyClass::type;
+    cls.def("__hash__", [](Class const &self) {
+        static auto const hash = std::hash<Class>();
+        return hash(self);
+    });
+}
+
+/**
 Compute a C++ index from a Python index (negative values count from the end) and range-check.
 
 @param[in] size  Number of elements in the collection.
