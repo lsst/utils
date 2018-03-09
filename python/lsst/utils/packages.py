@@ -81,10 +81,24 @@ ENVIRONMENT = set(["astrometry_net", "astrometry_net_data", "minuit2", "xpa"])
 
 
 def getVersionFromPythonModule(module):
-    """Determine the version of a python module
+    """Determine the version of a python module.
 
-    Will raise AttributeError if the __version__ attribute is not set.
+    Parameters
+    ----------
+    module : `module`
+        Module for which to get version.
 
+    Returns
+    -------
+    version : `str`
+
+    Raises
+    ------
+    AttributeError
+        Raised if __version__ attribute is not set.
+
+    Notes
+    -----
     We supplement the version with information from the __dependency_versions__
     (a specific variable set by LSST's sconsUtils at build time) only for packages
     that are typically used only at build-time.
@@ -101,8 +115,15 @@ def getVersionFromPythonModule(module):
 
 
 def getPythonPackages():
-    """Return a dict of imported python packages and their versions
+    """Get imported python packages and their versions.
 
+    Returns
+    -------
+    packages : `dict`
+        Keys (type `str`) are package names; values (type `str`) are their versions.
+
+    Notes
+    -----
     We wade through sys.modules and attempt to determine the version for each
     module.  Note, therefore, that we can only report on modules that have
     *already* been imported.
@@ -151,8 +172,15 @@ _eups = None  # Singleton Eups object
 
 
 def getEnvironmentPackages():
-    """Provide a dict of products and their versions from the environment
+    """Get products and their versions from the environment.
 
+    Returns
+    -------
+    packages : `dict`
+        Keys (type `str`) are product names; values (type `str`) are their versions.
+
+    Notes
+    -----
     We use EUPS to determine the version of certain products (those that don't provide
     a means to determine the version any other way) and to check if uninstalled packages
     are being used. We only report the product/version for these packages.
@@ -207,26 +235,32 @@ def getEnvironmentPackages():
 
 
 class Packages(object):
-    """A table of packages and their versions
+    """A table of packages and their versions.
 
-    Essentially a wrapper around a dict with some conveniences.
+    Parameters
+    ----------
+    packages : `dict`
+        A mapping {package: version} where both keys and values are type `str`.
+
+    Notes
+    -----
+    This is essentially a wrapper around a dict with some conveniences.
     """
 
     def __init__(self, packages):
-        """Constructor
-
-        'packages' should be a mapping {package: version}, such as a dict.
-        """
         assert isinstance(packages, Mapping)
         self._packages = packages
         self._names = set(packages.keys())
 
     @classmethod
     def fromSystem(cls):
-        """Construct from the system
+        """Construct a `Packages` by examining the system.
 
-        Attempts to determine packages by examining the system (python's sys.modules,
-        runtime libraries and EUPS).
+        Determine packages by examining python's sys.modules, runtime libraries and EUPS.
+
+        Returns
+        -------
+        packages : `Packages`
         """
         packages = {}
         packages.update(getPythonPackages())
@@ -236,12 +270,28 @@ class Packages(object):
 
     @classmethod
     def read(cls, filename):
-        """Read packages from filename"""
+        """Read packages from filename.
+
+        Parameters
+        ----------
+        filename : `str`
+            Filename from which to read.
+
+        Returns
+        -------
+        packages : `Packages`
+        """
         with open(filename, "rb") as ff:
             return pickle.load(ff)
 
     def write(self, filename):
-        """Write packages to file"""
+        """Write to file.
+
+        Parameters
+        ----------
+        filename : `str`
+            Filename to which to write.
+        """
         with open(filename, "wb") as ff:
             pickle.dump(self, ff)
 
@@ -266,28 +316,65 @@ class Packages(object):
         return iter(self._packages)
 
     def update(self, other):
-        """Update packages using another set of packages
+        """Update packages with contents of another set of packages.
 
+        Parameters
+        ----------
+        other : `Packages`
+            Other packages to merge with self.
+
+        Notes
+        -----
         No check is made to see if we're clobbering anything.
         """
         self._packages.update(other._packages)
         self._names.update(other._names)
 
     def extra(self, other):
-        """Return packages in 'self' but not in 'other'
+        """Get packages in self but not in another `Packages` object.
 
-        These are extra packages in 'self' compared to 'other'.
+        Parameters
+        ----------
+        other : `Packages`
+            Other packages to compare against.
+
+        Returns
+        -------
+        extra : `dict`
+            Extra packages.
+            Keys (type `str`) are package names; values (type `str`) are their versions.
         """
         return {pkg: self._packages[pkg] for pkg in self._names - other._names}
 
     def missing(self, other):
-        """Return packages in 'other' but not in 'self'
+        """Get packages in another `Packages` object but missing from self.
 
-        These are missing packages in 'self' compared to 'other'.
+        Parameters
+        ----------
+        other : `Packages`
+            Other packages to compare against.
+
+        Returns
+        -------
+        missing : `dict`
+            Missing packages.
+            Keys (type `str`) are package names; values (type `str`) are their versions.
         """
         return {pkg: other._packages[pkg] for pkg in other._names - self._names}
 
     def difference(self, other):
-        """Return packages different between 'self' and 'other'"""
+        """Get packages in symmetric difference of self and another `Packages` object.
+
+        Parameters
+        ----------
+        other : `Packages`
+            Other packages to compare against.
+
+        Returns
+        -------
+        difference : `dict`
+            Packages in symmetric difference.
+            Keys (type `str`) are package names; values (type `str`) are their versions.
+        """
         return {pkg: (self._packages[pkg], other._packages[pkg]) for
                 pkg in self._names & other._names if self._packages[pkg] != other._packages[pkg]}
