@@ -58,8 +58,8 @@ def isAttributeSafeToTransfer(name, value):
 def continueClass(cls):
     """Re-open the decorated class, adding any new definitions into the original.
 
-    For example,
-    ::
+    For example::
+
         class Foo:
             pass
 
@@ -68,8 +68,8 @@ def continueClass(cls):
             def run(self):
                 return None
 
-    is equivalent to
-    ::
+    is equivalent to::
+
         class Foo:
             def run(self):
                 return None
@@ -91,8 +91,8 @@ def continueClass(cls):
 def inClass(cls, name=None):
     """Add the decorated function to the given class as a method.
 
-    For example,
-    ::
+    For example::
+
         class Foo:
             pass
 

@@ -26,7 +26,7 @@ from __future__ import division
 from builtins import zip
 from builtins import range
 
-from contextlib import contextmanager
+import contextlib
 import gc
 import inspect
 import os
@@ -37,6 +37,9 @@ import warnings
 import numpy
 import functools
 import tempfile
+
+__all__ = ["init", "run", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
+           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual"]
 
 # File descriptor leak test will be skipped if psutil can not be imported
 try:
@@ -77,7 +80,7 @@ def init():
 
 
 def run(suite, exit=True):
-    """!Exit with the status code resulting from running the provided test suite"""
+    """Exit with the status code resulting from running the provided test suite"""
 
     if unittest.TextTestRunner().run(suite).wasSuccessful():
         status = 0
@@ -91,7 +94,7 @@ def run(suite, exit=True):
 
 
 def sort_tests(tests):
-    """!Go through the supplied sequence of test suites and sort them to ensure that
+    """Go through the supplied sequence of test suites and sort them to ensure that
     MemoryTestCases are at the end of the test list. Returns a combined
     TestSuite."""
 
@@ -131,18 +134,18 @@ unittest.defaultTestLoader.suiteClass = suiteClassWrapper
 
 
 class MemoryTestCase(unittest.TestCase):
-    """!Check for memory leaks since memId0 was allocated"""
+    """Check for memory leaks since memId0 was allocated"""
 
     def setUp(self):
         pass
 
     @classmethod
     def tearDownClass(cls):
-        """!Reset the leak counter when the tests have been completed"""
+        """Reset the leak counter when the tests have been completed"""
         init()
 
     def testLeaks(self):
-        """!Check for memory leaks in the preceding tests"""
+        """Check for memory leaks in the preceding tests"""
         if dafBase:
             gc.collect()
             global memId0, nleakPrintMax
@@ -183,7 +186,7 @@ class MemoryTestCase(unittest.TestCase):
 
 
 class ExecutablesTestCase(unittest.TestCase):
-    """!Test that executables can be run and return good status.
+    """Test that executables can be run and return good status.
 
     The test methods are dynamically created. Callers
     must subclass this class in their own test file and invoke
@@ -206,21 +209,25 @@ class ExecutablesTestCase(unittest.TestCase):
         pass
 
     def assertExecutable(self, executable, root_dir=None, args=None, msg=None):
-        """!Check an executable runs and returns good status.
-
-        @param executable: Path to an executable. root_dir is not used
-        if this is an absolute path.
-
-        @param root_dir: Directory containing exe. Ignored if None.
-
-        @param args: List or tuple of arguments to be provided to the
-        executable.
-
-        @param msg: Message to use when the test fails. Can be None for
-        default message.
+        """Check an executable runs and returns good status.
 
         Prints output to standard out. On bad exit status the test
         fails. If the executable can not be located the test is skipped.
+
+        Parameters
+        ----------
+        executable : `str`
+                Path to an executable. root_dir is not used if this is an
+                absolute path.
+
+        root_dir : `str`
+            Directory containing exe. Ignored if None.
+
+        args : list or tuple
+            Arguments to be provided to the executable.
+
+        msg : `str`
+        Message to use when the test fails. Can be None for default message.
         """
 
         if root_dir is not None and not os.path.isabs(executable):
@@ -250,18 +257,23 @@ class ExecutablesTestCase(unittest.TestCase):
 
     @classmethod
     def _build_test_method(cls, executable, root_dir):
-        """!Build a test method and attach to class.
+        """Build a test method and attach to class.
 
         The method is built for the supplied excutable located
         in the supplied root directory.
 
         cls._build_test_method(root_dir, executable)
 
-        @param cls The class in which to create the tests.
+        Parameters
+        ----------
+        cls : `object`
+            The class in which to create the tests.
 
-        @param executable Name of executable. Can be absolute path.
+        executable : `str`
+            Name of executable. Can be absolute path.
 
-        @param root_dir Path to executable. Not used if executable path is absolute.
+        root_dir : `str`
+            Path to executable. Not used if executable path is absolute.
         """
         if not os.path.isabs(executable):
             executable = os.path.abspath(os.path.join(root_dir, executable))
@@ -280,7 +292,7 @@ class ExecutablesTestCase(unittest.TestCase):
 
     @classmethod
     def create_executable_tests(cls, ref_file, executables=None):
-        """!Discover executables to test and create corresponding test methods.
+        """Discover executables to test and create corresponding test methods.
 
         Scans the directory containing the supplied reference file
         (usually __file__ supplied from the test class) to look for
@@ -329,7 +341,7 @@ class ExecutablesTestCase(unittest.TestCase):
 
 
 def findFileFromRoot(ifile):
-    """!Find file which is specified as a path relative to the toplevel directory;
+    """Find file which is specified as a path relative to the toplevel directory;
     we start in $cwd and walk up until we find the file (or throw IOError if it doesn't exist)
 
     This is useful for running tests that may be run from _dir_/tests or _dir_"""
@@ -354,9 +366,9 @@ def findFileFromRoot(ifile):
     raise IOError("Can't find %s" % ifile)
 
 
-@contextmanager
+@contextlib.contextmanager
 def getTempFilePath(ext, expectOutput=True):
-    """!Return a path suitable for a temporary file and try to delete the file on success
+    """Return a path suitable for a temporary file and try to delete the file on success
 
     If the with block completes successfully then the file is deleted, if possible;
     failure results in a printed warning.
@@ -367,29 +379,39 @@ def getTempFilePath(ext, expectOutput=True):
     The file name has a random component such that nested context managers can be used
     with the same file suffix.
 
-    @param[in] ext  file name extension, e.g. ".fits"
-    @param[in] expectOutput If true, a file should be created within the context manager.
-                            If false, a file should not be present when the context manager
-                            is exited.
-    @return path for a temporary file. The path is a combination of the caller's file path
-    and the name of the top-level function, as per this simple example:
-    @code
-    # file tests/testFoo.py
-    import unittest
-    import lsst.utils.tests
-    class FooTestCase(unittest.TestCase):
-        def testBasics(self):
-            self.runTest()
+    Parameters
+    ----------
 
-        def runTest(self):
-            with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
-                # if tests/.tests exists then tmpFile = "tests/.tests/testFoo_testBasics.fits"
-                # otherwise tmpFile = "testFoo_testBasics.fits"
-                ...
-                # at the end of this "with" block the path tmpFile will be deleted, but only if
-                # the file exists and the "with" block terminated normally (rather than with an exception)
-    ...
-    @endcode
+    ext : `str`  file name extension, e.g. ".fits"
+    expectOutput : `bool`
+        If true, a file should be created within the context manager.
+        If false, a file should not be present when the context manager exits.
+
+    Returns
+    -------
+    `str`
+        Path for a temporary file. The path is a combination of the caller's
+        file path and the name of the top-level function
+
+    Notes
+    -----
+    ::
+
+        # file tests/testFoo.py
+        import unittest
+        import lsst.utils.tests
+        class FooTestCase(unittest.TestCase):
+            def testBasics(self):
+                self.runTest()
+
+            def runTest(self):
+                with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
+                    # if tests/.tests exists then tmpFile = "tests/.tests/testFoo_testBasics.fits"
+                    # otherwise tmpFile = "testFoo_testBasics.fits"
+                    ...
+                    # at the end of this "with" block the path tmpFile will be deleted, but only if
+                    # the file exists and the "with" block terminated normally (rather than with an exception)
+        ...
     """
     stack = inspect.stack()
     # get name of first function in the file
@@ -440,13 +462,13 @@ def getTempFilePath(ext, expectOutput=True):
 
 
 class TestCase(unittest.TestCase):
-    """!Subclass of unittest.TestCase that adds some custom assertions for
+    """Subclass of unittest.TestCase that adds some custom assertions for
     convenience.
     """
 
 
 def inTestCase(func):
-    """!A decorator to add a free function to our custom TestCase class, while also
+    """A decorator to add a free function to our custom TestCase class, while also
     making it available as a free function.
     """
     setattr(TestCase, func.__name__, func)
@@ -455,13 +477,14 @@ def inTestCase(func):
 
 @inTestCase
 def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
+    """.. note:: Deprecated in 12_0"""
     warnings.warn("assertRaisesLsstCpp is deprecated; please just use TestCase.assertRaises",
                   DeprecationWarning, stacklevel=2)
     return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
 
 
 def debugger(*exceptions):
-    """!Decorator to enter the debugger when there's an uncaught exception
+    """Decorator to enter the debugger when there's an uncaught exception
 
     To use, just slap a "@debugger()" on your function.
 
@@ -489,18 +512,25 @@ def debugger(*exceptions):
 
 
 def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
-    """!Plot the comparison of two 2-d NumPy arrays.
+    """Plot the comparison of two 2-d NumPy arrays.
 
     NOTE: this method uses matplotlib and imports it internally; it should be
     wrapped in a try/except block within packages that do not depend on
     matplotlib (including utils).
 
-    @param[in]  lhs            LHS values to compare; a 2-d NumPy array
-    @param[in]  rhs            RHS values to compare; a 2-d NumPy array
-    @param[in]  bad            A 2-d boolean NumPy array of values to emphasize in the plots
-    @param[in]  diff           difference array; a 2-d NumPy array, or None to show lhs-rhs
-    @param[in]  plotFileName   Filename to save the plot to.  If None, the plot will be displayed in a
-                               a window.
+    Parameters
+    ----------
+    lhs : `numpy.ndarray`
+        LHS values to compare; a 2-d NumPy array
+    rhs : `numpy.ndarray`
+        RHS values to compare; a 2-d NumPy array
+    bad : `numpy.ndarray`
+        A 2-d boolean NumPy array of values to emphasize in the plots
+    diff : `numpy.ndarray`
+        difference array; a 2-d NumPy array, or None to show lhs-rhs
+    plotFileName : `str`
+        Filename to save the plot to.  If None, the plot will be displayed in
+        a window.
     """
     from matplotlib import pyplot
     if diff is None:
@@ -548,12 +578,12 @@ def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
                             atol=sys.float_info.epsilon, relTo=None,
                             printFailures=True, plotOnFailure=False,
                             plotFileName=None, invert=False, msg=None):
-    """!Highly-configurable floating point comparisons for scalars and arrays.
+    """Highly-configurable floating point comparisons for scalars and arrays.
 
     The test assertion will fail if all elements lhs and rhs are not equal to within the tolerances
     specified by rtol and atol.  More precisely, the comparison is:
 
-    abs(lhs - rhs) <= relTo*rtol OR abs(lhs - rhs) <= atol
+    ``abs(lhs - rhs) <= relTo*rtol OR abs(lhs - rhs) <= atol``
 
     If rtol or atol is None, that term in the comparison is not performed at all.
 
@@ -561,21 +591,34 @@ def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
     set manually, it should usually be set to either lhs or rhs, or a scalar value typical of what
     is expected.
 
-    @param[in]  testCase       unittest.TestCase instance the test is part of
-    @param[in]  lhs            LHS value(s) to compare; may be a scalar or array-like of any dimension
-    @param[in]  rhs            RHS value(s) to compare; may be a scalar or array-like of any dimension
-    @param[in]  rtol           Relative tolerance for comparison; defaults to double-precision epsilon.
-    @param[in]  atol           Absolute tolerance for comparison; defaults to double-precision epsilon.
-    @param[in]  relTo          Value to which comparison with rtol is relative.
-    @param[in]  printFailures  Upon failure, print all inequal elements as part of the message.
-    @param[in]  plotOnFailure  Upon failure, plot the originals and their residual with matplotlib.
-                               Only 2-d arrays are supported.
-    @param[in]  plotFileName   Filename to save the plot to.  If None, the plot will be displayed in a
-                               a window.
-    @param[in]  invert         If True, invert the comparison and fail only if any elements *are* equal.
-                               Used to implement assertFloatsNotEqual, which should generally be used instead
-                               for clarity.
-    @param[in] msg             String to append to the error message when assert fails.
+    Parameters
+    ----------
+    testCase : `unittest.TestCase`
+        Instance the test is part of.
+    lhs : scalar or array-like
+        LHS value(s) to compare; may be a scalar or array-like of any dimension
+    rhs : scalar or array-like
+        RHS value(s) to compare; may be a scalar or array-like of any dimension
+    rtol : `float` or None
+        Relative tolerance for comparison; defaults to double-precision epsilon.
+    atol : `float` or None
+        Absolute tolerance for comparison; defaults to double-precision epsilon.
+    relTo : `float`
+        Value to which comparison with rtol is relative.
+    printFailures : `bool`
+        Upon failure, print all inequal elements as part of the message.
+    plotOnFailure : `bool`
+        Upon failure, plot the originals and their residual with matplotlib.
+        Only 2-d arrays are supported.
+    plotFileName : `str`
+        Filename to save the plot to.  If None, the plot will be displayed in
+        a window.
+    invert : `bool`
+        If True, invert the comparison and fail only if any elements *are* equal.
+        Used to implement assertFloatsNotEqual, which should generally be used instead
+        for clarity.
+    msg : `str`
+        String to append to the error message when assert fails.
     """
     if not numpy.isfinite(lhs).all():
         testCase.fail("Non-finite values in lhs")
@@ -653,7 +696,7 @@ def assertFloatsNotEqual(testCase, lhs, rhs, **kwds):
     """
     Fail a test if the given floating point values are equal to within the given tolerances.
 
-    See assertClose for more information.
+    See assertFloatsAlmostEqual (called with rtol=atol=0) for more information.
     """
     return assertFloatsAlmostEqual(testCase, lhs, rhs, invert=True, **kwds)
 
@@ -663,13 +706,14 @@ def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
     """
     Assert that lhs == rhs (both numeric types, whether scalar or array).
 
-    See assertClose (called with rtol=atol=0) for more information.
+    See assertFloatsAlmostEqual (called with rtol=atol=0) for more information.
     """
     return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
 
 
 @inTestCase
 def assertClose(*args, **kwargs):
+    """.. note:: Deprecated in 12_0"""
     warnings.warn("assertClose is deprecated; please use TestCase.assertFloatsAlmostEqual",
                   DeprecationWarning, stacklevel=2)
     return assertFloatsAlmostEqual(*args, **kwargs)
@@ -677,6 +721,7 @@ def assertClose(*args, **kwargs):
 
 @inTestCase
 def assertNotClose(*args, **kwargs):
+    """.. note:: Deprecated in 12_0"""
     warnings.warn("assertNotClose is deprecated; please use TestCase.assertFloatsNotEqual",
                   DeprecationWarning, stacklevel=2)
     return assertFloatsNotEqual(*args, **kwargs)
