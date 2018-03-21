@@ -1,9 +1,10 @@
 #ifndef LSST_UTILS_PYTHON_CACHE_H
 #define LSST_UTILS_PYTHON_CACHE_H
 
+#include <functional>  // for std::function
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
-#include "pybind11/functional.h"  // for Cache::operator()
+#include "pybind11/functional.h"  // for binding std::function
 
 #include "lsst/utils/Cache.h"
 
@@ -21,7 +22,10 @@ void declareCache(py::module & mod, std::string const& name) {
     py::class_<Class> cls(mod, name.c_str());
 
     cls.def(py::init<std::size_t>(), "maxElements"_a=0);
-    cls.def("__call__", &Class::operator(), "key"_a, "func"_a);
+    cls.def("__call__",
+            [](Class & self, Key const& key, std::function<Value(Key const& key)> func) {
+                return self(key, func); },
+            "key"_a, "func"_a);
     cls.def("__getitem__", &Class::operator[]);
     cls.def("add", &Class::add, "key"_a, "value"_a);
     cls.def("size", &Class::size);

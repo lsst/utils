@@ -55,6 +55,7 @@ def numberToWords(value):
 
 
 class CacheTestCase(lsst.utils.tests.TestCase):
+    """Tests of lsst.utils.Cache"""
     def check(self, addFunction):
         """Exercise the Cache
 
