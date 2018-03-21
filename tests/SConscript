@@ -1,5 +1,5 @@
 # -*- python -*-
 from lsst.sconsUtils import scripts
-scripts.BasicSConscript.pybind11(['example', 'backtrace'])
-scripts.BasicSConscript.tests(noBuildList=['example.cc', 'backtrace.cc'],
+scripts.BasicSConscript.pybind11(['example', 'backtrace', 'cache'])
+scripts.BasicSConscript.tests(noBuildList=['example.cc', 'backtrace.cc', 'cache.cc'],
                               pyList=[])
