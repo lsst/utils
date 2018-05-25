@@ -277,17 +277,16 @@ class TemplateMeta(type):
             )
         return self
 
-    def __call__(self, *args, **kwds):
+    def __call__(cls, *args, **kwds):
         # __call__ is invoked when someone tries to construct an instance of
         # the abstract base class.
         # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those strings
         # as the kwargs we should intercept to find the right type.
-
         # Generate a type mapping key from input keywords. If the type returned
         # from the keyword lookup is a numpy dtype object, fetch the underlying
         # type of the dtype
         key = []
-        for p, d in zip(self.TEMPLATE_PARAMS, self.TEMPLATE_DEFAULTS):
+        for p, d in zip(cls.TEMPLATE_PARAMS, cls.TEMPLATE_DEFAULTS):
             tempKey = kwds.pop(p, d)
             if isinstance(tempKey, np.dtype):
                 tempKey = tempKey.type
@@ -295,41 +294,41 @@ class TemplateMeta(type):
         key = tuple(key)
 
         # indices are only tuples if there are multiple elements
-        cls = self._registry.get(key[0] if len(key) == 1 else key, None)
-        if cls is None:
-            d = {k: v for k, v in zip(self.TEMPLATE_PARAMS, key)}
+        clz = cls._registry.get(key[0] if len(key) == 1 else key, None)
+        if clz is None:
+            d = {k: v for k, v in zip(cls.TEMPLATE_PARAMS, key)}
             raise TypeError("No registered subclass for {}.".format(d))
-        return cls(*args, **kwds)
+        return clz(*args, **kwds)
 
-    def __subclasscheck__(self, subclass):
+    def __subclasscheck__(cls, subclass):
         # Special method hook for the issubclass built-in: we return true for
         # any registered type or true subclass thereof.
-        if subclass in self._registry:
+        if subclass in cls._registry:
             return True
-        for v in self._registry.values():
+        for v in cls._registry.values():
             if issubclass(subclass, v):
                 return True
         return False
 
-    def __instancecheck__(self, instance):
+    def __instancecheck__(cls, instance):
         # Special method hook for the isinstance built-in: we return true for
         # an instance of any registered type or true subclass thereof.
-        if type(instance) in self._registry:
+        if type(instance) in cls._registry:
             return True
-        for v in self._registry.values():
+        for v in cls._registry.values():
             if isinstance(instance, v):
                 return True
         return False
 
-    def __subclasses__(self):
+    def __subclasses__(cls):
         """Return a tuple of all classes that inherit from this class.
         """
         # This special method isn't defined as part of the Python data model,
         # but it exists on builtins (including ABCMeta), and it provides useful
         # functionality.
-        return tuple(set(self._registry.values()))
+        return tuple(set(cls._registry.values()))
 
-    def register(self, key, subclass):
+    def register(cls, key, subclass):
         """Register a subclass of this ABC with the given key (a string,
         number, type, or other hashable).
 
@@ -337,25 +336,25 @@ class TemplateMeta(type):
         """
         if key is None:
             raise ValueError("None may not be used as a key.")
-        if subclass in self._registry.values():
+        if subclass in cls._registry.values():
             raise ValueError(
                 "This subclass has already registered with another key; "
                 "use alias() instead."
             )
-        if self._registry.setdefault(key, subclass) != subclass:
-            if len(self.TEMPLATE_PARAMS) == 1:
-                d = {self.TEMPLATE_PARAMS[0]: key}
+        if cls._registry.setdefault(key, subclass) != subclass:
+            if len(cls.TEMPLATE_PARAMS) == 1:
+                d = {cls.TEMPLATE_PARAMS[0]: key}
             else:
-                d = {k: v for k, v in zip(self.TEMPLATE_PARAMS, key)}
+                d = {k: v for k, v in zip(cls.TEMPLATE_PARAMS, key)}
             raise KeyError(
                 "Another subclass is already registered with {}".format(d)
             )
         # If the key used to register a class matches the default key,
         # make the static methods available through the ABC
-        if self.TEMPLATE_DEFAULTS:
-            defaults = (self.TEMPLATE_DEFAULTS[0] if
-                        len(self.TEMPLATE_DEFAULTS) == 1 else
-                        self.TEMPLATE_DEFAULTS)
+        if cls.TEMPLATE_DEFAULTS:
+            defaults = (cls.TEMPLATE_DEFAULTS[0] if
+                        len(cls.TEMPLATE_DEFAULTS) == 1 else
+                        cls.TEMPLATE_DEFAULTS)
             if key == defaults:
                 conflictStr = ("Base class has attribute {}"
                                " which is a {} method of {}."
@@ -376,16 +375,16 @@ class TemplateMeta(type):
                     isBuiltin = isinstance(obj, types.BuiltinFunctionType)
                     isStatic = isinstance(obj, staticmethod)
                     if isBuiltin or isStatic:
-                        if hasattr(self, name):
+                        if hasattr(cls, name):
                             raise AttributeError(
                                 conflictStr.format(name, "static", subclass))
-                        setattr(self, name, obj)
+                        setattr(cls, name, obj)
                     # copy over the class methods
                     elif isinstance(obj, classmethod):
-                        if hasattr(self, name):
+                        if hasattr(cls, name):
                             raise AttributeError(
                                 conflictStr.format(name, "class", subclass))
-                        setattr(self, name, getattr(subclass, name))
+                        setattr(cls, name, getattr(subclass, name))
 
         def setattrSafe(name, value):
             try:
@@ -399,71 +398,71 @@ class TemplateMeta(type):
             except AttributeError:
                 setattr(subclass, name, value)
 
-        if len(self.TEMPLATE_PARAMS) == 1:
-            setattrSafe(self.TEMPLATE_PARAMS[0], key)
-        elif len(self.TEMPLATE_PARAMS) == len(key):
-            for p, k in zip(self.TEMPLATE_PARAMS, key):
+        if len(cls.TEMPLATE_PARAMS) == 1:
+            setattrSafe(cls.TEMPLATE_PARAMS[0], key)
+        elif len(cls.TEMPLATE_PARAMS) == len(key):
+            for p, k in zip(cls.TEMPLATE_PARAMS, key):
                 setattrSafe(p, k)
         else:
             raise ValueError(
                 "key must have {} elements (one for each of {})".format(
-                    len(self.TEMPLATE_PARAMS), self.TEMPLATE_PARAMS
+                    len(cls.TEMPLATE_PARAMS), cls.TEMPLATE_PARAMS
                 )
             )
 
-        for name, attr in self._inherited.items():
+        for name, attr in cls._inherited.items():
             setattr(subclass, name, attr)
 
-    def alias(self, key, subclass):
+    def alias(cls, key, subclass):
         """Add an alias that allows an existing subclass to be accessed with a
         different key.
         """
         if key is None:
             raise ValueError("None may not be used as a key.")
-        if key in self._registry:
+        if key in cls._registry:
             raise KeyError("Cannot multiply-register key {}".format(key))
         primaryKey = tuple(getattr(subclass, p, None)
-                           for p in self.TEMPLATE_PARAMS)
+                           for p in cls.TEMPLATE_PARAMS)
         if len(primaryKey) == 1:
             # indices are only tuples if there are multiple elements
             primaryKey = primaryKey[0]
-        if self._registry.get(primaryKey, None) != subclass:
+        if cls._registry.get(primaryKey, None) != subclass:
             raise ValueError("Subclass is not registered with this base class.")
-        self._registry[key] = subclass
+        cls._registry[key] = subclass
 
     # Immutable mapping interface defined below.  We don't use collections
     # mixins because we don't want their comparison operators.
 
-    def __getitem__(self, key):
-        return self._registry[key]
+    def __getitem__(cls, key):
+        return cls._registry[key]
 
-    def __iter__(self):
-        return iter(self._registry)
+    def __iter__(cls):
+        return iter(cls._registry)
 
-    def __len__(self):
-        return len(self._registry)
+    def __len__(cls):
+        return len(cls._registry)
 
-    def __contains__(self, key):
-        return key in self._registry
+    def __contains__(cls, key):
+        return key in cls._registry
 
-    def keys(self):
+    def keys(cls):
         """Return an iterable containing all keys (including aliases).
         """
-        return self._registry.keys()
+        return cls._registry.keys()
 
-    def values(self):
+    def values(cls):
         """Return an iterable of registered subclasses, with duplicates
         corresponding to any aliases.
         """
-        return self._registry.values()
+        return cls._registry.values()
 
-    def items(self):
+    def items(cls):
         """Return an iterable of (key, subclass) pairs.
         """
-        return self._registry.items()
+        return cls._registry.items()
 
-    def get(self, key, default=None):
+    def get(cls, key, default=None):
         """Return the subclass associated with the given key (including
         aliases), or ``default`` if the key is not recognized.
         """
-        return self._registry.get(key, default)
+        return cls._registry.get(key, default)
