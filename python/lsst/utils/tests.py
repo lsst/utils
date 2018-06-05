@@ -340,32 +340,6 @@ class ExecutablesTestCase(unittest.TestCase):
             cls._build_test_method(e, ref_dir)
 
 
-def findFileFromRoot(ifile):
-    """Find file which is specified as a path relative to the toplevel directory;
-    we start in $cwd and walk up until we find the file (or throw IOError if it doesn't exist)
-
-    This is useful for running tests that may be run from _dir_/tests or _dir_"""
-
-    if os.path.isfile(ifile):
-        return ifile
-
-    ofile = None
-    file = ifile
-    while file != "":
-        dirname, basename = os.path.split(file)
-        if ofile:
-            ofile = os.path.join(basename, ofile)
-        else:
-            ofile = basename
-
-        if os.path.isfile(ofile):
-            return ofile
-
-        file = dirname
-
-    raise IOError("Can't find %s" % ifile)
-
-
 @contextlib.contextmanager
 def getTempFilePath(ext, expectOutput=True):
     """Return a path suitable for a temporary file and try to delete the file on success
