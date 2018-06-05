@@ -32,7 +32,11 @@ class TestCaseOrdering(lsst.utils.tests.TestCase):
         class DummyMemoryTest(lsst.utils.tests.MemoryTestCase):
             pass
 
-        suite = unittest.defaultTestLoader.suiteClass([DummyMemoryTest("testLeaks"),
+        class DummyTest2(unittest.TestCase):
+            def noOp(self):
+                pass
+
+        suite = unittest.defaultTestLoader.suiteClass([DummyTest2("noOp"), DummyMemoryTest("testLeaks"),
                                                        DummyTest("noOp")])
 
         self.assertNotIsInstance(suite._tests[0], lsst.utils.tests.MemoryTestCase)
