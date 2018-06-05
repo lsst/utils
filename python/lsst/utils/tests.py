@@ -82,6 +82,9 @@ def init():
 def run(suite, exit=True):
     """Exit with the status code resulting from running the provided test suite"""
 
+    warnings.warn("lsst.utils.tests.run() is deprecated; please use unittest.main() instead",
+                  DeprecationWarning, stacklevel=2)
+
     if unittest.TextTestRunner().run(suite).wasSuccessful():
         status = 0
     else:
