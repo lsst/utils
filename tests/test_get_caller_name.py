@@ -31,7 +31,8 @@ class GetCallerNameTestCase(unittest.TestCase):
     """Test get_caller_name
 
     Warning: due to the different ways this can be run
-    (e.g. directly or py.test, the module name can be one of two different things)
+    (e.g. directly or py.test), the module name can be one of two different
+    things.
     """
 
     def test_free_function(self):

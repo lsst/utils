@@ -13,18 +13,18 @@ class ExplicitBinaryTester(lsst.utils.tests.ExecutablesTestCase):
                               msg="testexe.sh failed")
 
         # Try a non-existent test
-        with self.assertRaises(Exception):
+        with self.assertRaises(AssertionError):
             self.assertExecutable("testexe-missing.sh")
 
         # Force test to fail, explicit fail message
-        with self.assertRaises(Exception):
+        with self.assertRaises(AssertionError):
             self.assertExecutable("testexe.sh",
                                   root_dir=os.path.dirname(__file__),
                                   args=["-f"],
                                   msg="testexe.sh failed")
 
         # Force script to fail, default fail message
-        with self.assertRaises(Exception):
+        with self.assertRaises(AssertionError):
             self.assertExecutable("testexe.sh",
                                   root_dir=os.path.dirname(__file__),
                                   args=["-f"])

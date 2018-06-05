@@ -27,20 +27,28 @@ __all__ = ["get_caller_name"]
 
 
 def get_caller_name(skip=2):
-    """Get the name of the caller as a string in the form module.class.method
+    """Get the name of the caller method.
 
-    Any item that cannot be determined (or is not relevant, e.g. a free function
-    function has no class) is silently omitted, along with an associated separator.
-    An empty string is returned if `skip` exceeds the stack height.
+    Any item that cannot be determined (or is not relevant, e.g. a free
+    function has no class) is silently omitted, along with an
+    associated separator.
 
     Parameters
     ----------
-    skip : int
+    skip : `int`
         How many levels of stack to skip while getting caller name;
         1 means "who calls me", 2 means "who calls my caller", etc.
 
+    Returns
+    -------
+    name : `str`
+        Name of the caller as a string in the form ``module.class.method``.
+        An empty string is returned if ``skip`` exceeds the stack height.
+
+    Notes
+    -----
     Adapted from from http://stackoverflow.com/a/9812105
-    by adding support to get the class from parentframe.f_locals['cls']
+    by adding support to get the class from ``parentframe.f_locals['cls']``
     """
     stack = inspect.stack()
     start = 0 + skip
