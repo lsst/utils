@@ -20,3 +20,4 @@ version.py
 tests/ieee
 examples/demangle
 _build.*
+.coverage
