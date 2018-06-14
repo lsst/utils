@@ -163,10 +163,14 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
 
     def testConstruction(self):
         self.register()
-        f = self.Example(dtype=np.float32)
-        self.assertIsInstance(f, self.Example)
-        self.assertIsInstance(f, self.ExampleF)
-        self.assertNotIsInstance(f, self.ExampleD)
+        f1 = self.Example(dtype=np.float32)
+        # Test that numpy dtype objects resolve to their underlying type
+        f2 = self.Example(dtype=np.dtype(np.float32))
+        for f in (f1, f2):
+            self.assertIsInstance(f, self.Example)
+            self.assertIsInstance(f, self.ExampleF)
+            self.assertNotIsInstance(f, self.ExampleD)
+
         with self.assertRaises(TypeError):
             self.Example()
         with self.assertRaises(TypeError):
