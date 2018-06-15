@@ -25,6 +25,8 @@ from __future__ import absolute_import, division, print_function
 import sys
 import types
 
+import numpy as np
+
 __all__ = ("continueClass", "inClass", "TemplateMeta")
 
 
@@ -265,8 +267,18 @@ class TemplateMeta(type):
         # the abstract base class.
         # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those strings
         # as the kwargs we should intercept to find the right type.
-        key = tuple(kwds.pop(p, d) for p, d in zip(self.TEMPLATE_PARAMS,
-                                                   self.TEMPLATE_DEFAULTS))
+
+        # Generate a type mapping key from input keywords. If the type returned
+        # from the keyword lookup is a numpy dtype object, fetch the underlying
+        # type of the dtype
+        key = []
+        for p, d in zip(self.TEMPLATE_PARAMS, self.TEMPLATE_DEFAULTS):
+            tempKey = kwds.pop(p, d)
+            if isinstance(tempKey, np.dtype):
+                tempKey = tempKey.type
+            key.append(tempKey)
+        key = tuple(key)
+
         # indices are only tuples if there are multiple elements
         cls = self._registry.get(key[0] if len(key) == 1 else key, None)
         if cls is None:
