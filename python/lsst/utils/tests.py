@@ -217,7 +217,7 @@ class MemoryTestCase(unittest.TestCase):
         now_open = set(f for f in now_open if not f.endswith(".car") and
                        not f.startswith("/proc/") and
                        not f.endswith(".ttf") and
-                       f != "/var/lib/sss/mc/passwd" and
+                       not (f.startswith("/var/lib/") and f.endswith("/passwd")) and
                        not f.endswith("astropy.log"))
 
         diff = now_open.difference(open_files)
