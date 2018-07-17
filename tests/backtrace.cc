@@ -30,10 +30,6 @@ void generateSegfault() {
     raise(SIGSEGV);
 }
 
-PYBIND11_PLUGIN(_backtrace) {
-    py::module mod("_backtrace");
-
+PYBIND11_MODULE(_backtrace, mod) {
     mod.def("generateSegfault", generateSegfault);
-
-    return mod.ptr();
 }

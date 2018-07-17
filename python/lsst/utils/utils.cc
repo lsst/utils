@@ -7,12 +7,8 @@ namespace py = pybind11;
 namespace lsst {
 namespace utils {
 
-PYBIND11_PLUGIN(utils) {
-    py::module mod("utils");
-
+PYBIND11_MODULE(utils, mod) {
     mod.def("getPackageDir", getPackageDir);
-
-    return mod.ptr();
 }
 
 }  // utils

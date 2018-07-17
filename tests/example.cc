@@ -81,9 +81,7 @@ bool acceptNumberConstRef(std::numeric_limits<T> *) { return false; }
 std::string getName(int) { return "int"; }
 std::string getName(double) { return "double"; }
 
-PYBIND11_PLUGIN(_example) {
-    py::module mod("_example", "example module");
-
+PYBIND11_MODULE(_example, mod) {
     py::class_<Example> cls(mod, "Example");
 
     cls.def(py::init<std::string const &>());
@@ -127,6 +125,4 @@ PYBIND11_PLUGIN(_example) {
 
     mod.def("getName", (std::string (*)(int)) getName);
     mod.def("getName", (std::string (*)(double)) getName);
-
-    return mod.ptr();
 }

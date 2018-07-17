@@ -7,12 +7,8 @@ namespace py = pybind11;
 namespace lsst {
 namespace utils {
 
-PYBIND11_PLUGIN(demangle) {
-    py::module mod("demangle");
-
+PYBIND11_MODULE(demangle, mod) {
     mod.def("demangleType", demangleType);
-
-    return mod.ptr();
 }
 
 }  // utils
