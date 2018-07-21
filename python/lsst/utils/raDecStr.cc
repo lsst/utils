@@ -8,9 +8,7 @@ using namespace pybind11::literals;
 namespace lsst {
 namespace utils {
 
-PYBIND11_PLUGIN(raDecStr) {
-    py::module mod("raDecStr");
-
+PYBIND11_MODULE(raDecStr, mod) {
     mod.def("raRadToStr", raRadToStr);
     mod.def("decRadToStr", decRadToStr);
     mod.def("raDegToStr", raDegToStr);
@@ -21,8 +19,6 @@ PYBIND11_PLUGIN(raDecStr) {
     mod.def("raStrToDeg", raStrToDeg, "raStr"_a, "delimiter"_a = ":");
     mod.def("decStrToRad", decStrToRad, "raStr"_a, "delimiter"_a = ":");
     mod.def("decStrToDeg", decStrToDeg, "raStr"_a, "delimiter"_a = ":");
-
-    return mod.ptr();
 }
 
 }  // utils
