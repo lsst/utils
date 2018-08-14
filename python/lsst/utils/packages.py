@@ -20,43 +20,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 Determine which packages are being used in the system and their versions
-
-There are a few different types of packages, and their versions are collected
-in different ways:
-
-1. Run-time libraries (e.g., cfitsio, fftw): we get their version from
-   interrogating the dynamic library
-2. Python modules (e.g., afw, numpy; galsim is also in this group even though
-   we only use it through the library, because no version information is
-   currently provided through the library): we get their version from the
-   ``__version__`` module variable. Note that this means that we're only aware
-   of modules that have already been imported.
-3. Other packages provide no run-time accessible version information (e.g.,
-   astrometry_net): we get their version from interrogating the environment.
-   Currently, that means EUPS; if EUPS is replaced or dropped then we'll need
-   to consider an alternative means of getting this version information.
-4. Local versions of packages (a non-installed EUPS package, selected with
-   ``setup -r /path/to/package``): we identify these through the environment
-   (EUPS again) and use as a version the path supplemented with the ``git``
-   SHA and, if the git repo isn't clean, an MD5 of the diff.
-
-These package versions are collected and stored in a Packages object, which
-provides useful comparison and persistence features.
-
-Example usage:
-
-.. code-block:: python
-
-    from lsst.base import Packages
-    pkgs = Packages.fromSystem()
-    print "Current packages:", pkgs
-    old = Packages.read("/path/to/packages.pickle")
-    print "Old packages:", old
-    print "Missing packages compared to before:", pkgs.missing(old)
-    print "Extra packages compared to before:", pkgs.extra(old)
-    print "Different packages: ", pkgs.difference(old)
-    old.update(pkgs)  # Include any new packages in the old
-    old.write("/path/to/packages.pickle")
 """
 import os
 import sys
@@ -243,6 +206,43 @@ def getEnvironmentPackages():
 
 class Packages:
     """A table of packages and their versions.
+
+    There are a few different types of packages, and their versions are collected
+    in different ways:
+
+    1. Run-time libraries (e.g., cfitsio, fftw): we get their version from
+       interrogating the dynamic library
+    2. Python modules (e.g., afw, numpy; galsim is also in this group even though
+       we only use it through the library, because no version information is
+       currently provided through the library): we get their version from the
+       ``__version__`` module variable. Note that this means that we're only aware
+       of modules that have already been imported.
+    3. Other packages provide no run-time accessible version information (e.g.,
+       astrometry_net): we get their version from interrogating the environment.
+       Currently, that means EUPS; if EUPS is replaced or dropped then we'll need
+       to consider an alternative means of getting this version information.
+    4. Local versions of packages (a non-installed EUPS package, selected with
+       ``setup -r /path/to/package``): we identify these through the environment
+       (EUPS again) and use as a version the path supplemented with the ``git``
+       SHA and, if the git repo isn't clean, an MD5 of the diff.
+
+    These package versions are collected and stored in a Packages object, which
+    provides useful comparison and persistence features.
+
+    Example usage:
+
+    .. code-block:: python
+
+        from lsst.base import Packages
+        pkgs = Packages.fromSystem()
+        print("Current packages:", pkgs)
+        old = Packages.read("/path/to/packages.pickle")
+        print("Old packages:", old)
+        print("Missing packages compared to before:", pkgs.missing(old))
+        print("Extra packages compared to before:", pkgs.extra(old))
+        print("Different packages: ", pkgs.difference(old))
+        old.update(pkgs)  # Include any new packages in the old
+        old.write("/path/to/packages.pickle")
 
     Parameters
     ----------
