@@ -21,23 +21,31 @@
 """
 Determine which packages are being used in the system and their versions
 
-There are a few different types of packages, and their versions are collected in different ways:
-1. Run-time libraries (e.g., cfitsio, fftw): we get their version from interrogating the dynamic library
-2. Python modules (e.g., afw, numpy; galsim is also in this group even though we only use it through the
-   library, because no version information is currently provided through the library): we get their version
-   from the __version__ module variable. Note that this means that we're only aware of modules that have
-   already been imported.
-3. Other packages provide no run-time accessible version information (e.g., astrometry_net): we get their
-   version from interrogating the environment. Currently, that means EUPS; if EUPS is replaced or dropped then
-   we'll need to consider an alternative means of getting this version information.
-4. Local versions of packages (a non-installed EUPS package, selected with "setup -r /path/to/package"): we
-   identify these through the environment (EUPS again) and use as a version the path supplemented with the
-   git SHA and, if the git repo isn't clean, an MD5 of the diff.
+There are a few different types of packages, and their versions are collected
+in different ways:
 
-These package versions are collected and stored in a Packages object, which provides useful comparison and
-persistence features.
+1. Run-time libraries (e.g., cfitsio, fftw): we get their version from
+   interrogating the dynamic library
+2. Python modules (e.g., afw, numpy; galsim is also in this group even though
+   we only use it through the library, because no version information is
+   currently provided through the library): we get their version from the
+   ``__version__`` module variable. Note that this means that we're only aware
+   of modules that have already been imported.
+3. Other packages provide no run-time accessible version information (e.g.,
+   astrometry_net): we get their version from interrogating the environment.
+   Currently, that means EUPS; if EUPS is replaced or dropped then we'll need
+   to consider an alternative means of getting this version information.
+4. Local versions of packages (a non-installed EUPS package, selected with
+   ``setup -r /path/to/package``): we identify these through the environment
+   (EUPS again) and use as a version the path supplemented with the ``git``
+   SHA and, if the git repo isn't clean, an MD5 of the diff.
+
+These package versions are collected and stored in a Packages object, which
+provides useful comparison and persistence features.
 
 Example usage:
+
+.. code-block:: python
 
     from lsst.base import Packages
     pkgs = Packages.fromSystem()
@@ -94,9 +102,10 @@ def getVersionFromPythonModule(module):
 
     Notes
     -----
-    We supplement the version with information from the __dependency_versions__
-    (a specific variable set by LSST's sconsUtils at build time) only for packages
-    that are typically used only at build-time.
+    We supplement the version with information from the
+    ``__dependency_versions__`` (a specific variable set by LSST's
+    `~lsst.sconsUtils` at build time) only for packages that are typically
+    used only at build-time.
     """
     version = module.__version__
     if hasattr(module, "__dependency_versions__"):
@@ -115,11 +124,12 @@ def getPythonPackages():
     Returns
     -------
     packages : `dict`
-        Keys (type `str`) are package names; values (type `str`) are their versions.
+        Keys (type `str`) are package names; values (type `str`) are their
+        versions.
 
     Notes
     -----
-    We wade through sys.modules and attempt to determine the version for each
+    We wade through `sys.modules` and attempt to determine the version for each
     module.  Note, therefore, that we can only report on modules that have
     *already* been imported.
 
@@ -172,13 +182,15 @@ def getEnvironmentPackages():
     Returns
     -------
     packages : `dict`
-        Keys (type `str`) are product names; values (type `str`) are their versions.
+        Keys (type `str`) are product names; values (type `str`) are their
+        versions.
 
     Notes
     -----
-    We use EUPS to determine the version of certain products (those that don't provide
-    a means to determine the version any other way) and to check if uninstalled packages
-    are being used. We only report the product/version for these packages.
+    We use EUPS to determine the version of certain products (those that don't
+    provide a means to determine the version any other way) and to check if
+    uninstalled packages are being used. We only report the product/version
+    for these packages.
     """
     try:
         from eups import Eups
@@ -251,7 +263,8 @@ class Packages:
     def fromSystem(cls):
         """Construct a `Packages` by examining the system.
 
-        Determine packages by examining python's sys.modules, runtime libraries and EUPS.
+        Determine packages by examining python's `sys.modules`, runtime
+        libraries and EUPS.
 
         Returns
         -------
@@ -336,8 +349,8 @@ class Packages:
         Returns
         -------
         extra : `dict`
-            Extra packages.
-            Keys (type `str`) are package names; values (type `str`) are their versions.
+            Extra packages. Keys (type `str`) are package names; values
+            (type `str`) are their versions.
         """
         return {pkg: self._packages[pkg] for pkg in self._names - other._names}
 
@@ -352,13 +365,14 @@ class Packages:
         Returns
         -------
         missing : `dict`
-            Missing packages.
-            Keys (type `str`) are package names; values (type `str`) are their versions.
+            Missing packages. Keys (type `str`) are package names; values
+            (type `str`) are their versions.
         """
         return {pkg: other._packages[pkg] for pkg in other._names - self._names}
 
     def difference(self, other):
-        """Get packages in symmetric difference of self and another `Packages` object.
+        """Get packages in symmetric difference of self and another `Packages`
+        object.
 
         Parameters
         ----------
@@ -368,8 +382,8 @@ class Packages:
         Returns
         -------
         difference : `dict`
-            Packages in symmetric difference.
-            Keys (type `str`) are package names; values (type `str`) are their versions.
+            Packages in symmetric difference.  Keys (type `str`) are package
+            names; values (type `str`) are their versions.
         """
         return {pkg: (self._packages[pkg], other._packages[pkg]) for
                 pkg in self._names & other._names if self._packages[pkg] != other._packages[pkg]}
