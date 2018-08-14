@@ -50,8 +50,6 @@ Example usage:
     old.update(pkgs)  # Include any new packages in the old
     old.write("/path/to/packages.pickle")
 """
-from builtins import object
-
 import os
 import sys
 import hashlib
@@ -61,9 +59,6 @@ import pickle as pickle
 from collections import Mapping
 
 from .versions import getRuntimeVersions
-
-from future import standard_library
-standard_library.install_aliases()
 
 __all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages", "Packages"]
 
@@ -234,7 +229,7 @@ def getEnvironmentPackages():
     return packages
 
 
-class Packages(object):
+class Packages:
     """A table of packages and their versions.
 
     Parameters
