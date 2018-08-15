@@ -1,4 +1,4 @@
-# 
+#
 # LSST Data Management System
 #
 # Copyright 2008-2017  AURA/LSST.
@@ -20,7 +20,6 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import
 
 # Register Backtrace signal handlers first
 from . import backtrace
@@ -34,4 +33,3 @@ from .get_caller_name import *
 from .wrappers import *
 from .python import *
 from .version import *
-
