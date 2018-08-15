@@ -19,7 +19,6 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division, print_function
 import sys
 import unittest
 
@@ -43,7 +42,7 @@ class GetCallerNameTestCase(unittest.TestCase):
         self.assertEqual(result, "{}.test_func".format(__name__))
 
     def test_instance_method(self):
-        class TestClass(object):
+        class TestClass:
             def run(self):
                 return get_caller_name(1)
 
@@ -52,7 +51,7 @@ class GetCallerNameTestCase(unittest.TestCase):
         self.assertEqual(result, "{}.TestClass.run".format(__name__))
 
     def test_class_method(self):
-        class TestClass(object):
+        class TestClass:
             @classmethod
             def run(cls):
                 return get_caller_name(1)

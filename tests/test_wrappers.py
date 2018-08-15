@@ -1,6 +1,24 @@
-from __future__ import absolute_import, division, print_function
-
-from future.utils import with_metaclass
+#
+# LSST Data Management System
+# Copyright 2008-2016 LSST Corporation.
+#
+# This product includes software developed by the
+# LSST Project (http://www.lsst.org/).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
+# see <http://www.lsstcorp.org/LegalNotices/>.
+#
 
 import numpy as np
 import unittest
@@ -95,7 +113,7 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
 
     def setUp(self):
 
-        class Example(with_metaclass(lsst.utils.TemplateMeta, object)):
+        class Example(metaclass=lsst.utils.TemplateMeta):
 
             def method1(self):
                 return self
@@ -253,7 +271,7 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
 
     def setUp(self):
 
-        class Example(with_metaclass(lsst.utils.TemplateMeta, object)):
+        class Example(metaclass=lsst.utils.TemplateMeta):
 
             TEMPLATE_PARAMS = ("d", "u")
             TEMPLATE_DEFAULTS = (2, None)
@@ -393,7 +411,7 @@ class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
     registered as a default type in a type ABC are properly copied.
     """
     def setUp(self):
-        class Example(with_metaclass(lsst.utils.TemplateMeta, object)):
+        class Example(metaclass=lsst.utils.TemplateMeta):
 
             TEMPLATE_PARAMS = ("dtype",)
             TEMPLATE_DEFAULTS = (np.float32,)

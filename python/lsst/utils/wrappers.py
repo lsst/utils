@@ -20,7 +20,6 @@
 # the GNU General Public License along with this program.  If not,
 # see <https://www.lsstcorp.org/LegalNotices/>.
 #
-from __future__ import absolute_import, division, print_function
 
 import sys
 import types
@@ -62,6 +61,8 @@ def continueClass(cls):
 
     For example::
 
+    .. code-block:: python
+
         class Foo:
             pass
 
@@ -71,6 +72,8 @@ def continueClass(cls):
                 return None
 
     is equivalent to::
+
+    .. code-block:: python
 
         class Foo:
             def run(self):
@@ -95,6 +98,8 @@ def inClass(cls, name=None):
 
     For example::
 
+    .. code-block:: python
+
         class Foo:
             pass
 
@@ -103,6 +108,8 @@ def inClass(cls, name=None):
             return None
 
     is equivalent to::
+
+    .. code-block:: python
 
         class Foo:
             def run(self):
@@ -156,6 +163,8 @@ class TemplateMeta(type):
     after a subclass already been registered with a "primary" type key.  For
     example (using Python 3 metaclass syntax)::
 
+    .. code-block:: python
+
         import numpy as np
         from ._image import ImageF, ImageD
 
@@ -175,6 +184,8 @@ class TemplateMeta(type):
     This allows user code to construct objects directly using ``Image``, as
     long as an extra ``dtype`` keyword argument is passed that matches one of
     the type keys::
+
+    .. code-block:: python
 
         img = Image(52, 64, dtype=np.float32)
 
@@ -196,6 +207,8 @@ class TemplateMeta(type):
     ``TemplateMeta`` also provides a way to add pure-Python methods and other
     attributes to the wrapped template classes.  To add a ``sum`` method to
     all registered types, for example, we can just do::
+
+    .. code-block:: python
 
         class Image(metaclass=TemplateMeta):
 
@@ -220,6 +233,8 @@ class TemplateMeta(type):
     Finally, abstract base classes that use ``TemplateMeta`` define a dict-
     like interface for accessing their registered subclasses, providing
     something like the C++ syntax for templates::
+
+    .. code-block:: python
 
         Image[np.float32] -> ImageF
         Image["D"] -> ImageD

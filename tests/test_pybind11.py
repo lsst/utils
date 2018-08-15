@@ -19,8 +19,6 @@
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
-from builtins import str
-from past.builtins import long
 
 import sys
 import unittest
@@ -82,7 +80,6 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
 
     def checkNumeric(self, function):
         self.assertAccepts(function, int(1), msg="Failure passing int to %s" % function.__name__)
-        self.assertAccepts(function, long(1), msg="Failure passing long to %s" % function.__name__)
         self.assertRaises((TypeError, NotImplementedError),
                           function, "5")  # should fail to convert even numeric strings
         # We should be able to coerce integers with different signedness and size to any numeric
