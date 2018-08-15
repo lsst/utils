@@ -24,8 +24,9 @@ void declareCache(py::module & mod, std::string const& name) {
     cls.def(py::init<std::size_t>(), "maxElements"_a=0);
     cls.def("__call__",
             [](Class & self, Key const& key, std::function<Value(Key const& key)> func) {
-                return self(key, func); },
-            "key"_a, "func"_a);
+                py::gil_scoped_release release;
+                return self(key, func);
+            }, "key"_a, "func"_a);
     cls.def("__getitem__", &Class::operator[]);
     cls.def("add", &Class::add, "key"_a, "value"_a);
     cls.def("size", &Class::size);
