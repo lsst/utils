@@ -26,10 +26,13 @@ import sys
 import hashlib
 import importlib
 import subprocess
+import logging
 import pickle as pickle
 from collections import Mapping
 
 from .versions import getRuntimeVersions
+
+log = logging.getLogger(__name__)
 
 __all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages", "Packages"]
 
@@ -159,8 +162,7 @@ def getEnvironmentPackages():
         from eups import Eups
         from eups.Product import Product
     except ImportError:
-        from lsst.pex.logging import getDefaultLog
-        getDefaultLog().warn("Unable to import eups, so cannot determine package versions from environment")
+        log.warning("Unable to import eups, so cannot determine package versions from environment")
         return {}
 
     # Cache eups object since creating it can take a while
