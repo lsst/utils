@@ -161,7 +161,7 @@ class TemplateMeta(type):
     classes with multiple template parameters) are good choices.  Alternate
     type keys for existing classes can be added by calling ``alias``, but only
     after a subclass already been registered with a "primary" type key.  For
-    example (using Python 3 metaclass syntax)::
+    example::
 
     .. code-block:: python
 
