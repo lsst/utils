@@ -369,7 +369,7 @@ class TemplateMeta(type):
                 # methods must be transfered to the ABC as a bound method
                 # so that the correct cls be called with the class method
                 for name in subclass.__dict__:
-                    if name == "__new__":
+                    if name in ("__new__", "__init_subclass__"):
                         continue
                     obj = subclass.__dict__[name]
                     # copy over the static methods
