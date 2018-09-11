@@ -161,7 +161,7 @@ class TemplateMeta(type):
     classes with multiple template parameters) are good choices.  Alternate
     type keys for existing classes can be added by calling ``alias``, but only
     after a subclass already been registered with a "primary" type key.  For
-    example (using Python 3 metaclass syntax)::
+    example::
 
     .. code-block:: python
 
@@ -357,9 +357,9 @@ class TemplateMeta(type):
                         len(self.TEMPLATE_DEFAULTS) == 1 else
                         self.TEMPLATE_DEFAULTS)
             if key == defaults:
-                conflictStr = ("Base Class has an attribute with the same"
-                               "name as a {} method in the default subclass"
-                               ". Cannot link {} method to base class")
+                conflictStr = ("Base class has attribute {}"
+                               " which is a {} method of {}."
+                               " Cannot link method to base class.")
                 # In the following if statements, the explicit lookup in
                 # __dict__ must be done, as a call to getattr returns the
                 # bound method, which no longer reports as a static or class
@@ -369,7 +369,7 @@ class TemplateMeta(type):
                 # methods must be transfered to the ABC as a bound method
                 # so that the correct cls be called with the class method
                 for name in subclass.__dict__:
-                    if name == "__new__":
+                    if name in ("__new__", "__init_subclass__"):
                         continue
                     obj = subclass.__dict__[name]
                     # copy over the static methods
@@ -377,12 +377,14 @@ class TemplateMeta(type):
                     isStatic = isinstance(obj, staticmethod)
                     if isBuiltin or isStatic:
                         if hasattr(self, name):
-                            raise AttributeError(conflictStr.format("static"))
+                            raise AttributeError(
+                                conflictStr.format(name, "static", subclass))
                         setattr(self, name, obj)
                     # copy over the class methods
                     elif isinstance(obj, classmethod):
                         if hasattr(self, name):
-                            raise AttributeError(conflictStr.format("class"))
+                            raise AttributeError(
+                                conflictStr.format(name, "class", subclass))
                         setattr(self, name, getattr(subclass, name))
 
         def setattrSafe(name, value):
