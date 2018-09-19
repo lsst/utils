@@ -46,7 +46,7 @@ public:
 
     std::string getValue() const { return _value; }
     void setValue(std::string const & v) { _value = v; }
-    
+
     bool operator==(Example const & other) const {
         return other._value == _value;
     }
@@ -81,48 +81,60 @@ bool acceptNumberConstRef(std::numeric_limits<T> *) { return false; }
 std::string getName(int) { return "int"; }
 std::string getName(double) { return "double"; }
 
+void wrapExample(lsst::utils::python::WrapperCollection & wrappers) {
+    wrappers.wrapType(
+        py::class_<Example>(wrappers.module, "Example"),
+        [](auto & mod, auto & cls) {
+            cls.def(py::init<std::string const &>());
+            cls.def(py::init<bool>());
+            cls.def(py::init<Example const &>());
+
+            cls.def("get1", &Example::get1);
+            cls.def("get2", &Example::get1);
+            cls.def("get3", &Example::get1);
+
+            cls.def("getValue", &Example::getValue);
+            cls.def("setValue", &Example::setValue);
+
+            cls.def(py::self == py::self);
+            cls.def(py::self != py::self);
+
+            lsst::utils::python::addOutputOp(cls, "__str__");
+            lsst::utils::python::addOutputOp(cls, "__repr__");
+        }
+    );
+}
+
 PYBIND11_MODULE(_example, mod) {
-    py::class_<Example> cls(mod, "Example");
+    lsst::utils::python::WrapperCollection wrappers(mod, "example");
+    wrapExample(wrappers);
+    wrappers.wrapFunctions(
+        [](auto & mod) {
+            mod.def("accept_float32", [](float val){return acceptNumber(val);});
+            mod.def("accept_float64", [](double val){return acceptNumber(val);});
+            mod.def("accept_uint8", [](unsigned char val){return acceptNumber(val);});
+            mod.def("accept_uint16", [](unsigned short val){return acceptNumber(val);});
+            mod.def("accept_uint32", [](unsigned int val){return acceptNumber(val);});
+            mod.def("accept_uint64", [](unsigned long long val){return acceptNumber(val);});
+            mod.def("accept_int8", [](signed char val){return acceptNumber(val);});
+            mod.def("accept_int16", [](short val){return acceptNumber(val);});
+            mod.def("accept_int32", [](int val){return acceptNumber(val);});
+            mod.def("accept_int64", [](long long val){return acceptNumber(val);});
 
-    cls.def(py::init<std::string const &>());
-    cls.def(py::init<bool>());
-    cls.def(py::init<Example const &>());
+            mod.def("accept_cref_float32", [](float const &val){return acceptNumber(val);});
+            mod.def("accept_cref_float64", [](double const &val){return acceptNumber(val);});
+            mod.def("accept_cref_uint8", [](unsigned char const &val){return acceptNumber(val);});
+            mod.def("accept_cref_uint16", [](unsigned short const &val){return acceptNumber(val);});
+            mod.def("accept_cref_uint32", [](unsigned int const &val){return acceptNumber(val);});
+            mod.def("accept_cref_uint64", [](unsigned long long const &val){return acceptNumber(val);});
+            mod.def("accept_cref_int8", [](signed char const &val){return acceptNumber(val);});
+            mod.def("accept_cref_int16", [](short const &val){return acceptNumber(val);});
+            mod.def("accept_cref_int32", [](int const &val){return acceptNumber(val);});
+            mod.def("accept_cref_int64", [](long long const &val){return acceptNumber(val);});
 
-    cls.def("get1", &Example::get1);
-    cls.def("get2", &Example::get1);
-    cls.def("get3", &Example::get1);
-
-    cls.def("getValue", &Example::getValue);
-    cls.def("setValue", &Example::setValue);
-
-    cls.def(py::self == py::self);
-    cls.def(py::self != py::self);
-
-    lsst::utils::python::addOutputOp(cls, "__str__");
-    lsst::utils::python::addOutputOp(cls, "__repr__");
-
-    mod.def("accept_float32", [](float val){return acceptNumber(val);});
-    mod.def("accept_float64", [](double val){return acceptNumber(val);});
-    mod.def("accept_uint8", [](unsigned char val){return acceptNumber(val);});
-    mod.def("accept_uint16", [](unsigned short val){return acceptNumber(val);});
-    mod.def("accept_uint32", [](unsigned int val){return acceptNumber(val);});
-    mod.def("accept_uint64", [](unsigned long long val){return acceptNumber(val);});
-    mod.def("accept_int8", [](signed char val){return acceptNumber(val);});
-    mod.def("accept_int16", [](short val){return acceptNumber(val);});
-    mod.def("accept_int32", [](int val){return acceptNumber(val);});
-    mod.def("accept_int64", [](long long val){return acceptNumber(val);});
-
-    mod.def("accept_cref_float32", [](float const &val){return acceptNumber(val);});
-    mod.def("accept_cref_float64", [](double const &val){return acceptNumber(val);});
-    mod.def("accept_cref_uint8", [](unsigned char const &val){return acceptNumber(val);});
-    mod.def("accept_cref_uint16", [](unsigned short const &val){return acceptNumber(val);});
-    mod.def("accept_cref_uint32", [](unsigned int const &val){return acceptNumber(val);});
-    mod.def("accept_cref_uint64", [](unsigned long long const &val){return acceptNumber(val);});
-    mod.def("accept_cref_int8", [](signed char const &val){return acceptNumber(val);});
-    mod.def("accept_cref_int16", [](short const &val){return acceptNumber(val);});
-    mod.def("accept_cref_int32", [](int const &val){return acceptNumber(val);});
-    mod.def("accept_cref_int64", [](long long const &val){return acceptNumber(val);});
-
-    mod.def("getName", (std::string (*)(int)) getName);
-    mod.def("getName", (std::string (*)(double)) getName);
+            mod.def("getName", (std::string (*)(int)) getName);
+            mod.def("getName", (std::string (*)(double)) getName);
+        }
+    );
+    wrappers.finish();
 }
