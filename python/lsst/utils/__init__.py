@@ -26,7 +26,6 @@ from . import backtrace
 
 import lsst.pex.exceptions
 
-from .raDecStr import *
 from .demangle import *
 from .utils import *
 from .get_caller_name import *
