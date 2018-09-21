@@ -21,3 +21,4 @@ tests/ieee
 examples/demangle
 _build.*
 .coverage
+.pytest_cache
