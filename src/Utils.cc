@@ -25,7 +25,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "boost/regex.hpp"
 #include "lsst/pex/exceptions.h"
 
 namespace lsst {
