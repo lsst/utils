@@ -158,4 +158,3 @@ inline std::pair<std::size_t, std::size_t> cppIndex(std::ptrdiff_t size_i, std::
 }}}  // namespace lsst::utils::python
 
 #endif
-
