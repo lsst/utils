@@ -12,7 +12,7 @@ namespace lsst {
 namespace utils {
 namespace python {
 
-PYBIND11_MODULE(python, mod) {
+PYBIND11_MODULE(_cppIndex, mod) {
     // wrap cppIndex in order to make it easy to test
     mod.def("cppIndex", (std::size_t(*)(std::ptrdiff_t, std::ptrdiff_t))cppIndex, "size"_a, "i"_a);
     mod.def("cppIndex", (std::pair<std::size_t, std::size_t>(*)(std::ptrdiff_t, std::ptrdiff_t,

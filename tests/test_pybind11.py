@@ -25,7 +25,7 @@ import unittest
 import numpy
 
 import lsst.utils.tests
-from lsst.utils import cppIndex
+from _cppIndex import cppIndex
 import _example
 
 

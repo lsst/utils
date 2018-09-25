@@ -1,8 +1,5 @@
 # -*- python -*-
 from lsst.sconsUtils import scripts
-scripts.BasicSConscript.pybind11([
-    'python',
-    'demangle',
-    'utils',
-    'backtrace',
-], addUnderscore=False)
+scripts.BasicSConscript.python(
+    extra=["backtrace/_Backtrace.cc"]
+)
