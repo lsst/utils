@@ -32,7 +32,7 @@
 #include <cxxabi.h>
 #include <execinfo.h>
 
-#include "boost/regex.hpp"
+#include <regex>
 
 #include "lsst/utils/Backtrace.h"
 
@@ -62,18 +62,18 @@ char *demangleAndPrint(char *input, char *buffer, size_t *bufferSize) noexcept {
     int status = 1;
 
     try {
-        boost::cmatch matches;
-        boost::regex rgx(
+        std::cmatch matches;
+        std::regex rgx(
                 "(.*[\\s|\\(])"  // before
                 "(_\\w+)"        // mangled name
                 "(.*\\+.*)"      // after
                 );
 
-        if (boost::regex_match(input, matches, rgx)) {
+        if (std::regex_match(input, matches, rgx)) {
             buffer = abi::__cxa_demangle(matches.str(2).c_str(), buffer, bufferSize, &status);
             fprintf(stderr, "%s%s%s\n", matches.str(1).c_str(), buffer, matches.str(3).c_str());
         }
-    } catch(const boost::bad_expression &e) {
+    } catch(const std::regex_error &e) {
         fprintf(stderr, "[demangleAndPrint] %s\n", e.what());
         status = 1;
     } catch(const std::runtime_error &e) {
@@ -180,4 +180,3 @@ Backtrace::Backtrace() noexcept : enabled(false) {}
 }  // namespace lsst
 
 #endif
-

@@ -15,4 +15,3 @@ int main()
               << lsst::utils::demangleType(typeid(im).name())
               << std::endl;
 }
-

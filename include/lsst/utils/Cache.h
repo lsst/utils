@@ -112,7 +112,7 @@ class Cache {
      *
      * If the key is in the cache, it will be promoted to the
      * most recently used value.
-     *     
+     *
      * @throws lsst::pex::exceptions::NotFoundError  If key is not in the
      * cache.
      *
@@ -142,7 +142,7 @@ class Cache {
      *
      * @exceptsafe Strong exception safety: exceptions will return the
      * system to previous state.
-     */    
+     */
     std::vector<Key> keys() const;
 
     /** Does the cache contain the key?
@@ -172,7 +172,7 @@ class Cache {
      *
      * @exceptsafe Basic exception safety: exceptions will leave the
      * system in a valid but unpredictable state.
-     */     
+     */
     void flush();
 
 #ifdef LSST_CACHE_DEBUG

@@ -1,7 +1,7 @@
 /* 
  * LSST Data Management System
  * Copyright 2008, 2009, 2010 LSST Corporation.
- * 
+ *
  * This product includes software developed by the
  * LSST Project (http://www.lsst.org/).
  *
@@ -9,17 +9,17 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
- * You should have received a copy of the LSST License Statement and 
- * the GNU General Public License along with this program.  If not, 
+ *
+ * You should have received a copy of the LSST License Statement and
+ * the GNU General Public License along with this program.  If not,
  * see <http://www.lsstcorp.org/LegalNotices/>.
  */
- 
+
 #include "lsst/utils/Demangle.h"
 
 #include <iostream>
@@ -48,7 +48,7 @@ public:
     ~Symbol() {}
 
     static void reset() { n_next = 0; } // reset counter
-    
+
     void print() const {
         std::cout << '\t' << n << " " << key << '\n';
     }
@@ -124,10 +124,10 @@ std::string demangleType(std::string const _typeName) {
     typedef SymbolTable::index<n>::type::iterator nIterator;
     typedef SymbolTable::index<key>::type::iterator keyIterator;
     Symbol::reset();
-   
+
     // Here's my symbol table and its indices
     SymbolTable st;
-    
+
     SymbolTable::index<n>::type &nIndex = st.get<n>();
     SymbolTable::index<key>::type &keyIndex = st.get<key>();
     //
@@ -139,7 +139,7 @@ std::string demangleType(std::string const _typeName) {
     if (*ptr == 'r' || *ptr == 'V' || *ptr == 'K') {
         ptr++;                          // (restrict/volatile/const)
     }
-    
+
     if (*ptr == 'P') ptr++;             // We passed "this" which is (type *)
 
     std::string currentSymbol = "";     // Current symbol
@@ -171,7 +171,7 @@ std::string demangleType(std::string const _typeName) {
                     typeName += ',';
                 }
             }
-                        
+
             break;
           case 'I':
             typeStack.push(*ptr++);
@@ -259,7 +259,7 @@ std::string demangleType(std::string const _typeName) {
                     currentSymbol += "::";
                     typeName += "::";
                 }
-            
+
                 currentSymbol += name;
                 typeName += name;
 
