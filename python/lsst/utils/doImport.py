@@ -71,6 +71,15 @@ def doImport(importable):
     while moduleComponents:
         try:
             pytype = tryImport(".".join(moduleComponents), infileComponents)
+            if not infileComponents and hasattr(pytype, moduleComponents[-1]):
+                # This module has an attribute with the same name as the
+                # module itself (like doImport.doImport, actually!).
+                # If that attribute was lifted to the package, we should
+                # return the attribute, not the module.
+                try:
+                    return tryImport(".".join(moduleComponents[:-1]), moduleComponents[-1:])
+                except ModuleNotFoundError:
+                    pass
             return pytype
         except ModuleNotFoundError:
             # Move element from module to file and try again
