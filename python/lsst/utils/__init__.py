@@ -29,6 +29,7 @@ import lsst.pex.exceptions
 from .demangle import *
 from .utils import *
 from .get_caller_name import *
+from .doImport import *
 from .wrappers import *
 from .python import *
 from .version import *
