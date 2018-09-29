@@ -366,7 +366,7 @@ public:
      *                     adds pybind11 wrappers to it, to be called later
      *                     by `finish()`.
      */
-    void wrapFunctions(WrapperCallback function) {
+    void wrap(WrapperCallback function) {
         _definitions.emplace_back(std::make_pair(module, function));
     }
 
@@ -393,7 +393,7 @@ public:
             cls.attr("__module__") = _package;
         }
         // lambda below is mutable so it can modify the captured `cls` variable
-        wrapFunctions(
+        wrap(
             [cls=cls, function=std::move(function)] (pybind11::module & mod) mutable -> void {
                 function(mod, cls);
             }

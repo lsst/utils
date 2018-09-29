@@ -30,7 +30,7 @@ namespace lsst {
 namespace utils {
 
 void wrapDemangle(python::WrapperCollection & wrappers) {
-    wrappers.wrapFunctions(
+    wrappers.wrap(
         [](auto & mod) {
             mod.def("demangleType", demangleType);
         }

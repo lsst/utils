@@ -107,7 +107,7 @@ void wrapExample(lsst::utils::python::WrapperCollection & wrappers) {
 PYBIND11_MODULE(_example, mod) {
     lsst::utils::python::WrapperCollection wrappers(mod, "example");
     wrapExample(wrappers);
-    wrappers.wrapFunctions(
+    wrappers.wrap(
         [](auto & mod) {
             mod.def("accept_float32", [](float val){return acceptNumber(val);});
             mod.def("accept_float64", [](double val){return acceptNumber(val);});

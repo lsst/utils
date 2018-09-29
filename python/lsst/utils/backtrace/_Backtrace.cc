@@ -30,7 +30,7 @@ namespace lsst {
 namespace utils {
 
 void wrapBacktrace(python::WrapperCollection & wrappers) {
-    wrappers.wrapFunctions(
+    wrappers.wrap(
         [](auto & mod) {
             Backtrace &backtrace = Backtrace::get();
             // Trick to tell the compiler backtrace is used and should not be
