@@ -27,7 +27,7 @@ namespace lsst {
 namespace utils {
 
 void wrapBacktrace(python::WrapperCollection & wrappers);
-void wrapUtils(python::WrapperCollection & wrappers);
+void wrapPackaging(python::WrapperCollection & wrappers);
 void wrapDemangle(python::WrapperCollection & wrappers);
 
 PYBIND11_MODULE(_utils, mod) {
@@ -37,7 +37,7 @@ PYBIND11_MODULE(_utils, mod) {
         wrapBacktrace(backtraceWrappers);
         wrappers.collectSubmodule(std::move(backtraceWrappers));
     }
-    wrapUtils(wrappers);
+    wrapPackaging(wrappers);
     wrapDemangle(wrappers);
     wrappers.finish();
 }

@@ -22,12 +22,12 @@
 #include "pybind11/pybind11.h"
 
 #include "lsst/utils/python.h"
-#include "lsst/utils/Utils.h"
+#include "lsst/utils/packaging.h"
 
 namespace lsst {
 namespace utils {
 
-void wrapUtils(python::WrapperCollection & wrappers) {
+void wrapPackaging(python::WrapperCollection & wrappers) {
     wrappers.wrap(
         [](auto & mod) {
             mod.def("getPackageDir", getPackageDir);

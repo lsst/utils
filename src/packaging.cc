@@ -1,8 +1,6 @@
-// -*- lsst-c++ -*-
-
 /*
  * LSST Data Management System
- * See COPYRIGHT file at the top of the source tree.
+ * Copyright 2008, 2009, 2010 LSST Corporation.
  *
  * This product includes software developed by the
  * LSST Project (http://www.lsst.org/).
@@ -22,12 +20,28 @@
  * see <http://www.lsstcorp.org/LegalNotices/>.
  */
 
-#ifndef LSST_UTILS_UTILS_H
-#define LSST_UTILS_UTILS_H
-
-// THIS FILE IS FOR BACKWARDS-COMPATIBILITY ONLY; NEW CODE SHOULD INCLUDE
-// packaging.h DIRECTLY.
-
 #include "lsst/utils/packaging.h"
 
-#endif
+#include <iostream>
+#include <sstream>
+#include <string>
+#include "lsst/pex/exceptions.h"
+
+namespace lsst {
+namespace utils {
+
+std::string getPackageDir(std::string const& packageName) {
+    std::string envVar = packageName;      // package's environment variable
+
+    transform(envVar.begin(), envVar.end(), envVar.begin(), (int (*)(int)) toupper);
+    envVar += "_DIR";
+
+    char const *dir = getenv(envVar.c_str());
+    if (!dir) {
+        throw LSST_EXCEPT(lsst::pex::exceptions::NotFoundError, "Package " + packageName + " not found");
+    }
+
+    return dir;
+}
+
+}} // namespace lsst::utils
