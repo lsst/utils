@@ -19,16 +19,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <signal.h>
-
 #include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
+
+#include <utility>
+
+#include "lsst/utils/python.h"
 
 namespace py = pybind11;
+using namespace pybind11::literals;
 
-void generateSegfault() {
-    raise(SIGSEGV);
+namespace lsst {
+namespace utils {
+namespace python {
+
+PYBIND11_MODULE(_cppIndex, mod) {
+    // wrap cppIndex in order to make it easy to test
+    mod.def("cppIndex", (std::size_t(*)(std::ptrdiff_t, std::ptrdiff_t))cppIndex, "size"_a, "i"_a);
+    mod.def("cppIndex", (std::pair<std::size_t, std::size_t>(*)(std::ptrdiff_t, std::ptrdiff_t,
+                                                                std::ptrdiff_t, std::ptrdiff_t))cppIndex,
+            "size_i"_a, "size_j"_a, "i"_a, "j"_a);
 }
 
-PYBIND11_MODULE(_backtrace, mod) {
-    mod.def("generateSegfault", generateSegfault);
-}
+}  // python
+}  // utils
+}  // lsst

@@ -19,16 +19,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <signal.h>
-
 #include "pybind11/pybind11.h"
 
-namespace py = pybind11;
+#include "lsst/utils/python.h"
+#include "lsst/utils/packaging.h"
 
-void generateSegfault() {
-    raise(SIGSEGV);
+namespace lsst {
+namespace utils {
+
+void wrapPackaging(python::WrapperCollection & wrappers) {
+    wrappers.wrap(
+        [](auto & mod) {
+            mod.def("getPackageDir", getPackageDir);
+        }
+    );
 }
 
-PYBIND11_MODULE(_backtrace, mod) {
-    mod.def("generateSegfault", generateSegfault);
-}
+}  // utils
+}  // lsst

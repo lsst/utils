@@ -19,16 +19,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <signal.h>
-
 #include "pybind11/pybind11.h"
+
+#include "lsst/utils/python.h"
+#include "lsst/utils/Backtrace.h"
 
 namespace py = pybind11;
 
-void generateSegfault() {
-    raise(SIGSEGV);
+namespace lsst {
+namespace utils {
+
+void wrapBacktrace(python::WrapperCollection & wrappers) {
+    wrappers.wrap(
+        [](auto & mod) {
+            Backtrace &backtrace = Backtrace::get();
+            // Trick to tell the compiler backtrace is used and should not be
+            // optimized away, as well as convenient way to check if backtrace
+            // is enabled.
+            mod.def("isEnabled", [&backtrace]() -> bool { return backtrace.isEnabled(); });
+        }
+    );
 }
 
-PYBIND11_MODULE(_backtrace, mod) {
-    mod.def("generateSegfault", generateSegfault);
-}
+}  // utils
+}  // lsst

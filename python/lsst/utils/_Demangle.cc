@@ -19,16 +19,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <signal.h>
-
 #include "pybind11/pybind11.h"
+
+#include "lsst/utils/python.h"
+#include "lsst/utils/Demangle.h"
 
 namespace py = pybind11;
 
-void generateSegfault() {
-    raise(SIGSEGV);
+namespace lsst {
+namespace utils {
+
+void wrapDemangle(python::WrapperCollection & wrappers) {
+    wrappers.wrap(
+        [](auto & mod) {
+            mod.def("demangleType", demangleType);
+        }
+    );
 }
 
-PYBIND11_MODULE(_backtrace, mod) {
-    mod.def("generateSegfault", generateSegfault);
-}
+}  // utils
+}  // lsst

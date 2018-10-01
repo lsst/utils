@@ -19,16 +19,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <signal.h>
-
 #include "pybind11/pybind11.h"
 
-namespace py = pybind11;
+#include "lsst/utils/python.h"
 
-void generateSegfault() {
-    raise(SIGSEGV);
+namespace lsst {
+namespace utils {
+
+void wrapBacktrace(python::WrapperCollection & wrappers);
+void wrapPackaging(python::WrapperCollection & wrappers);
+void wrapDemangle(python::WrapperCollection & wrappers);
+
+PYBIND11_MODULE(_utils, mod) {
+    python::WrapperCollection wrappers(mod, "_utils");
+    {
+        auto backtraceWrappers = wrappers.makeSubmodule("backtrace");
+        wrapBacktrace(backtraceWrappers);
+        wrappers.collectSubmodule(std::move(backtraceWrappers));
+    }
+    wrapPackaging(wrappers);
+    wrapDemangle(wrappers);
+    wrappers.finish();
 }
 
-PYBIND11_MODULE(_backtrace, mod) {
-    mod.def("generateSegfault", generateSegfault);
-}
+}  // utils
+}  // lsst

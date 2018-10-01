@@ -79,6 +79,12 @@ def continueClass(cls):
             def run(self):
                 return None
 
+    .. warning::
+
+        Python's built-in `super` function does not behave properly in classes
+        decorated with `continueClass`.  Base class methods must be invoked
+        directly using their explicit types instead.
+
     """
     orig = getattr(sys.modules[cls.__module__], cls.__name__)
     for name in dir(cls):
@@ -243,6 +249,13 @@ class TemplateMeta(type):
     which means types with aliases will be present multiple times in the dict.
     To obtain the sequence of unique subclasses, use the ``__subclasses__``
     method.
+
+    .. warning::
+
+        Python's built-in `super` function does not behave properly in classes
+        that have `TemplateMeta` as their metaclass (which should be rare, as
+        TemplateMeta ABCs will have base classes of their own)..
+
     """
 
     def __new__(cls, name, bases, attrs):
