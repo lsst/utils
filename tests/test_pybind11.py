@@ -21,7 +21,7 @@
 
 import sys
 import unittest
-import numpy
+import numpy as np
 
 import lsst.utils.tests
 from _cppIndex import cppIndex
@@ -85,7 +85,7 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
         # type argument (as long as we don't trigger overflow)
         for size in (8, 16, 32, 64):
             for name in ("int%d" % size, "uint%d" % size):
-                array = numpy.ones(1, dtype=getattr(numpy, name))
+                array = np.ones(1, dtype=getattr(np, name))
                 self.assertAccepts(function, array[0],
                                    msg="Failure passing numpy.%s to %s" % (name, function.__name__))
 
@@ -186,6 +186,16 @@ class Pybind11TestCase(lsst.utils.tests.TestCase):
                             cppIndex(size0, size1, negbad0, size1)
                         with self.assertRaises(IndexError):
                             cppIndex(size0, size1, negbad0, negbad1)
+
+    def testTemplateInvoker(self):
+        """Test using TemplateInvoker to transform a C++ template to a
+        Python function with a dtype argument.
+        """
+        for t in (np.uint16, np.int32, np.float32):
+            dtype = np.dtype(t)
+            a = _example.returnTypeHolder(dtype)
+            self.assertEqual(a.dtype, dtype)
+        self.assertIsNone(_example.returnTypeHolder(np.dtype(np.float64)))
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):

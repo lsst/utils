@@ -27,8 +27,10 @@
 #include "pybind11/numpy.h"
 
 #include "lsst/utils/python.h"
+#include "lsst/utils/python/TemplateInvoker.h"
 
 namespace py = pybind11;
+using namespace pybind11::literals;
 
 class Example {
 public:
@@ -80,6 +82,32 @@ bool acceptNumberConstRef(std::numeric_limits<T> *) { return false; }
 std::string getName(int) { return "int"; }
 std::string getName(double) { return "double"; }
 
+// Just some C++ templated C++ type we've wrapped for pybind11; it's here just
+// as the thing that returnTypeHolder returns.
+template <typename T>
+struct TypeHolder {};
+
+// Pybind11 wrapers for TypeHolder
+template <typename T>
+void declareTypeHolder(py::module & mod, std::string const & suffix) {
+    static std::string const name = "TypeHolder" + suffix;
+    py::class_<TypeHolder<T>> cls(mod, name.c_str());
+    cls.def_property_readonly(
+        "dtype",
+        [](TypeHolder<T> const & self) {
+            return py::dtype::of<T>();
+        }
+    );
+}
+
+// A templated C++ function whose arguments don't depend on the template
+// parameter (in this case, because there are none).  That makes it difficult
+// to wrap without TemplateInvoker.
+template <typename T>
+TypeHolder<T> returnTypeHolder() {
+    return TypeHolder<T>();
+}
+
 void wrapExample(lsst::utils::python::WrapperCollection & wrappers) {
     wrappers.wrapType(
         py::class_<Example>(wrappers.module, "Example"),
@@ -103,6 +131,7 @@ void wrapExample(lsst::utils::python::WrapperCollection & wrappers) {
         }
     );
 }
+
 
 PYBIND11_MODULE(_example, mod) {
     lsst::utils::python::WrapperCollection wrappers(mod, "example");
@@ -133,6 +162,28 @@ PYBIND11_MODULE(_example, mod) {
 
             mod.def("getName", (std::string (*)(int)) getName);
             mod.def("getName", (std::string (*)(double)) getName);
+
+            declareTypeHolder<std::uint16_t>(mod, "_uint16");
+            declareTypeHolder<std::int32_t>(mod, "_int32");
+            declareTypeHolder<float>(mod, "_float32");
+
+            mod.def(
+                "returnTypeHolder",
+                [](py::dtype const & dtype) {
+                    return lsst::utils::python::TemplateInvoker(
+                        // lambda to handle errors
+                        [](py::dtype const & dtype) -> py::object {
+                            return py::none();
+                        }
+                    ).apply(
+                        // universal lambda to handle successful match
+                        [](auto t) { return returnTypeHolder<decltype(t)>(); },
+                        dtype,
+                        lsst::utils::python::TemplateInvoker::Tag<std::uint16_t, std::int32_t, float>()
+                    );
+                },
+                "dtype"_a
+            );
         }
     );
     wrappers.finish();
