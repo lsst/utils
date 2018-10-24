@@ -58,7 +58,7 @@ def doImport(importable):
         for f in fromlist:
             try:
                 pytype = getattr(pytype, f)
-            except AttributeError as e:
+            except AttributeError:
                 raise ImportError(f"Could not get attribute '{f}' from '{module}'")
         return pytype
 
