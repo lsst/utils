@@ -66,6 +66,38 @@ std::size_t hashCombine(std::size_t seed, const T& value, Rest... rest) noexcept
     return hashCombine(seed, rest...);
 }
 
+/**
+ * Combine hashes in an iterable.
+ *
+ * This is provided as a convenience for those who need to hash a container.
+ *
+ * @tparam InputIterator an iterator to the objects to be hashed. The
+ *                       pointed-to type must have a valid (in particular,
+ *                       non-throwing) specialization of std::hash.
+ *
+ * @param seed An arbitrary starting value.
+ * @param begin, end The range to hash.
+ * @returns A combined hash for all the elements in [begin, end).
+ *
+ * @exceptsafe Shall not throw exceptions.
+ *
+ * To use it:
+ *
+ *     // Arbitrary seed; can change to get different hashes of same argument list
+ *     std::size_t seed = 0;
+ *     result = hashIterable(seed, container.begin(), container.end());
+ */
+// Note: not an overload of hashCombine to avoid ambiguity with hashCombine(size_t, T1, T2)
+// WARNING: should not be inline or constexpr; it can cause instantiation-order problems with std::hash<T>
+template <typename InputIterator>
+std::size_t hashIterable(std::size_t seed, InputIterator begin, InputIterator end) noexcept {
+    std::size_t result = 0;
+    for (; begin != end; ++begin) {
+        result = hashCombine(result, *begin);
+    }
+    return result;
+}
+
 }} // namespace lsst::utils
 
 #endif
