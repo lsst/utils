@@ -27,30 +27,76 @@
 namespace lsst {
 namespace utils {
 
-//@{
-/** Combine hashes
+/**
+ * Combine hashes
+ *
+ * A specialization of hashCombine for a trivial argument list.
+ */
+inline std::size_t hashCombine(std::size_t seed) noexcept { return seed; }
+
+/**
+ * Combine hashes
  *
  * This is provided as a convenience for those who need to hash a composite.
  * C++11 includes std::hash, but neglects to include a facility for
  * combining hashes.
  *
+ * @tparam T, Rest the types to hash. All types must have a valid (in
+ *                 particular, non-throwing) specialization of std::hash.
+ *
+ * @param seed An arbitrary starting value.
+ * @param value, rest The objects to hash.
+ * @returns A combined hash for all the arguments after `seed`.
+ *
+ * @exceptsafe Shall not throw exceptions.
+ *
  * To use it:
  *
- *    std::size_t seed = 0;
- *    result = hashCombine(seed, obj1, obj2, obj3);
- *
- * This solution is provided by Matteo Italia
- * https://stackoverflow.com/a/38140932/834250
+ *     // Arbitrary seed; can change to get different hashes of same argument list
+ *     std::size_t seed = 0;
+ *     result = hashCombine(seed, obj1, obj2, obj3);
  */
-inline std::size_t hashCombine(std::size_t seed) { return seed; }
-
+// This implementation is provided by Matteo Italia, https://stackoverflow.com/a/38140932/834250
+// Algorithm described at https://stackoverflow.com/a/27952689
+// WARNING: should not be inline or constexpr; it can cause instantiation-order problems with std::hash<T>
 template <typename T, typename... Rest>
-std::size_t hashCombine(std::size_t seed, const T& value, Rest... rest) {
+std::size_t hashCombine(std::size_t seed, const T& value, Rest... rest) noexcept {
     std::hash<T> hasher;
     seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     return hashCombine(seed, rest...);
 }
-//@}
+
+/**
+ * Combine hashes in an iterable.
+ *
+ * This is provided as a convenience for those who need to hash a container.
+ *
+ * @tparam InputIterator an iterator to the objects to be hashed. The
+ *                       pointed-to type must have a valid (in particular,
+ *                       non-throwing) specialization of std::hash.
+ *
+ * @param seed An arbitrary starting value.
+ * @param begin, end The range to hash.
+ * @returns A combined hash for all the elements in [begin, end).
+ *
+ * @exceptsafe Shall not throw exceptions.
+ *
+ * To use it:
+ *
+ *     // Arbitrary seed; can change to get different hashes of same argument list
+ *     std::size_t seed = 0;
+ *     result = hashIterable(seed, container.begin(), container.end());
+ */
+// Note: not an overload of hashCombine to avoid ambiguity with hashCombine(size_t, T1, T2)
+// WARNING: should not be inline or constexpr; it can cause instantiation-order problems with std::hash<T>
+template <typename InputIterator>
+std::size_t hashIterable(std::size_t seed, InputIterator begin, InputIterator end) noexcept {
+    std::size_t result = 0;
+    for (; begin != end; ++begin) {
+        result = hashCombine(result, *begin);
+    }
+    return result;
+}
 
 }} // namespace lsst::utils
 
