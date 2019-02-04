@@ -24,6 +24,7 @@ from . import backtrace
 
 from .get_caller_name import *
 from .doImport import *
+from .iterable import *
 from .wrappers import *
 
 from .version import *
