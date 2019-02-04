@@ -16,6 +16,7 @@ doc/doxygen.conf
 tests/.tests
 tests/.cache
 tests/testPybind11
+pytest_session.txt
 version.py
 tests/ieee
 examples/demangle
