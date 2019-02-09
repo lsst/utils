@@ -9,5 +9,4 @@ utils documentation preview
 .. toctree::
    :maxdepth: 1
 
-   utils/index
    lsst.utils/index

@@ -1,15 +1,27 @@
+.. py:currentmodule:: lsst.utils
+
 .. _lsst.utils:
 
 ##########
 lsst.utils
 ##########
 
-.. Paragraph that describes what this Python module does and links to related modules and frameworks.
+The ``lsst.utils`` module provides common code for tests, interfacing between C++ and Python, and debugging.
 
-.. Add subsections with toctree to individual topic pages.
+.. _lsst.utils-contributing:
+
+Contributing
+============
+
+``lsst.utils`` is developed at https://github.com/lsst/utils.
+You can find Jira issues for this module under the `utils <https://jira.lsstcorp.org/issues/?jql=project%20%3D%20DM%20AND%20component%20%3D%20utils>`_ component.
+
+.. _lsst.utils-pyapi:
 
 Python API reference
 ====================
 
 .. automodapi:: lsst.utils
+   :no-main-docstr:
 .. automodapi:: lsst.utils.tests
+   :no-main-docstr:
