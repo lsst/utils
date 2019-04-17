@@ -76,8 +76,6 @@ def init():
     """Initialize the memory tester and file descriptor leak tester."""
     global memId0
     global open_files
-    if dafBase:
-        memId0 = dafBase.Citizen.getNextMemId()  # used by MemoryTestCase
     # Reset the list of open files
     open_files = _get_open_files()
 
@@ -180,26 +178,6 @@ class MemoryTestCase(unittest.TestCase):
     def tearDownClass(cls):
         """Reset the leak counter when the tests have been completed"""
         init()
-
-    def testLeaks(self):
-        """Check for memory leaks in the preceding tests"""
-        if dafBase:
-            gc.collect()
-            global memId0, nleakPrintMax
-            nleak = dafBase.Citizen.census(0, memId0)
-            if nleak != 0:
-                plural = "s" if nleak != 1 else ""
-                print("\n%d Object%s leaked:" % (nleak, plural))
-
-                if nleak <= nleakPrintMax:
-                    print(dafBase.Citizen.census(memId0))
-                else:
-                    census = dafBase.Citizen.census()
-                    print("...")
-                    for i in range(nleakPrintMax - 1, -1, -1):
-                        print(census[i].repr())
-
-                self.fail("Leaked %d block%s" % (nleak, plural))
 
     def testFileDescriptorLeaks(self):
         """Check if any file descriptors are open since init() called."""
