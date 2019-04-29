@@ -19,12 +19,28 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from ._utils import *
-from . import backtrace
+import unittest
+import lsst.utils.tests
 
-from .get_caller_name import *
-from .doImport import *
-from .wrappers import *
-from .deprecated import *
+import lsst.utils
 
-from .version import *
+
+class DeprecatedTestCase(lsst.utils.tests.TestCase):
+    def test_deprecate_pybind11(self):
+        def old(x):
+            """Docstring"""
+            return x + 1
+        # Use an unusual category
+        old = lsst.utils.deprecate_pybind11(
+            old, reason="For testing.", category=PendingDeprecationWarning)
+        with self.assertWarnsRegex(
+                PendingDeprecationWarning,
+                r"Call to deprecated function \(or staticmethod\) old\. \(For testing\.\)$"):
+            # Check that the function still works
+            self.assertEqual(old(3), 4)
+        self.assertIn("Docstring", old.__doc__)
+        self.assertIn("For testing.", old.__doc__)
+
+
+if __name__ == "__main__":
+    unittest.main()
