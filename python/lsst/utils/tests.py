@@ -124,9 +124,6 @@ unittest.defaultTestLoader.suiteClass = suiteClassWrapper
 class MemoryTestCase(unittest.TestCase):
     """Check for resource leaks."""
 
-    def setUp(self):
-        pass
-
     @classmethod
     def tearDownClass(cls):
         """Reset the leak counter when the tests have been completed"""
