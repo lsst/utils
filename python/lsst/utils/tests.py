@@ -477,14 +477,6 @@ def inTestCase(func):
     return func
 
 
-@inTestCase
-def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
-    """.. note:: Deprecated in 12_0"""
-    warnings.warn("assertRaisesLsstCpp is deprecated; please just use TestCase.assertRaises",
-                  DeprecationWarning, stacklevel=2)
-    return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
-
-
 def debugger(*exceptions):
     """Decorator to enter the debugger when there's an uncaught exception
 
@@ -765,19 +757,3 @@ def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
         The values are not equal.
     """
     return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
-
-
-@inTestCase
-def assertClose(*args, **kwargs):
-    """.. note:: Deprecated in 12_0"""
-    warnings.warn("assertClose is deprecated; please use TestCase.assertFloatsAlmostEqual",
-                  DeprecationWarning, stacklevel=2)
-    return assertFloatsAlmostEqual(*args, **kwargs)
-
-
-@inTestCase
-def assertNotClose(*args, **kwargs):
-    """.. note:: Deprecated in 12_0"""
-    warnings.warn("assertNotClose is deprecated; please use TestCase.assertFloatsNotEqual",
-                  DeprecationWarning, stacklevel=2)
-    return assertFloatsNotEqual(*args, **kwargs)

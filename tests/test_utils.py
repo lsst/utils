@@ -225,22 +225,6 @@ class UtilsTestCase(lsst.utils.tests.TestCase):
             self.assertFloatsAlmostEqual(0.0, np.inf)
 
 
-class TestDeprecations(lsst.utils.tests.TestCase):
-    def test_deprecated_close(self):
-        with self.assertWarns(DeprecationWarning):
-            self.assertClose(1., 1.)
-
-    def test_deprecated_notclose(self):
-        with self.assertWarns(DeprecationWarning):
-            self.assertNotClose(1., 2.)
-
-    def test_deprecated_rasiesLsst(self):
-        def fails():
-            self.assertTrue(False)
-        with self.assertWarns(DeprecationWarning):
-            self.assertRaisesLsstCpp(AssertionError, fails)
-
-
 class TestMemory(lsst.utils.tests.MemoryTestCase):
     pass
 
