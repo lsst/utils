@@ -34,7 +34,7 @@ import numpy
 import functools
 import tempfile
 
-__all__ = ["init", "run", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
+__all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
            "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual"]
 
 # File descriptor leak test will be skipped if psutil can not be imported
@@ -42,17 +42,6 @@ try:
     import psutil
 except ImportError:
     psutil = None
-
-try:
-    import lsst.daf.base as dafBase
-except ImportError:
-    dafBase = None
-
-try:
-    type(memId0)
-except NameError:
-    memId0 = 0                          # ignore leaked blocks with IDs before memId0
-    nleakPrintMax = 20                  # maximum number of leaked blocks to print
 
 # Initialize the list of open files to an empty set
 open_files = set()
@@ -74,45 +63,9 @@ def _get_open_files():
 
 def init():
     """Initialize the memory tester and file descriptor leak tester."""
-    global memId0
     global open_files
     # Reset the list of open files
     open_files = _get_open_files()
-
-
-def run(suite, exit=True):
-    """Run a test suite and report the test return status to caller or shell.
-
-    .. note:: Deprecated in 13_0
-              Use `unittest.main()` instead, which automatically detects
-              all tests in a test case and does not require a test suite.
-
-    Parameters
-    ----------
-    suite : `unittest.TestSuite`
-        Test suite to run.
-    exit : `bool`, optional
-        If `True`, Python process will exit with the test exit status.
-
-    Returns
-    -------
-    status : `int`
-        If ``exit`` is `False`, will return 0 if the tests passed, or 1 if
-        the tests failed.
-    """
-
-    warnings.warn("lsst.utils.tests.run() is deprecated; please use unittest.main() instead",
-                  DeprecationWarning, stacklevel=2)
-
-    if unittest.TextTestRunner().run(suite).wasSuccessful():
-        status = 0
-    else:
-        status = 1
-
-    if exit:
-        sys.exit(status)
-    else:
-        return status
 
 
 def sort_tests(tests):
@@ -169,10 +122,7 @@ unittest.defaultTestLoader.suiteClass = suiteClassWrapper
 
 
 class MemoryTestCase(unittest.TestCase):
-    """Check for memory leaks since memId0 was allocated"""
-
-    def setUp(self):
-        pass
+    """Check for resource leaks."""
 
     @classmethod
     def tearDownClass(cls):
@@ -477,14 +427,6 @@ def inTestCase(func):
     return func
 
 
-@inTestCase
-def assertRaisesLsstCpp(testcase, excClass, callableObj, *args, **kwargs):
-    """.. note:: Deprecated in 12_0"""
-    warnings.warn("assertRaisesLsstCpp is deprecated; please just use TestCase.assertRaises",
-                  DeprecationWarning, stacklevel=2)
-    return testcase.assertRaises(excClass, callableObj, *args, **kwargs)
-
-
 def debugger(*exceptions):
     """Decorator to enter the debugger when there's an uncaught exception
 
@@ -765,19 +707,3 @@ def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
         The values are not equal.
     """
     return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
-
-
-@inTestCase
-def assertClose(*args, **kwargs):
-    """.. note:: Deprecated in 12_0"""
-    warnings.warn("assertClose is deprecated; please use TestCase.assertFloatsAlmostEqual",
-                  DeprecationWarning, stacklevel=2)
-    return assertFloatsAlmostEqual(*args, **kwargs)
-
-
-@inTestCase
-def assertNotClose(*args, **kwargs):
-    """.. note:: Deprecated in 12_0"""
-    warnings.warn("assertNotClose is deprecated; please use TestCase.assertFloatsNotEqual",
-                  DeprecationWarning, stacklevel=2)
-    return assertFloatsNotEqual(*args, **kwargs)
