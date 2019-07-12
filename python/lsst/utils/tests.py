@@ -34,7 +34,7 @@ import numpy
 import functools
 import tempfile
 
-__all__ = ["init", "run", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
+__all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
            "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual"]
 
 # File descriptor leak test will be skipped if psutil can not be imported
@@ -78,41 +78,6 @@ def init():
     global open_files
     # Reset the list of open files
     open_files = _get_open_files()
-
-
-def run(suite, exit=True):
-    """Run a test suite and report the test return status to caller or shell.
-
-    .. note:: Deprecated in 13_0
-              Use `unittest.main()` instead, which automatically detects
-              all tests in a test case and does not require a test suite.
-
-    Parameters
-    ----------
-    suite : `unittest.TestSuite`
-        Test suite to run.
-    exit : `bool`, optional
-        If `True`, Python process will exit with the test exit status.
-
-    Returns
-    -------
-    status : `int`
-        If ``exit`` is `False`, will return 0 if the tests passed, or 1 if
-        the tests failed.
-    """
-
-    warnings.warn("lsst.utils.tests.run() is deprecated; please use unittest.main() instead",
-                  DeprecationWarning, stacklevel=2)
-
-    if unittest.TextTestRunner().run(suite).wasSuccessful():
-        status = 0
-    else:
-        status = 1
-
-    if exit:
-        sys.exit(status)
-    else:
-        return status
 
 
 def sort_tests(tests):
