@@ -43,17 +43,6 @@ try:
 except ImportError:
     psutil = None
 
-try:
-    import lsst.daf.base as dafBase
-except ImportError:
-    dafBase = None
-
-try:
-    type(memId0)
-except NameError:
-    memId0 = 0                          # ignore leaked blocks with IDs before memId0
-    nleakPrintMax = 20                  # maximum number of leaked blocks to print
-
 # Initialize the list of open files to an empty set
 open_files = set()
 
@@ -74,7 +63,6 @@ def _get_open_files():
 
 def init():
     """Initialize the memory tester and file descriptor leak tester."""
-    global memId0
     global open_files
     # Reset the list of open files
     open_files = _get_open_files()
@@ -134,7 +122,7 @@ unittest.defaultTestLoader.suiteClass = suiteClassWrapper
 
 
 class MemoryTestCase(unittest.TestCase):
-    """Check for memory leaks since memId0 was allocated"""
+    """Check for resource leaks."""
 
     def setUp(self):
         pass
