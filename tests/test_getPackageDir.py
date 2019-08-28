@@ -23,7 +23,6 @@ import sys
 import os
 import unittest
 
-import lsst.pex.exceptions
 import lsst.utils.tests
 from lsst.utils import getPackageDir
 
@@ -36,7 +35,10 @@ class GetPackageDirTestCase(unittest.TestCase):
         # Confirm that we have a correct Python exception and pex exception
         with self.assertRaises(LookupError) as cm:
             getPackageDir("nameOfNonexistendPackage2234q?#!")
-        self.assertIsInstance(cm.exception, lsst.pex.exceptions.NotFoundError)
+
+        # Deliberately do not import pex_exceptions so as not to bias the
+        # tests. Check for the name instead.
+        self.assertIn("NotFoundError", type(cm.exception).__name__)
 
     def testUnicodeBasics(self):
         utilsPath = getPackageDir(u"utils")
