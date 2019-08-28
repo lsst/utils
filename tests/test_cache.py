@@ -22,7 +22,6 @@
 import unittest
 
 import lsst.utils.tests
-from lsst.pex.exceptions import NotFoundError
 from _cache import NumbersCache
 
 
@@ -97,7 +96,7 @@ class CacheTestCase(lsst.utils.tests.TestCase):
             self.assertIn(ii, cache, "Should be present")
             self.assertEqual(cache[ii], numberToWords(ii), "Value accessible and as expected")
         self.assertListEqual(actualContents, expectedContents, "Contents are as expected")
-        with self.assertRaises(NotFoundError):
+        with self.assertRaises(LookupError):
             cache[maximum - capacity - 1]
         newCapacity = 5
         cache.reserve(newCapacity)
