@@ -4,5 +4,11 @@ scripts.BasicSConscript.python('_example', ['example.cc'])
 scripts.BasicSConscript.python('_backtrace', ['backtrace.cc'])
 scripts.BasicSConscript.python('_cache', ['cache.cc'])
 scripts.BasicSConscript.python('_cppIndex', ['cppIndex.cc'])
-scripts.BasicSConscript.tests(noBuildList=['example.cc', 'backtrace.cc', 'cache.cc', 'cppIndex.cc'],
+scripts.BasicSConscript.python('_inheritance', ['inheritance.cc'])
+scripts.BasicSConscript.tests(noBuildList=['example.cc',
+                                           'backtrace.cc',
+                                           'cache.cc',
+                                           'cppIndex.cc',
+                                           'inheritance.cc',
+                                           ],
                               pyList=[])
