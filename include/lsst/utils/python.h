@@ -151,7 +151,7 @@ inline std::pair<std::size_t, std::size_t> cppIndex(std::ptrdiff_t size_i, std::
                                                     std::ptrdiff_t i, std::ptrdiff_t j) {
     try {
         return {cppIndex(size_i, i), cppIndex(size_j, j)};
-    } catch (lsst::pex::exceptions::OutOfRangeError) {
+    } catch (lsst::pex::exceptions::OutOfRangeError const&) {
         std::ostringstream os;
         os << "Index (" << i << ", " << j << ") not in range ["
            << -size_i << ", " << size_i - 1 << "], ["
