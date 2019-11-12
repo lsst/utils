@@ -446,7 +446,7 @@ def debugger(*exceptions):
     Consider using ``pytest --pdb`` instead of this decorator.
     """
     if not exceptions:
-        exceptions = (AssertionError, )
+        exceptions = (Exception, )
 
     def decorator(f):
         @functools.wraps(f)
