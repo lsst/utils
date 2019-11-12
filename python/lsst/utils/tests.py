@@ -35,7 +35,8 @@ import functools
 import tempfile
 
 __all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
-           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual"]
+           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
+           "debugger", "classParameters", "methodParameters"]
 
 # File descriptor leak test will be skipped if psutil can not be imported
 try:
