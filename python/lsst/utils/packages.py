@@ -28,7 +28,7 @@ import importlib
 import subprocess
 import logging
 import pickle as pickle
-from collections import Mapping
+from collections.abc import Mapping
 
 from .versions import getRuntimeVersions
 
