@@ -26,9 +26,6 @@ import tempfile
 
 import lsst.base
 
-from future import standard_library
-standard_library.install_aliases()
-
 
 class PackagesTestCase(unittest.TestCase):
     """Tests for package version collection
