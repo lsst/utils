@@ -35,7 +35,8 @@ import functools
 import tempfile
 
 __all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
-           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual"]
+           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
+           "debugger", "classParameters", "methodParameters"]
 
 # File descriptor leak test will be skipped if psutil can not be imported
 try:
@@ -446,7 +447,7 @@ def debugger(*exceptions):
     Consider using ``pytest --pdb`` instead of this decorator.
     """
     if not exceptions:
-        exceptions = (AssertionError, )
+        exceptions = (Exception, )
 
     def decorator(f):
         @functools.wraps(f)
@@ -707,3 +708,111 @@ def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
         The values are not equal.
     """
     return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
+
+
+def _settingsIterator(settings):
+    """Return an iterator for the provided test settings
+
+    Parameters
+    ----------
+    settings : `dict` (`str`: iterable)
+        Lists of test parameters. Each should be an iterable of the same length.
+
+    Raises
+    ------
+    AssertionError
+        If the ``settings`` are not of the same length.
+
+    Yields
+    ------
+    parameters : `dict` (`str`: anything)
+        Set of parameters.
+    """
+    num = len(next(iter(settings.values())))  # Number of settings
+    for name, values in settings.items():
+        if isinstance(values, str):
+            # Probably meant as a single-element string, rather than an iterable of chars
+            values = [values]
+            settings[name] = values
+        assert len(values) == num, f"Length mismatch for setting {name}: {len(values)} vs {num}"
+    for ii in range(num):
+        values = [settings[kk][ii] for kk in settings]
+        yield dict(zip(settings.keys(), values))
+
+
+def classParameters(**settings):
+    """Class decorator for generating unit tests
+
+    This decorator generates classes with class variables according to the
+    supplied ``settings``.
+
+    Parameters
+    ----------
+    **settings : `dict` (`str`: iterable)
+        The lists of test parameters to set as class variables in turn. Each
+        should be an iterable of the same length.
+
+    Example
+    -------
+
+        @classParameters(foo=[1, 2], bar=[3, 4])
+        class MyTestCase(unittest.TestCase):
+            ...
+
+    will generate two classes, as if you wrote:
+
+        class MyTestCase_1_3(unittest.TestCase):
+            foo = 1
+            bar = 3
+            ...
+
+        class MyTestCase_2_4(unittest.TestCase):
+            foo = 2
+            bar = 4
+            ...
+
+    Note that the values are embedded in the class name.
+    """
+    def decorator(cls):
+        module = sys.modules[cls.__module__].__dict__
+        for params in _settingsIterator(settings):
+            name = f"{cls.__name__}_{'_'.join(str(vv) for vv in params.values())}"
+            bindings = dict(cls.__dict__)
+            bindings.update(params)
+            module[name] = type(name, (cls,), bindings)
+    return decorator
+
+
+def methodParameters(**settings):
+    """Method decorator for unit tests
+
+    This decorator iterates over the supplied settings, using
+    ``TestCase.subTest`` to communicate the values in the event of a failure.
+
+    Parameters
+    ----------
+    **settings : `dict` (`str`: iterable)
+        The lists of test parameters. Each should be an iterable of the same
+        length.
+
+    Example
+    -------
+
+        @methodParameters(foo=[1, 2], bar=[3, 4])
+        def testSomething(self, foo, bar):
+            ...
+
+    will run:
+
+        testSomething(foo=1, bar=3)
+        testSomething(foo=2, bar=4)
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            for params in _settingsIterator(settings):
+                kwargs.update(params)
+                with self.subTest(**params):
+                    func(self, *args, **kwargs)
+        return wrapper
+    return decorator
