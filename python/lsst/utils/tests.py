@@ -717,6 +717,8 @@ def _settingsIterator(settings):
     ----------
     settings : `dict` (`str`: iterable)
         Lists of test parameters. Each should be an iterable of the same length.
+        If a string is provided as an iterable, it will be converted to a list
+        of a single string.
 
     Raises
     ------
@@ -728,12 +730,12 @@ def _settingsIterator(settings):
     parameters : `dict` (`str`: anything)
         Set of parameters.
     """
-    num = len(next(iter(settings.values())))  # Number of settings
     for name, values in settings.items():
         if isinstance(values, str):
             # Probably meant as a single-element string, rather than an iterable of chars
-            values = [values]
-            settings[name] = values
+            settings[name] = [values]
+    num = len(next(iter(settings.values())))  # Number of settings
+    for name, values in settings.items():
         assert len(values) == num, f"Length mismatch for setting {name}: {len(values)} vs {num}"
     for ii in range(num):
         values = [settings[kk][ii] for kk in settings]
