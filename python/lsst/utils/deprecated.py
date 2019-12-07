@@ -23,7 +23,7 @@ import deprecated.sphinx
 import functools
 
 
-def deprecate_pybind11(func, reason, category=FutureWarning):
+def deprecate_pybind11(obj, reason, category=FutureWarning):
     """Deprecate a pybind11-wrapped C++ interface function, method or class.
 
     This needs to use a pass-through Python wrapper so that
@@ -35,7 +35,7 @@ def deprecate_pybind11(func, reason, category=FutureWarning):
 
     Parameters
     ----------
-    func : function, method, or class
+    obj : function, method, or class
         The function, method, or class to deprecate.
     reason : `str`
         Reason for deprecation, passed to `~deprecated.sphinx.deprecated`
@@ -44,8 +44,8 @@ def deprecate_pybind11(func, reason, category=FutureWarning):
 
     Returns
     -------
-    func : function
-        Wrapped function
+    obj : function, method, or class
+        Wrapped function, method, or class
 
     Examples
     -------
@@ -55,7 +55,9 @@ def deprecate_pybind11(func, reason, category=FutureWarning):
             reason="Replaced by getPhotoCalib. (Will be removed in 18.0)",
             category=FutureWarning))
     """
-    @functools.wraps(func)
+
+    @functools.wraps(obj)
     def internal(*args, **kwargs):
-        return func(*args, **kwargs)
+        return obj(*args, **kwargs)
+
     return deprecated.sphinx.deprecated(reason=reason, category=category)(internal)
