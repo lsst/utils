@@ -48,12 +48,12 @@ def deprecate_pybind11(obj, reason, category=FutureWarning):
         Wrapped function, method, or class
 
     Examples
-    -------
+    --------
     .. code-block:: python
 
-    ExposureF.getCalib = deprecate_pybind11(ExposureF.getCalib,
-            reason="Replaced by getPhotoCalib. (Will be removed in 18.0)",
-            category=FutureWarning))
+       ExposureF.getCalib = deprecate_pybind11(ExposureF.getCalib,
+               reason="Replaced by getPhotoCalib. (Will be removed in 18.0)",
+               category=FutureWarning))
     """
 
     @functools.wraps(obj)
