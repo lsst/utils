@@ -754,14 +754,15 @@ def classParameters(**settings):
         The lists of test parameters to set as class variables in turn. Each
         should be an iterable of the same length.
 
-    Example
-    -------
+    Examples
+    --------
+    ::
 
         @classParameters(foo=[1, 2], bar=[3, 4])
         class MyTestCase(unittest.TestCase):
             ...
 
-    will generate two classes, as if you wrote:
+    will generate two classes, as if you wrote::
 
         class MyTestCase_1_3(unittest.TestCase):
             foo = 1
@@ -797,14 +798,15 @@ def methodParameters(**settings):
         The lists of test parameters. Each should be an iterable of the same
         length.
 
-    Example
-    -------
+    Examples
+    --------
+    ::
 
         @methodParameters(foo=[1, 2], bar=[3, 4])
         def testSomething(self, foo, bar):
             ...
 
-    will run:
+    will run::
 
         testSomething(foo=1, bar=3)
         testSomething(foo=2, bar=4)
