@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+__all__ = ['deprecate_pybind11', 'suppress_deprecations']
+
 import deprecated.sphinx
 import functools
 import unittest.mock
