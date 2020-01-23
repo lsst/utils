@@ -74,7 +74,9 @@ def suppress_deprecations(category=FutureWarning):
     Naively, one might attempt to suppress these warnings by using
     `~warnings.catch_warnings`. However, `~deprecated.sphinx.deprecated`
     attempts to install its own filter, overriding that. This convenience
-    method works around this and properly suppresses the warnings.
+    method works around this and properly suppresses the warnings by providing
+    a mock `~warnings.simplefilter` for `~deprecated.sphinx.deprecated` to
+    call.
 
     Parameters
     ----------
