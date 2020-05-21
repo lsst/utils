@@ -31,18 +31,13 @@ import sys
 import unittest
 import warnings
 import numpy
+import psutil
 import functools
 import tempfile
 
 __all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
            "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
            "debugger", "classParameters", "methodParameters"]
-
-# File descriptor leak test will be skipped if psutil can not be imported
-try:
-    import psutil
-except ImportError:
-    psutil = None
 
 # Initialize the list of open files to an empty set
 open_files = set()
@@ -57,8 +52,6 @@ def _get_open_files():
     open_files : `set`
         Set containing the list of open files.
     """
-    if psutil is None:
-        return set()
     return set(p.path for p in psutil.Process().open_files())
 
 
@@ -132,8 +125,6 @@ class MemoryTestCase(unittest.TestCase):
 
     def testFileDescriptorLeaks(self):
         """Check if any file descriptors are open since init() called."""
-        if psutil is None:
-            self.skipTest("Unable to test file descriptor leaks. psutil unavailable.")
         gc.collect()
         global open_files
         now_open = _get_open_files()
