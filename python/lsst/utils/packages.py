@@ -414,3 +414,22 @@ class Packages:
         """
         return {pkg: (self._packages[pkg], other._packages[pkg]) for
                 pkg in self._names & other._names if self._packages[pkg] != other._packages[pkg]}
+
+
+# Register YAML representers
+
+def pkg_representer(dumper, data):
+    """Represent Packages as a simple dict"""
+    return dumper.represent_mapping("lsst.base.Packages", data._packages,
+                                    flow_style=None)
+
+
+yaml.add_representer(Packages, pkg_representer)
+
+
+def pkg_constructor(loader, node):
+    yield Packages(loader.construct_mapping(node, deep=True))
+
+
+for loader in (yaml.Loader, yaml.CLoader, yaml.UnsafeLoader, yaml.SafeLoader, yaml.FullLoader):
+    yaml.add_constructor("lsst.base.Packages", pkg_constructor, Loader=loader)
