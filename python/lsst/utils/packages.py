@@ -325,6 +325,12 @@ class Packages:
     def __iter__(self):
         return iter(self._packages)
 
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+
+        return self._packages == other._packages
+
     def update(self, other):
         """Update packages with contents of another set of packages.
 
