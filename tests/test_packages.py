@@ -86,8 +86,10 @@ class PackagesTestCase(unittest.TestCase):
         new_pkl = self._writeTempFile(packages, ".pkl")
         new_yaml = self._writeTempFile(packages, ".yaml")
 
-        self.assertIsInstance(new, lsst.base.Packages)
-        self.assertIsInstance(new_yaml, lsst.base.Packages)
+        self.assertIsInstance(new, lsst.base.Packages,
+                              f"Checking type ({type(new)}) from pickle")
+        self.assertIsInstance(new_yaml, lsst.base.Packages,
+                              f"Checking type ({type(new_yaml)}) from YAML")
         self.assertEqual(new, packages)
         self.assertEqual(new_pkl, new)
         self.assertEqual(new, new_yaml)
