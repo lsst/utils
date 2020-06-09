@@ -62,13 +62,12 @@ class PackagesTestCase(unittest.TestCase):
         """
         lsst.base.getRuntimeVersions()
 
-    def testPackages(self):
-        """Test the Packages class"""
-        packages = lsst.base.Packages.fromSystem()
-
-        # Test pickling
+    def _writeTempFile(self, packages, suffix):
+        """Write packages to a temp file using the supplied suffix and read
+        back.
+        """
         # Can't use lsst.utils.tests.getTempFilePath because we're its dependency
-        temp = tempfile.NamedTemporaryFile(prefix="packages.", suffix=".pickle", delete=False)
+        temp = tempfile.NamedTemporaryFile(prefix="packages.", suffix=suffix, delete=False)
         tempName = temp.name
         temp.close()  # We don't use the fd, just want a filename
         try:
@@ -76,6 +75,29 @@ class PackagesTestCase(unittest.TestCase):
             new = lsst.base.Packages.read(tempName)
         finally:
             os.unlink(tempName)
+        return new
+
+    def testPackages(self):
+        """Test the Packages class"""
+        packages = lsst.base.Packages.fromSystem()
+
+        # Test pickling and YAML
+        new = self._writeTempFile(packages, ".pickle")
+        new_pkl = self._writeTempFile(packages, ".pkl")
+        new_yaml = self._writeTempFile(packages, ".yaml")
+
+        self.assertIsInstance(new, lsst.base.Packages)
+        self.assertIsInstance(new_yaml, lsst.base.Packages)
+        self.assertEqual(new, packages)
+        self.assertEqual(new_pkl, new)
+        self.assertEqual(new, new_yaml)
+
+        with self.assertRaises(ValueError):
+            self._writeTempFile(packages, ".txt")
+
+        with self.assertRaises(ValueError):
+            # .txt extension is not recognized
+            lsst.base.Packages.read("something.txt")
 
         # 'packages' and 'new' should have identical content
         self.assertDictEqual(packages.difference(new), {})
