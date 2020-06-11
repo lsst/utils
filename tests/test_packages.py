@@ -134,6 +134,22 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(packages.extra(new), {})
         self.assertEqual(len(packages), len(new))
 
+        # Serialize via bytes
+        for format in ("pickle", "yaml"):
+            asbytes = new.toBytes(format)
+            from_bytes = lsst.base.Packages.fromBytes(asbytes, format)
+            self.assertEqual(from_bytes, new)
+
+        with self.assertRaises(ValueError):
+            new.toBytes("unknown_format")
+
+        with self.assertRaises(ValueError):
+            lsst.base.Packages.fromBytes(from_bytes, "unknown_format")
+
+        with self.assertRaises(TypeError):
+            some_yaml = b"list: [1, 2]"
+            lsst.base.Packages.fromBytes(some_yaml, "yaml")
+
 
 if __name__ == "__main__":
     unittest.main()
