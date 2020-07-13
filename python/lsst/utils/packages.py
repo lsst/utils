@@ -82,7 +82,7 @@ def getVersionFromPythonModule(module):
         if buildtime:
             version += " with " + " ".join("%s=%s" % (pkg, deps[pkg])
                                            for pkg in sorted(buildtime))
-    return version
+    return str(version)
 
 
 def getPythonPackages():
