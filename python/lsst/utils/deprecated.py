@@ -29,7 +29,7 @@ import warnings
 from contextlib import contextmanager
 
 
-def deprecate_pybind11(obj, reason, category=FutureWarning):
+def deprecate_pybind11(obj, reason, version=None, category=FutureWarning):
     """Deprecate a pybind11-wrapped C++ interface function, method or class.
 
     This needs to use a pass-through Python wrapper so that
@@ -45,6 +45,9 @@ def deprecate_pybind11(obj, reason, category=FutureWarning):
         The function, method, or class to deprecate.
     reason : `str`
         Reason for deprecation, passed to `~deprecated.sphinx.deprecated`
+    version : 'str'
+        Next major version in which the interface will be deprecated,
+        passed to `~deprecated.sphinx.deprecated`
     category : `Warning`
         Warning category, passed to `~deprecated.sphinx.deprecated`
 
@@ -59,14 +62,17 @@ def deprecate_pybind11(obj, reason, category=FutureWarning):
 
        ExposureF.getCalib = deprecate_pybind11(ExposureF.getCalib,
                reason="Replaced by getPhotoCalib. (Will be removed in 18.0)",
-               category=FutureWarning))
+               version="17.0", category=FutureWarning))
     """
 
     @functools.wraps(obj)
     def internal(*args, **kwargs):
         return obj(*args, **kwargs)
 
-    return deprecated.sphinx.deprecated(reason=reason, category=category)(internal)
+    return deprecated.sphinx.deprecated(
+        reason=reason,
+        version=version,
+        category=category)(internal)
 
 
 @contextmanager
