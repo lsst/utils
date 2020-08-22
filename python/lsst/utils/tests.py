@@ -158,7 +158,7 @@ class ExecutablesTestCase(unittest.TestCase):
         no tests were found."""
 
         if cls.TESTS_DISCOVERED == 0:
-            raise Exception("No executables discovered.")
+            raise RuntimeError("No executables discovered.")
 
     def testSanity(self):
         """This test exists to ensure that there is at least one test to be
