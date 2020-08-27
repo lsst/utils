@@ -47,18 +47,18 @@ class PackagesTestCase(unittest.TestCase):
     def testEnvironment(self):
         """Test getting versions from the environment
 
-        Unfortunately, none of the products that need their versions divined from the
-        environment are dependencies of this package, and so all we can do is test
-        that this doesn't fall over.
+        Unfortunately, none of the products that need their versions divined
+        from the environment are dependencies of this package, and so all we
+        can do is test that this doesn't fall over.
         """
         lsst.base.getEnvironmentPackages()
 
     def testRuntime(self):
         """Test getting versions from runtime libraries
 
-        Unfortunately, none of the products that we get runtime versions from are
-        dependencies of this package, and so all we can do is test that this doesn't
-        fall over.
+        Unfortunately, none of the products that we get runtime versions from
+        are dependencies of this package, and so all we can do is test that
+        this doesn't fall over.
         """
         lsst.base.getRuntimeVersions()
 
@@ -66,7 +66,8 @@ class PackagesTestCase(unittest.TestCase):
         """Write packages to a temp file using the supplied suffix and read
         back.
         """
-        # Can't use lsst.utils.tests.getTempFilePath because we're its dependency
+        # Can't use lsst.utils.tests.getTempFilePath because we're its
+        # dependency
         temp = tempfile.NamedTemporaryFile(prefix="packages.", suffix=suffix, delete=False)
         tempName = temp.name
         temp.close()  # We don't use the fd, just want a filename
@@ -112,8 +113,10 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(new.missing(packages), {})
         self.assertDictEqual(new.extra(packages), {})
 
-        # Now load an obscure python package and the list of packages should change
-        import smtpd  # noqa Shouldn't be used by anything we've previously imported
+        # Now load an obscure python package and the list of packages should
+        # change
+        # Shouldn't be used by anything we've previously imported
+        import smtpd  # noqa: F401
         new = lsst.base.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
