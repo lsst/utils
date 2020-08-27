@@ -28,6 +28,7 @@ import importlib
 import subprocess
 import logging
 import pickle as pickle
+import re
 import yaml
 from collections.abc import Mapping
 
@@ -228,8 +229,22 @@ def getCondaPackages():
     except ImportError:
         return {}
 
+    # Get the installed package list
     versions_json = run_command(Commands.LIST, "--json")
-    return {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json[0])}
+    packages = {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json[0])}
+
+    # Try to work out the conda environment name and include it as a fake
+    # package. The "obvious" way of running "conda info --json" does give
+    # access to the active_prefix but takes about 2 seconds to run.
+    # The equivalent to the code above would be:
+    #    info_json = run_command(Commands.INFO, "--json")
+    # As a comporomise look for the env name in the path to the python
+    # executable
+    match = re.search(r"/envs/(.*?)/bin/", sys.executable)
+    if match:
+        packages["conda_env"] = match.group(1)
+
+    return packages
 
 
 class Packages:
