@@ -207,6 +207,31 @@ def getEnvironmentPackages():
     return packages
 
 
+def getCondaPackages():
+    """Get products and their versions from the conda environment.
+
+    Returns
+    -------
+    packages : `dict`
+        Keys (type `str`) are product names; values (type `str`) are their
+        versions.
+
+    Notes
+    -----
+    Returns empty result if a conda environment is not in use or can not
+    be queried.
+    """
+
+    try:
+        import json
+        from conda.cli.python_api import Commands, run_command
+    except ImportError:
+        return {}
+
+    versions_json = run_command(Commands.LIST, "--json")
+    return {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json[0])}
+
+
 class Packages:
     """A table of packages and their versions.
 
@@ -278,6 +303,7 @@ class Packages:
         packages : `Packages`
         """
         packages = {}
+        packages.update(getCondaPackages())
         packages.update(getPythonPackages())
         packages.update(getRuntimeVersions())
         packages.update(getEnvironmentPackages())  # Should be last, to override products with LOCAL versions
