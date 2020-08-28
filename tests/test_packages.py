@@ -62,6 +62,14 @@ class PackagesTestCase(unittest.TestCase):
         """
         lsst.base.getRuntimeVersions()
 
+    def testConda(self):
+        """Test getting versions from conda environement
+
+        We do not rely on being run in a conda environment so all we can do is
+        test that this doesn't fall over.
+        """
+        lsst.base.getCondaPackages()
+
     def _writeTempFile(self, packages, suffix):
         """Write packages to a temp file using the supplied suffix and read
         back.

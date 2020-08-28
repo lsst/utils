@@ -36,7 +36,8 @@ from .versions import getRuntimeVersions
 
 log = logging.getLogger(__name__)
 
-__all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages", "Packages"]
+__all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages",
+           "getCondaPackages", "Packages"]
 
 
 # Packages used at build-time (e.g., header-only)
