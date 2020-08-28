@@ -31,6 +31,7 @@ import pickle as pickle
 import re
 import yaml
 from collections.abc import Mapping
+from functools import lru_cache
 
 from .versions import getRuntimeVersions
 
@@ -149,6 +150,7 @@ def getPythonPackages():
 _eups = None  # Singleton Eups object
 
 
+@lru_cache(maxsize=1)
 def getEnvironmentPackages():
     """Get products and their versions from the environment.
 
@@ -217,6 +219,7 @@ def getEnvironmentPackages():
     return packages
 
 
+@lru_cache(maxsize=1)
 def getCondaPackages():
     """Get products and their versions from the conda environment.
 
