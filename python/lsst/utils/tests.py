@@ -34,6 +34,7 @@ import numpy
 import psutil
 import functools
 import tempfile
+import shutil
 
 __all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
            "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
@@ -811,3 +812,15 @@ def methodParameters(**settings):
                     func(self, *args, **kwargs)
         return wrapper
     return decorator
+
+
+@contextlib.contextmanager
+def temporaryDirectory():
+    """Context manager that creates and destroys a temporary directory.
+
+    The difference from `tempfile.TemporaryDirectory` is that this ignores
+    errors when deleting a directory, which may happen with some filesystems.
+    """
+    tmpdir = tempfile.mkdtemp()
+    yield tmpdir
+    shutil.rmtree(tmpdir, ignore_errors=True)
