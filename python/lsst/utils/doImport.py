@@ -52,14 +52,15 @@ def doImport(importable):
     if not isinstance(importable, str):
         raise TypeError(f"Unhandled type of importable, val: {importable}")
 
-    def tryImport(module, fromlist):
+    def tryImport(module, fromlist, previousError):
         pytype = importlib.import_module(module)
         # Can have functions inside classes inside modules
         for f in fromlist:
             try:
                 pytype = getattr(pytype, f)
             except AttributeError:
-                raise ImportError(f"Could not get attribute '{f}' from '{module}'")
+                extra = f"({previousError})" if previousError is not None else ""
+                raise ImportError(f"Could not get attribute '{f}' from '{module}' {extra}")
         return pytype
 
     # Go through the import path attempting to load the module
@@ -67,21 +68,23 @@ def doImport(importable):
     # from the module list to the attribute list until something works.
     moduleComponents = importable.split(".")
     infileComponents = []
+    previousError = None
 
     while moduleComponents:
         try:
-            pytype = tryImport(".".join(moduleComponents), infileComponents)
+            pytype = tryImport(".".join(moduleComponents), infileComponents, previousError)
             if not infileComponents and hasattr(pytype, moduleComponents[-1]):
                 # This module has an attribute with the same name as the
                 # module itself (like doImport.doImport, actually!).
                 # If that attribute was lifted to the package, we should
                 # return the attribute, not the module.
                 try:
-                    return tryImport(".".join(moduleComponents[:-1]), moduleComponents[-1:])
+                    return tryImport(".".join(moduleComponents[:-1]), moduleComponents[-1:], previousError)
                 except ModuleNotFoundError:
                     pass
             return pytype
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
+            previousError = str(e)
             # Move element from module to file and try again
             infileComponents.insert(0, moduleComponents.pop())
 
