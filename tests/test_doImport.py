@@ -32,6 +32,9 @@ class ImportTestCase(lsst.utils.tests.TestCase):
         c = doImport("lsst.utils.tests.TestCase")
         self.assertEqual(c, lsst.utils.tests.TestCase)
 
+        c = doImport("lsst.utils.tests.TestCase.assertFloatsAlmostEqual")
+        self.assertEqual(c, lsst.utils.tests.TestCase.assertFloatsAlmostEqual)
+
         c = doImport("lsst.utils.doImport")
         self.assertEqual(type(c), type(doImport))
         self.assertTrue(inspect.isfunction(c))
@@ -59,6 +62,31 @@ class ImportTestCase(lsst.utils.tests.TestCase):
 
         with self.assertRaises(TypeError):
             doImport([])
+
+        # Use a special test module
+        with self.assertRaises(RuntimeError):
+            doImport("import_test.two.three.runtime")
+
+        with self.assertRaises(ImportError):
+            doImport("import_test.two.three.success.not_okay")
+
+        with self.assertRaises(ImportError):
+            doImport("import_test.two.three.fail")
+
+        # Check that the error message reports the notthere failure
+        try:
+            doImport("import_test.two.three.fail.myfunc")
+        except ImportError as e:
+            self.assertIn("notthere", str(e))
+
+        c = doImport("import_test.two.three.success")
+        self.assertTrue(c.okay())
+        c = doImport("import_test.two.three.success.okay")
+        self.assertTrue(c())
+        c = doImport("import_test.two.three.success.Container")
+        self.assertEqual(c.inside(), "1")
+        c = doImport("import_test.two.three.success.Container.inside")
+        self.assertEqual(c(), "1")
 
 
 if __name__ == "__main__":
