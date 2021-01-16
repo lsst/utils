@@ -331,8 +331,8 @@ class Packages:
         packages : `Packages`
         """
         packages = {}
-        packages.update(getCondaPackages())
         packages.update(getPythonPackages())
+        packages.update(getCondaPackages())
         packages.update(getRuntimeVersions())
         packages.update(getEnvironmentPackages())  # Should be last, to override products with LOCAL versions
         return cls(packages)
