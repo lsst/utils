@@ -50,8 +50,8 @@ def isAttributeSafeToTransfer(name, value):
     classes, leaving only those explicitly defined in a class decorated by
     `continueClass` or registered with an instance of `TemplateMeta`.
     """
-    if name.startswith("__") and (value is getattr(object, name, None) or
-                                  name in INTRINSIC_SPECIAL_ATTRIBUTES):
+    if name.startswith("__") and (value is getattr(object, name, None)
+                                  or name in INTRINSIC_SPECIAL_ATTRIBUTES):
         return False
     return True
 
