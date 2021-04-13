@@ -29,7 +29,7 @@ import warnings
 from contextlib import contextmanager
 
 
-def deprecate_pybind11(obj, reason, version=None, category=FutureWarning):
+def deprecate_pybind11(obj, reason, version, category=FutureWarning):
     """Deprecate a pybind11-wrapped C++ interface function, method or class.
 
     This needs to use a pass-through Python wrapper so that
