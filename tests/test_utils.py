@@ -223,6 +223,25 @@ class UtilsTestCase(lsst.utils.tests.TestCase):
             self.assertFloatsAlmostEqual(np.nan, 0.0)
         with self.assertRaises(AssertionError):
             self.assertFloatsAlmostEqual(0.0, np.inf)
+        self.assertFloatsEqual(np.nan, np.nan, ignoreNaNs=True)
+        self.assertFloatsEqual(np.nan, np.array([np.nan, np.nan]), ignoreNaNs=True)
+        self.assertFloatsEqual(np.array([np.nan, np.nan]), np.nan, ignoreNaNs=True)
+        self.assertFloatsEqual(np.array([np.nan, np.nan]), np.array([np.nan, np.nan]), ignoreNaNs=True)
+        self.assertFloatsEqual(np.array([np.nan, 0.5]), np.array([np.nan, 0.5]), ignoreNaNs=True)
+        self.assertFloatsEqual(0.5, np.array([0.5, 0.5]), ignoreNaNs=True)
+        self.assertFloatsEqual(np.array([0.5, 0.5]), 0.5, ignoreNaNs=True)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsEqual(np.array([np.nan, 0.5]), np.array([0.5, np.nan]), ignoreNaNs=True)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsEqual(0.5, np.array([0.5, np.nan]), ignoreNaNs=True)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsEqual(np.nan, np.array([0.5, np.nan]), ignoreNaNs=True)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsEqual(np.array([0.5, np.nan]), 0.5, ignoreNaNs=True)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsEqual(np.array([0.5, np.nan]), np.nan, ignoreNaNs=True)
+        with self.assertRaises(AssertionError):
+            self.assertFloatsEqual(np.array([np.nan, 1.0]), np.array([np.nan, 0.5]), ignoreNaNs=True)
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
