@@ -280,7 +280,7 @@ public:
     WrapperCollection & operator=(WrapperCollection &&) = delete;
 
     ~WrapperCollection() noexcept {
-        if (!std::uncaught_exception() && !_definitions.empty()) {
+        if (std::uncaught_exceptions()==0 && !_definitions.empty()) {
             PyErr_SetString(PyExc_ImportError,
                             "WrapperCollection::finish() not called; module definition incomplete.");
             PyErr_WriteUnraisable(module.ptr());
