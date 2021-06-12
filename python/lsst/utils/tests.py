@@ -522,7 +522,8 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
 def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
                             atol=sys.float_info.epsilon, relTo=None,
                             printFailures=True, plotOnFailure=False,
-                            plotFileName=None, invert=False, msg=None):
+                            plotFileName=None, invert=False, msg=None,
+                            ignoreNaNs=False):
     """Highly-configurable floating point comparisons for scalars and arrays.
 
     The test assertion will fail if all elements ``lhs`` and ``rhs`` are not
@@ -569,14 +570,41 @@ def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
         If `True`, invert the comparison and fail only if any elements *are*
         equal. Used to implement `~lsst.utils.tests.assertFloatsNotEqual`,
         which should generally be used instead for clarity.
+        will return `True`).
     msg : `str`, optional
         String to append to the error message when assert fails.
+    ignoreNaNs : `bool`, optional
+        If `True` (`False` is default) mask out any NaNs from operand arrays
+        before performing comparisons if they are in the same locations; NaNs
+        in different locations are trigger test assertion failures, even when
+        ``invert=True``.  Scalar NaNs are treated like arrays containing only
+        NaNs of the same shape as the other operand, and no comparisons are
+        performed if both sides are scalar NaNs.
 
     Raises
     ------
     AssertionError
         The values are not almost equal.
     """
+    if ignoreNaNs:
+        lhsMask = numpy.isnan(lhs)
+        rhsMask = numpy.isnan(rhs)
+        if not numpy.all(lhsMask == rhsMask):
+            testCase.fail(f"lhs has {lhsMask.sum()} NaN values and rhs has {rhsMask.sum()} NaN values, "
+                          f"in different locations.")
+        if numpy.all(lhsMask):
+            assert numpy.all(rhsMask), "Should be guaranteed by previous if."
+            # All operands are fully NaN (either scalar NaNs or arrays of only
+            # NaNs).
+            return
+        assert not numpy.all(rhsMask), "Should be guaranteed by prevoius two ifs."
+        # If either operand is an array select just its not-NaN values.  Note
+        # that these expressions are never True for scalar operands, because if
+        # they are NaN then the numpy.all checks above will catch them.
+        if numpy.any(lhsMask):
+            lhs = lhs[numpy.logical_not(lhsMask)]
+        if numpy.any(rhsMask):
+            rhs = rhs[numpy.logical_not(rhsMask)]
     if not numpy.isfinite(lhs).all():
         testCase.fail("Non-finite values in lhs")
     if not numpy.isfinite(rhs).all():
