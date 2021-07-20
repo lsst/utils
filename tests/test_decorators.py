@@ -21,6 +21,7 @@
 
 import sys
 import unittest
+import itertools
 
 import lsst.utils.tests
 
@@ -33,6 +34,7 @@ numCalls = 0  # Number of times testMethodDecorator gets called
     length=[3, 3, 5, 4]
 )
 class DecoratorTestCase(lsst.utils.tests.TestCase):
+    """Test methodParameters and classParameters decorators"""
     def setUp(self):
         self.numCalls = 0
 
@@ -53,12 +55,43 @@ class DecoratorTestCase(lsst.utils.tests.TestCase):
             self.assertEqual(self.numCalls, 3)
 
 
+@lsst.utils.tests.classParametersProduct(
+    word=["one", "two"],
+    number=[3, 4]
+)
+class DecoratorProductTestCase(lsst.utils.tests.TestCase):
+    """Test methodParametersProduct and classParametersProduct decorators"""
+    def setUp(self):
+        self.combinations = set()
+
+    def testClassDecorator(self):
+        self.assertEqual(self.__class__.__name__, f"DecoratorProductTestCase_{self.word}_{self.number}")
+
+    @lsst.utils.tests.methodParametersProduct(
+        xx=[1, 2, 3],
+        yy=[9, 8],
+    )
+    def testMethodDecorator(self, xx, yy):
+        self.combinations.add((xx, yy))
+
+    def teardown_method(self, method):
+        if method.__name__ == "testMethodDecorator":
+            self.assertEqual(len(self.combinations), 6)
+            for xx, yy in itertools.product((1, 2, 3), (9, 8)):
+                self.assertIn((xx, yy), self.combinations)
+
+
 def testDecorators():
     world = globals()
     assert "DecoratorTestCase_one_3" in world
     assert "DecoratorTestCase_two_3" in world
     assert "DecoratorTestCase_three_5" in world
     assert "DecoratorTestCase_four_4" in world
+
+    assert "DecoratorProductTestCase_one_3" in world
+    assert "DecoratorProductTestCase_one_4" in world
+    assert "DecoratorProductTestCase_two_3" in world
+    assert "DecoratorProductTestCase_two_4" in world
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):

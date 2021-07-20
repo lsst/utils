@@ -35,6 +35,7 @@ import psutil
 import functools
 import tempfile
 import shutil
+import itertools
 
 __all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
            "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
@@ -759,7 +760,7 @@ def _settingsIterator(settings):
         assert len(values) == num, f"Length mismatch for setting {name}: {len(values)} vs {num}"
     for ii in range(num):
         values = [settings[kk][ii] for kk in settings]
-        yield dict(zip(settings.keys(), values))
+        yield dict(zip(settings, values))
 
 
 def classParameters(**settings):
@@ -840,6 +841,112 @@ def methodParameters(**settings):
                     func(self, *args, **kwargs)
         return wrapper
     return decorator
+
+
+def _cartesianProduct(settings):
+    """Return the cartesian product of the settings
+
+    Parameters
+    ----------
+    settings : `dict` mapping `str` to `iterable`
+        Parameter combinations.
+
+    Returns
+    -------
+    product : `dict` mapping `str` to `iterable`
+        Parameter combinations covering the cartesian product (all possible
+        combinations) of the input parameters.
+
+    Example
+    -------
+
+        cartesianProduct({"foo": [1, 2], "bar": ["black", "white"]})
+
+    returns:
+
+        {"foo": [1, 1, 2, 2], "bar": ["black", "white", "black", "white"]}
+    """
+    product = {kk: [] for kk in settings}
+    for values in itertools.product(*settings.values()):
+        for kk, vv in zip(settings.keys(), values):
+            product[kk].append(vv)
+    return product
+
+
+def classParametersProduct(**settings):
+    """Class decorator for generating unit tests
+
+    This decorator generates classes with class variables according to the
+    cartesian product of the supplied ``settings``.
+
+    Parameters
+    ----------
+    **settings : `dict` (`str`: iterable)
+        The lists of test parameters to set as class variables in turn. Each
+        should be an iterable.
+
+    Examples
+    --------
+    ::
+
+        @classParametersProduct(foo=[1, 2], bar=[3, 4])
+        class MyTestCase(unittest.TestCase):
+            ...
+
+    will generate four classes, as if you wrote::
+
+        class MyTestCase_1_3(unittest.TestCase):
+            foo = 1
+            bar = 3
+            ...
+
+        class MyTestCase_1_4(unittest.TestCase):
+            foo = 1
+            bar = 4
+            ...
+
+        class MyTestCase_2_3(unittest.TestCase):
+            foo = 2
+            bar = 3
+            ...
+
+        class MyTestCase_2_4(unittest.TestCase):
+            foo = 2
+            bar = 4
+            ...
+
+    Note that the values are embedded in the class name.
+    """
+    return classParameters(**_cartesianProduct(settings))
+
+
+def methodParametersProduct(**settings):
+    """Method decorator for unit tests
+
+    This decorator iterates over the cartesian product of the supplied settings,
+    using ``TestCase.subTest`` to communicate the values in the event of a
+    failure.
+
+    Parameters
+    ----------
+    **settings : `dict` (`str`: iterable)
+        The parameter combinations to test. Each should be an iterable.
+
+    Example
+    -------
+
+        @methodParametersProduct(foo=[1, 2], bar=["black", "white"])
+        def testSomething(self, foo, bar):
+            ...
+
+    will run:
+
+        testSomething(foo=1, bar="black")
+        testSomething(foo=1, bar="white")
+        testSomething(foo=2, bar="black")
+        testSomething(foo=2, bar="white")
+    """
+    return methodParameters(**_cartesianProduct(settings))
 
 
 @contextlib.contextmanager
