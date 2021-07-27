@@ -37,6 +37,7 @@ class DecoratorTestCase(lsst.utils.tests.TestCase):
     """Test methodParameters and classParameters decorators"""
     def setUp(self):
         self.numCalls = 0
+        self.methodDecorator = False  # testMethodDecorator fired
 
     def testClassDecorator(self):
         self.assertEqual(len(self.word), self.length)
@@ -47,11 +48,12 @@ class DecoratorTestCase(lsst.utils.tests.TestCase):
         yy=[9, 8, 7],
     )
     def testMethodDecorator(self, xx, yy):
+        self.methodDecorator = True
         self.assertEqual(xx + yy, 10)
         self.numCalls += 1
 
-    def teardown_method(self, method):
-        if method.__name__ == "testMethodDecorator":
+    def tearDown(self):
+        if self.methodDecorator:
             self.assertEqual(self.numCalls, 3)
 
 
@@ -63,6 +65,7 @@ class DecoratorProductTestCase(lsst.utils.tests.TestCase):
     """Test methodParametersProduct and classParametersProduct decorators"""
     def setUp(self):
         self.combinations = set()
+        self.methodDecorator = False  # testMethodDecorator fired
 
     def testClassDecorator(self):
         self.assertEqual(self.__class__.__name__, f"DecoratorProductTestCase_{self.word}_{self.number}")
@@ -72,10 +75,11 @@ class DecoratorProductTestCase(lsst.utils.tests.TestCase):
         yy=[9, 8],
     )
     def testMethodDecorator(self, xx, yy):
+        self.methodDecorator = True
         self.combinations.add((xx, yy))
 
-    def teardown_method(self, method):
-        if method.__name__ == "testMethodDecorator":
+    def tearDown(self):
+        if self.methodDecorator:
             self.assertEqual(len(self.combinations), 6)
             for xx, yy in itertools.product((1, 2, 3), (9, 8)):
                 self.assertIn((xx, yy), self.combinations)
