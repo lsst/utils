@@ -138,7 +138,8 @@ class UtilsTestCase(lsst.utils.tests.TestCase):
             self.assertFloatsAlmostEqual(self.ranges, self.rangesEpsilon, rtol=1E-15, atol=1E-4)
 
         if display:
-            # should see failures on the center row of the 5x5 image, but not the very center point
+            # should see failures on the center row of the 5x5 image, but not
+            # the very center point.
             nonzeroCenter = self.zeros.copy()
             nonzeroCenter[2, :] = 1e-5
             with self.assertRaises(AssertionError):

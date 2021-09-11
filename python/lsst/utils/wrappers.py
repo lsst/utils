@@ -57,7 +57,8 @@ def isAttributeSafeToTransfer(name, value):
 
 
 def continueClass(cls):
-    """Re-open the decorated class, adding any new definitions into the original.
+    """Re-open the decorated class, adding any new definitions into the
+    original.
 
     For example:
 
@@ -135,7 +136,8 @@ def inClass(cls, name=None):
                 name1 = func.__name__
             else:
                 if hasattr(func, "__func__"):
-                    # classmethod and staticmethod have __func__ but no __name__
+                    # classmethod and staticmethod have __func__ but
+                    # no __name__
                     name1 = func.__func__.__name__
                 elif hasattr(func, "fget"):
                     # property has fget but no __name__
@@ -293,8 +295,8 @@ class TemplateMeta(type):
     def __call__(cls, *args, **kwds):
         # __call__ is invoked when someone tries to construct an instance of
         # the abstract base class.
-        # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those strings
-        # as the kwargs we should intercept to find the right type.
+        # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those
+        # strings as the kwargs we should intercept to find the right type.
         # Generate a type mapping key from input keywords. If the type returned
         # from the keyword lookup is a numpy dtype object, fetch the underlying
         # type of the dtype

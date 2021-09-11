@@ -380,8 +380,10 @@ def getTempFilePath(ext, expectOutput=True):
     prefix = "%s_%s-" % (callerFileName, callerFuncName)
     outPath = tempfile.mktemp(dir=outDir, suffix=ext, prefix=prefix)
     if os.path.exists(outPath):
-        # There should not be a file there given the randomizer. Warn and remove.
-        # Use stacklevel 3 so that the warning is reported from the end of the with block
+        # There should not be a file there given the randomizer. Warn and
+        # remove.
+        # Use stacklevel 3 so that the warning is reported from the end of the
+        # with block
         warnings.warn("Unexpectedly found pre-existing tempfile named %r" % (outPath,),
                       stacklevel=3)
         try:
@@ -403,7 +405,8 @@ def getTempFilePath(ext, expectOutput=True):
         try:
             os.remove(outPath)
         except OSError as e:
-            # Use stacklevel 3 so that the warning is reported from the end of the with block
+            # Use stacklevel 3 so that the warning is reported from the end of
+            # the with block.
             warnings.warn("Warning: could not remove file %r: %s" % (outPath, e), stacklevel=3)
 
 
@@ -414,8 +417,8 @@ class TestCase(unittest.TestCase):
 
 
 def inTestCase(func):
-    """A decorator to add a free function to our custom TestCase class, while also
-    making it available as a free function.
+    """A decorator to add a free function to our custom TestCase class, while
+    also making it available as a free function.
     """
     setattr(TestCase, func.__name__, func)
     return func
@@ -656,9 +659,9 @@ def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
                 except ImportError:
                     errMsg.append("Failure plot requested but matplotlib could not be imported.")
             if printFailures:
-                # Make sure everything is an array if any of them are, so we can treat
-                # them the same (diff and absDiff are arrays if either rhs or lhs is),
-                # and we don't get here if neither is.
+                # Make sure everything is an array if any of them are, so we
+                # can treat them the same (diff and absDiff are arrays if
+                # either rhs or lhs is), and we don't get here if neither is.
                 if numpy.isscalar(relTo):
                     relTo = numpy.ones(bad.shape, dtype=float) * relTo
                 if numpy.isscalar(lhs):
@@ -737,9 +740,9 @@ def _settingsIterator(settings):
     Parameters
     ----------
     settings : `dict` (`str`: iterable)
-        Lists of test parameters. Each should be an iterable of the same length.
-        If a string is provided as an iterable, it will be converted to a list
-        of a single string.
+        Lists of test parameters. Each should be an iterable of the same
+        length. If a string is provided as an iterable, it will be converted
+        to a list of a single string.
 
     Raises
     ------
@@ -753,7 +756,8 @@ def _settingsIterator(settings):
     """
     for name, values in settings.items():
         if isinstance(values, str):
-            # Probably meant as a single-element string, rather than an iterable of chars
+            # Probably meant as a single-element string, rather than an
+            # iterable of chars.
             settings[name] = [values]
     num = len(next(iter(settings.values())))  # Number of settings
     for name, values in settings.items():
@@ -923,9 +927,9 @@ def classParametersProduct(**settings):
 def methodParametersProduct(**settings):
     """Method decorator for unit tests
 
-    This decorator iterates over the cartesian product of the supplied settings,
-    using ``TestCase.subTest`` to communicate the values in the event of a
-    failure.
+    This decorator iterates over the cartesian product of the supplied
+    settings, using `~unittest.TestCase.subTest` to communicate the values in
+    the event of a failure.
 
     Parameters
     ----------

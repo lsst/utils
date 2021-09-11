@@ -25,9 +25,9 @@ def inheritDoc(klass):
     class and extend it with any additional documentation defined.
 
     This decorator takes a class from which to draw documentation from as an
-    argument. This is so that any class may be used as a source of documentation
-    and not just the immediate parent of a class. This is useful when there may
-    be a long inheritance chain, or in the case of mixins.
+    argument. This is so that any class may be used as a source of
+    documentation and not just the immediate parent of a class. This is useful
+    when there may be a long inheritance chain, or in the case of mixins.
 
     Parameters
     ----------
@@ -40,7 +40,8 @@ def inheritDoc(klass):
         Intermediate decorator used in the documentation process.
     """
     def tmpDecorator(method):
-        """Decorator to update the documentation from a class with the same method
+        """Decorator to update the documentation from a class with the same
+        method.
         """
         methodName = method.__name__
         if not hasattr(klass, methodName):
