@@ -27,6 +27,7 @@ import lsst.utils.tests
 from lsst.utils import getPackageDir
 
 
+@unittest.skipIf("UTILS_DIR" not in os.environ, "EUPS has not set up this package.")
 class GetPackageDirTestCase(unittest.TestCase):
     def testBasics(self):
         utilsPath = getPackageDir("utils")
