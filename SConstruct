@@ -1,3 +1,3 @@
 # -*- python -*-
 from lsst.sconsUtils import scripts
-scripts.BasicSConstruct("utils")
+scripts.BasicSConstruct("utils", disableCc=True)

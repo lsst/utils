@@ -33,12 +33,8 @@ class GetPackageDirTestCase(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "test_getPackageDir.py")))
 
         # Confirm that we have a correct Python exception and pex exception
-        with self.assertRaises(LookupError) as cm:
+        with self.assertRaises(LookupError):
             getPackageDir("nameOfNonexistendPackage2234q?#!")
-
-        # Deliberately do not import pex_exceptions so as not to bias the
-        # tests. Check for the name instead.
-        self.assertIn("NotFoundError", type(cm.exception).__name__)
 
     def testUnicodeBasics(self):
         utilsPath = getPackageDir(u"utils")
