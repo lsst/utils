@@ -19,8 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+__all__ = ("inheritDoc",)
 
-def inheritDoc(klass):
+from typing import Callable, Type
+
+
+def inheritDoc(klass: Type) -> Callable:
     """Extends existing documentation for a method that exists in another
     class and extend it with any additional documentation defined.
 
@@ -39,7 +43,7 @@ def inheritDoc(klass):
     decorator : callable
         Intermediate decorator used in the documentation process.
     """
-    def tmpDecorator(method):
+    def tmpDecorator(method: Type) -> Callable:
         """Decorator to update the documentation from a class with the same
         method.
         """

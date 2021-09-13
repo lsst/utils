@@ -19,13 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-import importlib
-
 __all__ = ("doImport",)
 
+import importlib
+import types
+from typing import Type, List, Optional, Union
 
-def doImport(importable):
+
+def doImport(importable: str) -> Union[types.ModuleType, Type]:
     """Import a python object given an importable string and return it.
 
     Parameters
@@ -52,7 +53,8 @@ def doImport(importable):
     if not isinstance(importable, str):
         raise TypeError(f"Unhandled type of importable, val: {importable}")
 
-    def tryImport(module, fromlist, previousError):
+    def tryImport(module: str, fromlist: List[str],
+                  previousError: Optional[str]) -> Union[types.ModuleType, Type]:
         pytype = importlib.import_module(module)
         # Can have functions inside classes inside modules
         for f in fromlist:
@@ -67,7 +69,7 @@ def doImport(importable):
     # and retrieve the class or function as an attribute. Shift components
     # from the module list to the attribute list until something works.
     moduleComponents = importable.split(".")
-    infileComponents = []
+    infileComponents: List[str] = []
     previousError = None
 
     while moduleComponents:

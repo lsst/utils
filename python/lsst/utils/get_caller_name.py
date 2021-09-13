@@ -18,13 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+__all__ = ["get_caller_name"]
 
 import inspect
 
-__all__ = ["get_caller_name"]
 
-
-def get_caller_name(skip=2):
+def get_caller_name(skip: int = 2) -> str:
     """Get the name of the caller method.
 
     Any item that cannot be determined (or is not relevant, e.g. a free
