@@ -22,7 +22,7 @@ jobs:
         run: pip install mypy pydantic
 
       - name: Install third party stubs
-        run: pip install types-requests types-PyYAML types-click types-pkg_resources
+        run: pip install types-requests types-PyYAML types-click types-pkg_resources types-Deprecated
 
       - name: Fake a version
         run: |
