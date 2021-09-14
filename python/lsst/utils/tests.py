@@ -22,6 +22,10 @@
 #
 """Support code for running unit tests"""
 
+__all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
+           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
+           "debugger", "classParameters", "methodParameters"]
+
 import contextlib
 import gc
 import inspect
@@ -37,15 +41,25 @@ import tempfile
 import shutil
 import itertools
 
-__all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
-           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
-           "debugger", "classParameters", "methodParameters"]
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Mapping,
+    Set,
+    Sequence,
+    Type,
+    Union,
+)
 
 # Initialize the list of open files to an empty set
 open_files = set()
 
 
-def _get_open_files():
+def _get_open_files() -> Set[str]:
     """Return a set containing the list of files currently open in this
     process.
 
@@ -57,14 +71,14 @@ def _get_open_files():
     return set(p.path for p in psutil.Process().open_files())
 
 
-def init():
+def init() -> None:
     """Initialize the memory tester and file descriptor leak tester."""
     global open_files
     # Reset the list of open files
     open_files = _get_open_files()
 
 
-def sort_tests(tests):
+def sort_tests(tests) -> unittest.TestSuite:
     """Sort supplied test suites such that MemoryTestCases are at the end.
 
     `lsst.utils.tests.MemoryTestCase` tests should always run after any other
@@ -121,11 +135,11 @@ class MemoryTestCase(unittest.TestCase):
     """Check for resource leaks."""
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Reset the leak counter when the tests have been completed"""
         init()
 
-    def testFileDescriptorLeaks(self):
+    def testFileDescriptorLeaks(self) -> None:
         """Check if any file descriptors are open since init() called."""
         gc.collect()
         global open_files
@@ -155,20 +169,21 @@ class ExecutablesTestCase(unittest.TestCase):
     TESTS_DISCOVERED = -1
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Abort testing if automated test creation was enabled and
         no tests were found."""
 
         if cls.TESTS_DISCOVERED == 0:
             raise RuntimeError("No executables discovered.")
 
-    def testSanity(self):
+    def testSanity(self) -> None:
         """This test exists to ensure that there is at least one test to be
         executed. This allows the test runner to trigger the class set up
         machinery to test whether there are some executables to test."""
         pass
 
-    def assertExecutable(self, executable, root_dir=None, args=None, msg=None):
+    def assertExecutable(self, executable: str, root_dir: Optional[str] = None,
+                         args: Optional[Sequence[str]] = None, msg: Optional[str] = None) -> None:
         """Check an executable runs and returns good status.
 
         Prints output to standard out. On bad exit status the test
@@ -219,7 +234,7 @@ class ExecutablesTestCase(unittest.TestCase):
             self.fail(msg)
 
     @classmethod
-    def _build_test_method(cls, executable, root_dir):
+    def _build_test_method(cls, executable: str, root_dir: str) -> None:
         """Build a test method and attach to class.
 
         A test method is created for the supplied excutable located
@@ -242,7 +257,7 @@ class ExecutablesTestCase(unittest.TestCase):
         test_name = "test_exe_" + executable.replace("/", "_")
 
         # This is the function that will become the test method
-        def test_executable_runs(*args):
+        def test_executable_runs(*args: Any) -> None:
             self = args[0]
             self.assertExecutable(executable)
 
@@ -251,7 +266,7 @@ class ExecutablesTestCase(unittest.TestCase):
         setattr(cls, test_name, test_executable_runs)
 
     @classmethod
-    def create_executable_tests(cls, ref_file, executables=None):
+    def create_executable_tests(cls, ref_file: str, executables: Optional[Sequence[str]] = None) -> None:
         """Discover executables to test and create corresponding test methods.
 
         Scans the directory containing the supplied reference file
@@ -308,7 +323,7 @@ class ExecutablesTestCase(unittest.TestCase):
 
 
 @contextlib.contextmanager
-def getTempFilePath(ext, expectOutput=True):
+def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
     """Return a path suitable for a temporary file and try to delete the
     file on success
 
@@ -416,7 +431,7 @@ class TestCase(unittest.TestCase):
     """
 
 
-def inTestCase(func):
+def inTestCase(func: Callable) -> Callable:
     """A decorator to add a free function to our custom TestCase class, while
     also making it available as a free function.
     """
@@ -458,7 +473,8 @@ def debugger(*exceptions):
     return decorator
 
 
-def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
+def plotImageDiff(lhs: numpy.ndarray, rhs: numpy.ndarray, bad: Optional[numpy.ndarray] = None,
+                  diff: Optional[numpy.ndarray] = None, plotFileName: Optional[str] = None) -> None:
     """Plot the comparison of two 2-d NumPy arrays.
 
     Parameters
@@ -523,11 +539,13 @@ def plotImageDiff(lhs, rhs, bad=None, diff=None, plotFileName=None):
 
 
 @inTestCase
-def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
-                            atol=sys.float_info.epsilon, relTo=None,
-                            printFailures=True, plotOnFailure=False,
-                            plotFileName=None, invert=False, msg=None,
-                            ignoreNaNs=False):
+def assertFloatsAlmostEqual(testCase: unittest.TestCase, lhs: Union[float, numpy.ndarray],
+                            rhs: Union[float, numpy.ndarray],
+                            rtol: Optional[float] = sys.float_info.epsilon,
+                            atol: Optional[float] = sys.float_info.epsilon, relTo: Optional[float] = None,
+                            printFailures: bool = True, plotOnFailure: bool = False,
+                            plotFileName: Optional[str] = None, invert: bool = False,
+                            msg: Optional[str] = None, ignoreNaNs: bool = False) -> None:
     """Highly-configurable floating point comparisons for scalars and arrays.
 
     The test assertion will fail if all elements ``lhs`` and ``rhs`` are not
@@ -681,7 +699,8 @@ def assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=sys.float_info.epsilon,
 
 
 @inTestCase
-def assertFloatsNotEqual(testCase, lhs, rhs, **kwds):
+def assertFloatsNotEqual(testCase: unittest.TestCase, lhs: Union[float, numpy.ndarray],
+                         rhs: Union[float, numpy.ndarray], **kwds: Any) -> None:
     """Fail a test if the given floating point values are equal to within the
     given tolerances.
 
@@ -708,7 +727,8 @@ def assertFloatsNotEqual(testCase, lhs, rhs, **kwds):
 
 
 @inTestCase
-def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
+def assertFloatsEqual(testCase: unittest.TestCase, lhs: Union[float, numpy.ndarray],
+                      rhs: Union[float, numpy.ndarray], **kwargs: Any) -> None:
     """
     Assert that lhs == rhs (both numeric types, whether scalar or array).
 
@@ -734,7 +754,7 @@ def assertFloatsEqual(testCase, lhs, rhs, **kwargs):
     return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
 
 
-def _settingsIterator(settings):
+def _settingsIterator(settings: Dict[str, Sequence[Any]]) -> Iterator[Dict[str, Any]]:
     """Return an iterator for the provided test settings
 
     Parameters
@@ -767,7 +787,7 @@ def _settingsIterator(settings):
         yield dict(zip(settings, values))
 
 
-def classParameters(**settings):
+def classParameters(**settings: Sequence[Any]) -> Callable:
     """Class decorator for generating unit tests
 
     This decorator generates classes with class variables according to the
@@ -801,7 +821,7 @@ def classParameters(**settings):
 
     Note that the values are embedded in the class name.
     """
-    def decorator(cls):
+    def decorator(cls: Type) -> None:
         module = sys.modules[cls.__module__].__dict__
         for params in _settingsIterator(settings):
             name = f"{cls.__name__}_{'_'.join(str(vv) for vv in params.values())}"
@@ -811,7 +831,7 @@ def classParameters(**settings):
     return decorator
 
 
-def methodParameters(**settings):
+def methodParameters(**settings: Sequence[Any]) -> Callable:
     """Method decorator for unit tests
 
     This decorator iterates over the supplied settings, using
@@ -836,9 +856,9 @@ def methodParameters(**settings):
         testSomething(foo=1, bar=3)
         testSomething(foo=2, bar=4)
     """
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self: unittest.TestCase, *args: Any, **kwargs: Any) -> None:
             for params in _settingsIterator(settings):
                 kwargs.update(params)
                 with self.subTest(**params):
@@ -847,7 +867,7 @@ def methodParameters(**settings):
     return decorator
 
 
-def _cartesianProduct(settings):
+def _cartesianProduct(settings: Mapping[str, Sequence[Any]]) -> Mapping[str, Sequence[Any]]:
     """Return the cartesian product of the settings
 
     Parameters
@@ -870,14 +890,14 @@ def _cartesianProduct(settings):
 
         {"foo": [1, 1, 2, 2], "bar": ["black", "white", "black", "white"]}
     """
-    product = {kk: [] for kk in settings}
+    product: Dict[str, List[Any]] = {kk: [] for kk in settings}
     for values in itertools.product(*settings.values()):
         for kk, vv in zip(settings.keys(), values):
             product[kk].append(vv)
     return product
 
 
-def classParametersProduct(**settings):
+def classParametersProduct(**settings: Sequence[Any]) -> Callable:
     """Class decorator for generating unit tests
 
     This decorator generates classes with class variables according to the
@@ -924,7 +944,7 @@ def classParametersProduct(**settings):
     return classParameters(**_cartesianProduct(settings))
 
 
-def methodParametersProduct(**settings):
+def methodParametersProduct(**settings: Sequence[Any]) -> Callable:
     """Method decorator for unit tests
 
     This decorator iterates over the cartesian product of the supplied
@@ -954,7 +974,7 @@ def methodParametersProduct(**settings):
 
 
 @contextlib.contextmanager
-def temporaryDirectory():
+def temporaryDirectory() -> Iterator[str]:
     """Context manager that creates and destroys a temporary directory.
 
     The difference from `tempfile.TemporaryDirectory` is that this ignores
