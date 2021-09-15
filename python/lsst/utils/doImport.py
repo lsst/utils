@@ -50,7 +50,7 @@ def doImport(importable):
         item could not be retrieved from the imported module.
     """
     if not isinstance(importable, str):
-        raise TypeError(f"Unhandled type of importable, val: {importable}")
+        raise TypeError(f"Unhandled type of importable, value: {importable}")
 
     def tryImport(module, fromlist, previousError):
         pytype = importlib.import_module(module)
