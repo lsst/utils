@@ -16,18 +16,11 @@ longer be used from this package."""
 
 from deprecated.sphinx import deprecated
 
-_reason = "This function has been moved to the cpputils package. Will be removed after v25."
-_version_removed = "v23"
+_REASON = "This function has been moved to the cpputils package. Will be removed after v25."
+_VERSION_REMOVED = "v23"
 
 
-@deprecated(reason=_reason, version=_version_removed, category=FutureWarning)
+@deprecated(reason=_REASON, version=_VERSION_REMOVED, category=FutureWarning)
 def demangleType(type_name: str) -> str:
     import lsst.cpputils
     return lsst.cpputils.demangleType(type_name)
-
-
-@deprecated(reason=_reason, version=_version_removed, category=FutureWarning)
-def isEnabled() -> bool:
-    """Check that backtrace is enabled."""
-    from lsst.cpputils import backtrace
-    return backtrace.isEnabled()
