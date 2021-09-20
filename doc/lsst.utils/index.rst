@@ -8,6 +8,16 @@ lsst.utils
 
 The ``lsst.utils`` module provides common code for tests, interfacing between C++ and Python, and debugging.
 
+.. _lsst.utils-changes:
+
+Changes
+=======
+
+.. toctree::
+   :maxdepth: 1
+
+   CHANGES.rst
+
 .. _lsst.utils-contributing:
 
 Contributing

@@ -1,0 +1,1 @@
+Moved all C++ code out of this package and into ``cpputils`` package and changed license to BSD 3-clause.
