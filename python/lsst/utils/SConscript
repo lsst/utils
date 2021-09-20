@@ -1,5 +1,0 @@
-# -*- python -*-
-from lsst.sconsUtils import scripts
-scripts.BasicSConscript.python(
-    extra=["backtrace/_Backtrace.cc"]
-)

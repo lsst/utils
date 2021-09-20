@@ -2,30 +2,21 @@
 #
 # Developed for the LSST Data Management System.
 # This product includes software developed by the LSST Project
-# (http://www.lsst.org).
+# (https://www.lsst.org).
 # See the COPYRIGHT file at the top-level directory of this distribution
 # for details of code ownership.
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-import importlib
+# Use of this source code is governed by a 3-clause BSD-style
+# license that can be found in the LICENSE file.
 
 __all__ = ("doImport",)
 
+import importlib
+import types
+from typing import Type, List, Optional, Union
 
-def doImport(importable):
+
+def doImport(importable: str) -> Union[types.ModuleType, Type]:
     """Import a python object given an importable string and return it.
 
     Parameters
@@ -52,7 +43,8 @@ def doImport(importable):
     if not isinstance(importable, str):
         raise TypeError(f"Unhandled type of importable, val: {importable}")
 
-    def tryImport(module, fromlist, previousError):
+    def tryImport(module: str, fromlist: List[str],
+                  previousError: Optional[str]) -> Union[types.ModuleType, Type]:
         pytype = importlib.import_module(module)
         # Can have functions inside classes inside modules
         for f in fromlist:
@@ -67,7 +59,7 @@ def doImport(importable):
     # and retrieve the class or function as an attribute. Shift components
     # from the module list to the attribute list until something works.
     moduleComponents = importable.split(".")
-    infileComponents = []
+    infileComponents: List[str] = []
     previousError = None
 
     while moduleComponents:

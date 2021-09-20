@@ -1,8 +1,6 @@
-setupRequired(base)
-setupRequired(pex_exceptions)
-
-envPrepend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
-envPrepend(DYLD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
-envPrepend(LSST_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
+# Depend on this for temporary backwards compatibility during
+# deprecation period.
+setupRequired(cpputils)
+setupRequired(sconsUtils)
 
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)

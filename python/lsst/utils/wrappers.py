@@ -1,25 +1,13 @@
+# This file is part of utils.
 #
-# LSST Data Management System
+# Developed for the LSST Data Management System.
+# This product includes software developed by the LSST Project
+# (https://www.lsst.org).
+# See the COPYRIGHT file at the top-level directory of this distribution
+# for details of code ownership.
 #
-# Copyright 2008-2017  AURA/LSST.
-#
-# This product includes software developed by the
-# LSST Project (http://www.lsst.org/).
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the LSST License Statement and
-# the GNU General Public License along with this program.  If not,
-# see <https://www.lsstcorp.org/LegalNotices/>.
-#
+# Use of this source code is governed by a 3-clause BSD-style
+# license that can be found in the LICENSE file.
 
 import sys
 import types
@@ -57,7 +45,8 @@ def isAttributeSafeToTransfer(name, value):
 
 
 def continueClass(cls):
-    """Re-open the decorated class, adding any new definitions into the original.
+    """Re-open the decorated class, adding any new definitions into the
+    original.
 
     For example:
 
@@ -135,7 +124,8 @@ def inClass(cls, name=None):
                 name1 = func.__name__
             else:
                 if hasattr(func, "__func__"):
-                    # classmethod and staticmethod have __func__ but no __name__
+                    # classmethod and staticmethod have __func__ but
+                    # no __name__
                     name1 = func.__func__.__name__
                 elif hasattr(func, "fget"):
                     # property has fget but no __name__
@@ -293,8 +283,8 @@ class TemplateMeta(type):
     def __call__(cls, *args, **kwds):
         # __call__ is invoked when someone tries to construct an instance of
         # the abstract base class.
-        # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those strings
-        # as the kwargs we should intercept to find the right type.
+        # If the ABC defines a "TEMPLATE_PARAMS" attribute, we use those
+        # strings as the kwargs we should intercept to find the right type.
         # Generate a type mapping key from input keywords. If the type returned
         # from the keyword lookup is a numpy dtype object, fetch the underlying
         # type of the dtype
