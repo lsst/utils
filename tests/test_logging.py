@@ -63,6 +63,18 @@ class TestLogging(unittest.TestCase):
             self.assertRegex(record.levelname, "^[A-Z]+$")
             self.assertEqual(record.filename, "test_logging.py")
 
+        with self.assertLogs(level=root.DEBUG) as cm:
+            # Should only issue the INFO message.
+            with root.temporary_log_level(root.INFO):
+                root.info("Info")
+                root.debug("Debug")
+        self.assertEqual(len(cm.records), 1)
+
+        child = root.getChild("child")
+        self.assertEqual(child.getEffectiveLevel(), root.getEffectiveLevel())
+        child.setLevel(root.DEBUG)
+        self.assertNotEqual(child.getEffectiveLevel(), root.getEffectiveLevel())
+
 
 if __name__ == "__main__":
     unittest.main()
