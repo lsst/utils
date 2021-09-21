@@ -1,4 +1,4 @@
-# This file is part of pipe_base.
+# This file is part of utils.
 #
 # Developed for the LSST Data Management System.
 # This product includes software developed by the LSST Project
@@ -25,7 +25,7 @@
 import logging
 import unittest
 
-from lsst.pipe.base import getTaskLogger
+from lsst.utils.logging import getLogger
 
 
 class TestLogging(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestLogging(unittest.TestCase):
     def testLogLevels(self):
         """Check that the new log levels look reasonable."""
 
-        root = getTaskLogger()
+        root = getLogger()
 
         self.assertEqual(root.DEBUG, logging.DEBUG)
         self.assertGreater(root.VERBOSE, logging.DEBUG)
@@ -43,7 +43,7 @@ class TestLogging(unittest.TestCase):
     def testLogCommands(self):
         """Check that all the log commands work."""
 
-        root = getTaskLogger()
+        root = getLogger()
 
         with self.assertLogs(level=root.TRACE) as cm:
             root.trace("Trace")
@@ -58,7 +58,7 @@ class TestLogging(unittest.TestCase):
         self.assertEqual(len(cm.records), 8)
 
         # Check that each record has an explicit level name rather than
-        # "Level N" and comes from this file (and not the task_logging.py).
+        # "Level N" and comes from this file (and not the logging.py).
         for record in cm.records:
             self.assertRegex(record.levelname, "^[A-Z]+$")
             self.assertEqual(record.filename, "test_logging.py")

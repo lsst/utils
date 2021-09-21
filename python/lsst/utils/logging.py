@@ -1,4 +1,4 @@
-# This file is part of task_base.
+# This file is part of utils.
 #
 # Developed for the LSST Data Management System.
 # This product includes software developed by the LSST Project
@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = ("TRACE", "VERBOSE", "getTaskLogger", "TaskLogAdapter")
+__all__ = ("TRACE", "VERBOSE", "getLogger", "LsstLogAdapter")
 
 import logging
 from logging import LoggerAdapter
@@ -49,8 +49,8 @@ class _F:
         return self.fmt.format(*self.args, **self.kwargs)
 
 
-class TaskLogAdapter(LoggerAdapter):
-    """A special logging adapter to provide log features for `Task`.
+class LsstLogAdapter(LoggerAdapter):
+    """A special logging adapter to provide log features for LSST code.
 
     Expected to be instantiated initially by a call to `getLogger()`.
 
@@ -111,10 +111,10 @@ class TaskLogAdapter(LoggerAdapter):
 
         Returns
         -------
-        child : `TaskLogAdapter`
+        child : `LsstLogAdapter`
             The child logger.
         """
-        return getTaskLogger(name=name, logger=self.logger)
+        return getLogger(name=name, logger=self.logger)
 
     @deprecated(reason="Use Python Logger compatible isEnabledFor Will be removed after v23.",
                 version="v23", category=FutureWarning)
@@ -226,7 +226,7 @@ class TaskLogAdapter(LoggerAdapter):
         self.logger.removeHandler(handler)
 
 
-def getTaskLogger(name=None, logger=None):
+def getLogger(name=None, logger=None):
     """Get a logger compatible with LSST usage.
 
     Parameters
@@ -240,7 +240,7 @@ def getTaskLogger(name=None, logger=None):
 
     Returns
     -------
-    logger : `TaskLogAdapter`
+    logger : `LsstLogAdapter`
         The relevant logger.
 
     Notes
@@ -255,4 +255,4 @@ def getTaskLogger(name=None, logger=None):
         logger = logging.getLogger(name)
     elif name:
         logger = logger.getChild(name)
-    return TaskLogAdapter(logger, {})
+    return LsstLogAdapter(logger, {})
