@@ -139,7 +139,9 @@ class MemoryTestCase(unittest.TestCase):
                        and not f.startswith("/proc/")
                        and not f.endswith(".ttf")
                        and not (f.startswith("/var/lib/") and f.endswith("/passwd"))
-                       and not f.endswith("astropy.log"))
+                       and not f.endswith("astropy.log")
+                       and not f.endswith("mime/mime.cache")
+                       )
 
         diff = now_open.difference(open_files)
         if diff:
