@@ -22,7 +22,11 @@ import datetime
 
 from typing import (
     Any,
+    Callable,
+    Collection,
     MutableMapping,
+    Optional,
+    Tuple,
 )
 
 
@@ -44,9 +48,9 @@ def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
     try:
         try:
             # PropertySet should always prefer LongLong for integers
-            metadata.addLongLong(name, value)
+            metadata.addLongLong(name, value)  # type: ignore
         except TypeError:
-            metadata.add(name, value)
+            metadata.add(name, value)  # type: ignore
     except AttributeError:
         pass
     else:
@@ -58,7 +62,9 @@ def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
     metadata[name].append(value)
 
 
-def logPairs(obj, pairs, logLevel=logging.DEBUG, metadata=None, logger=None):
+def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = logging.DEBUG,
+             metadata: Optional[MutableMapping] = None,
+             logger: Optional[logging.Logger] = None) -> None:
     """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``
 
     Parameters
@@ -102,7 +108,8 @@ def logPairs(obj, pairs, logLevel=logging.DEBUG, metadata=None, logger=None):
         logging.getLogger("timer." + logger.name).log(logLevel, "; ".join(strList))
 
 
-def logInfo(obj, prefix, logLevel=logging.DEBUG, metadata=None, logger=None):
+def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
+            metadata: Optional[MutableMapping] = None, logger: Optional[logging.Logger] = None) -> None:
     """Log timer information to ``obj.metadata`` and ``obj.log``.
 
     Parameters
@@ -117,7 +124,7 @@ def logInfo(obj, prefix, logLevel=logging.DEBUG, metadata=None, logger=None):
 
         If `None`, at least one of ``metadata`` or ``logger`` should be passed
         or this function will do nothing.
-    prefix
+    prefix : `str`
         Name prefix, the resulting entries are ``CpuTime``, etc.. For example
         `timeMethod` uses ``prefix = Start`` when the method begins and
         ``prefix = End`` when the method ends.
@@ -170,8 +177,9 @@ def logInfo(obj, prefix, logLevel=logging.DEBUG, metadata=None, logger=None):
              logger=logger)
 
 
-def timeMethod(_func=None, *, metadata=None, logger=None,
-               logLevel=logging.DEBUG):
+def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping] = None,
+               logger: Optional[logging.Logger] = None,
+               logLevel: int = logging.DEBUG) -> Callable:
     """Decorator to measure duration of a method.
 
     Parameters
@@ -218,9 +226,9 @@ def timeMethod(_func=None, *, metadata=None, logger=None,
                 pass
     """
 
-    def decorator_timer(func):
+    def decorator_timer(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(self, *args, **keyArgs):
+        def wrapper(self: Any, *args: Any, **keyArgs: Any) -> Any:
             logInfo(obj=self, prefix=func.__name__ + "Start", metadata=metadata, logger=logger,
                     logLevel=logLevel)
             try:
