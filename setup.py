@@ -19,7 +19,7 @@ version = "0.1.0"
 with open("./python/lsst/utils/version.py", "w") as f:
     print(f"""
 __all__ = ("__version__", )
-__version__='{version}'""", file=f)
+__version__ = '{version}'""", file=f)
 
 # read the contents of our README file
 this_directory = os.path.abspath(os.path.dirname(__file__))
