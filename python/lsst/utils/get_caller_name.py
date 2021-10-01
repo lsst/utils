@@ -11,9 +11,13 @@
 
 __all__ = ["get_caller_name"]
 
-import inspect
+from deprecated.sphinx import deprecated
+from .introspection import get_caller_name as caller_name
 
 
+@deprecated(reason="get_caller_name has moved to lsst.utils.introspection.get_caller_name."
+            " Will be removed in v26.",
+            version="v24", category=FutureWarning)
 def get_caller_name(skip: int = 2) -> str:
     """Get the name of the caller method.
 
@@ -38,22 +42,5 @@ def get_caller_name(skip: int = 2) -> str:
     Adapted from from http://stackoverflow.com/a/9812105
     by adding support to get the class from ``parentframe.f_locals['cls']``
     """
-    stack = inspect.stack()
-    start = 0 + skip
-    if len(stack) < start + 1:
-        return ''
-    parentframe = stack[start][0]
-
-    name = []
-    module = inspect.getmodule(parentframe)
-    if module:
-        name.append(module.__name__)
-    # add class name, if any
-    if 'self' in parentframe.f_locals:
-        name.append(type(parentframe.f_locals['self']).__name__)
-    elif 'cls' in parentframe.f_locals:
-        name.append(parentframe.f_locals['cls'].__name__)
-    codename = parentframe.f_code.co_name
-    if codename != '<module>':  # top level usually
-        name.append(codename)  # function or a method
-    return ".".join(name)
+    # Offset the stack level to account for redirect and deprecated wrapper.
+    return caller_name(stacklevel=skip + 2)

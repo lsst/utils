@@ -11,13 +11,63 @@
 
 import unittest
 
-from lsst.utils.introspection import get_full_type_name, get_class_of, get_instance_of
+from lsst.utils.introspection import (
+    get_full_type_name,
+    get_class_of,
+    get_instance_of,
+    get_caller_name,
+)
 
 # Classes and functions to use in tests.
 import lsst.utils
 from lsst.utils._packaging import getPackageDir
 from lsst.utils import doImport
 from collections import Counter
+
+
+class GetCallerNameTestCase(unittest.TestCase):
+    """Test get_caller_name
+
+    Warning: due to the different ways this can be run
+    (e.g. directly or py.test), the module name can be one of two different
+    things.
+    """
+
+    def test_free_function(self):
+        def test_func():
+            return get_caller_name(1)
+
+        result = test_func()
+        self.assertEqual(result, f"{__name__}.test_func")
+
+    def test_instance_method(self):
+        class TestClass:
+            def run(self):
+                return get_caller_name(1)
+
+        tc = TestClass()
+        result = tc.run()
+        self.assertEqual(result, f"{__name__}.TestClass.run")
+
+    def test_class_method(self):
+        class TestClass:
+            @classmethod
+            def run(cls):
+                return get_caller_name(1)
+
+        tc = TestClass()
+        result = tc.run()
+        self.assertEqual(result, f"{__name__}.TestClass.run")
+
+    def test_skip(self):
+        def test_func(stacklevel):
+            return get_caller_name(stacklevel)
+
+        result = test_func(2)
+        self.assertEqual(result, f"{__name__}.GetCallerNameTestCase.test_skip")
+
+        result = test_func(2000000)  # use a large number to avoid details of how the test is run
+        self.assertEqual(result, "")
 
 
 class TestInstropection(unittest.TestCase):
