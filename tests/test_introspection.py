@@ -14,6 +14,7 @@ import unittest
 from lsst.utils.introspection import get_full_type_name, get_class_of, get_instance_of
 
 # Classes and functions to use in tests.
+import lsst.utils
 from lsst.utils._packaging import getPackageDir
 from lsst.utils import doImport
 from collections import Counter
@@ -30,6 +31,7 @@ class TestInstropection(unittest.TestCase):
                  (doImport, "lsst.utils.doImport.doImport"),  # no underscore
                  (Counter, "collections.Counter"),
                  (Counter(), "collections.Counter"),
+                 (lsst.utils, "lsst.utils"),
                  ]
 
         for item, typeName in tests:
@@ -63,6 +65,9 @@ class TestInstropection(unittest.TestCase):
         c = get_instance_of("collections.Counter", "abcdeab")
         self.assertIsInstance(c, Counter)
         self.assertEqual(c["a"], 2)
+        with self.assertRaises(TypeError) as cm:
+            get_instance_of(lsst.utils)
+        self.assertIn("lsst.utils", str(cm.exception))
 
 
 if __name__ == "__main__":

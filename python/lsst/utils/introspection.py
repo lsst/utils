@@ -17,6 +17,8 @@ from __future__ import annotations
 __all__ = ["get_class_of", "get_full_type_name", "get_instance_of", ]
 
 import builtins
+import inspect
+import types
 from typing import (
     Any,
     Union,
@@ -48,6 +50,10 @@ def get_full_type_name(cls: Any) -> str:
     on the assumption that they are an implementation detail and the
     entity will be hoisted into the parent namespace.
     """
+    # If we have a module that needs to be converted directly
+    # to a name.
+    if isinstance(cls, types.ModuleType):
+        return cls.__name__
     # If we have an instance we need to convert to a type
     if not hasattr(cls, "__qualname__"):
         cls = type(cls)
@@ -76,7 +82,7 @@ def get_full_type_name(cls: Any) -> str:
     return cleaned_name
 
 
-def get_class_of(typeOrName: Union[Type, str]) -> Type:
+def get_class_of(typeOrName: Union[Type, str]) -> Union[types.ModuleType, Type]:
     """Given the type name or a type, return the python type.
 
     If a type name is given, an attempt will be made to import the type.
@@ -124,4 +130,7 @@ def get_instance_of(typeOrName: Union[Type, str], *args: Any, **kwargs: Any) -> 
         parameters.
     """
     cls = get_class_of(typeOrName)
+    if isinstance(cls, types.ModuleType):
+        type_name = typeOrName if isinstance(typeOrName, str) else get_full_type_name(typeOrName)
+        raise TypeError(f"Module '{type_name}' is not Callable.")
     return cls(*args, **kwargs)
