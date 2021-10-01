@@ -11,6 +11,7 @@
 #
 
 import unittest
+import itertools
 
 from lsst.utils.iteration import isplit, iterable, chunk_iterable
 
@@ -37,7 +38,7 @@ class IterationTestCase(unittest.TestCase):
                 # Turn into a list so we can check against the
                 # expected result.
                 data = [data]
-            for original, from_iterable in zip(data, iterator):
+            for original, from_iterable in itertools.zip_longest(data, iterator):
                 self.assertEqual(original, from_iterable)
 
     def testChunking(self):
