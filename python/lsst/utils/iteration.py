@@ -103,6 +103,8 @@ def isplit(string: T, sep: T) -> Iterator[T]:
     subset : `str` or `bytes`
         The next subset extracted from the input until the next separator.
     """
+    if type(string) is not type(sep):
+        raise TypeError(f"String and separator types must match ({type(string)} != {type(sep)})")
     begin = 0
     while True:
         end = string.find(sep, begin)
