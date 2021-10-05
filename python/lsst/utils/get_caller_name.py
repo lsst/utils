@@ -15,7 +15,7 @@ from deprecated.sphinx import deprecated
 from .introspection import get_caller_name as caller_name
 
 
-@deprecated(reason="get_caller_name has moved to lsst.utils.introspection.get_caller_name."
+@deprecated(reason="get_caller_name has moved to `lsst.utils.introspection.get_caller_name`."
             " Will be removed in v26.",
             version="v24", category=FutureWarning)
 def get_caller_name(skip: int = 2) -> str:
@@ -36,11 +36,6 @@ def get_caller_name(skip: int = 2) -> str:
     name : `str`
         Name of the caller as a string in the form ``module.class.method``.
         An empty string is returned if ``skip`` exceeds the stack height.
-
-    Notes
-    -----
-    Adapted from from http://stackoverflow.com/a/9812105
-    by adding support to get the class from ``parentframe.f_locals['cls']``
     """
     # Offset the stack level to account for redirect and deprecated wrapper.
     return caller_name(stacklevel=skip + 2)

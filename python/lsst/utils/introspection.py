@@ -166,7 +166,7 @@ def get_caller_name(stacklevel: int = 2) -> str:
 
     Notes
     -----
-    Adapted from from http://stackoverflow.com/a/9812105
+    Adapted from http://stackoverflow.com/a/9812105
     by adding support to get the class from ``parentframe.f_locals['cls']``
     """
     stack = inspect.stack()
