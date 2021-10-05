@@ -14,7 +14,7 @@ import inspect
 
 import lsst.utils.tests
 
-from lsst.utils import doImport
+from lsst.utils import doImport, doImportType
 
 
 class ImportTestCase(lsst.utils.tests.TestCase):
@@ -79,6 +79,13 @@ class ImportTestCase(lsst.utils.tests.TestCase):
         self.assertEqual(c.inside(), "1")
         c = doImport("import_test.two.three.success.Container.inside")
         self.assertEqual(c(), "1")
+
+    def testDoImportType(self):
+        with self.assertRaises(TypeError):
+            doImportType("lsst.utils")
+
+        c = doImportType("lsst.utils.tests.TestCase")
+        self.assertEqual(c, lsst.utils.tests.TestCase)
 
 
 if __name__ == "__main__":
