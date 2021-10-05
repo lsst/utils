@@ -25,7 +25,7 @@ from typing import (
     Type,
 )
 
-from .doImport import doImport
+from .doImport import doImportType, doImport
 
 
 def get_full_type_name(cls: Any) -> str:
@@ -82,7 +82,7 @@ def get_full_type_name(cls: Any) -> str:
     return cleaned_name
 
 
-def get_class_of(typeOrName: Union[Type, str]) -> Union[types.ModuleType, Type]:
+def get_class_of(typeOrName: Union[Type, str]) -> Type:
     """Given the type name or a type, return the python type.
 
     If a type name is given, an attempt will be made to import the type.
@@ -101,11 +101,18 @@ def get_class_of(typeOrName: Union[Type, str]) -> Union[types.ModuleType, Type]:
     Notes
     -----
     This is a thin wrapper around `~lsst.utils.doImport`.
+
+    Raises
+    ------
+    TypeError
+        Raised if a module is imported rather than a type.
     """
     if isinstance(typeOrName, str):
-        cls = doImport(typeOrName)
+        cls = doImportType(typeOrName)
     else:
         cls = typeOrName
+        if isinstance(cls, types.ModuleType):
+            raise TypeError(f"Can not get class of module {get_full_type_name(typeOrName)}")
     return cls
 
 
@@ -128,11 +135,13 @@ def get_instance_of(typeOrName: Union[Type, str], *args: Any, **kwargs: Any) -> 
     instance : `object`
         Instance of the requested type, instantiated with the provided
         parameters.
+
+    Raises
+    ------
+    TypeError
+        Raised if a module is imported rather than a type.
     """
     cls = get_class_of(typeOrName)
-    if isinstance(cls, types.ModuleType):
-        type_name = typeOrName if isinstance(typeOrName, str) else get_full_type_name(typeOrName)
-        raise TypeError(f"Module '{type_name}' is not Callable.")
     return cls(*args, **kwargs)
 
 

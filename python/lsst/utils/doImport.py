@@ -9,7 +9,7 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-__all__ = ("doImport",)
+__all__ = ("doImport", "doImportType")
 
 import importlib
 import types
@@ -81,3 +81,33 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
             infileComponents.insert(0, moduleComponents.pop())
 
     raise ModuleNotFoundError(f"Unable to import {importable}")
+
+
+def doImportType(importable: str) -> Type:
+    """Import a python type given an importable string and return it.
+
+    Parameters
+    ----------
+    importable : `str`
+        String containing dot-separated path of a Python class,
+        or member function.
+
+    Returns
+    -------
+    type : `type`
+        Type object. Can not return a module.
+
+    Raises
+    ------
+    TypeError
+        ``importable`` is not a `str` or the imported type is a module.
+    ModuleNotFoundError
+        No module in the supplied import string could be found.
+    ImportError
+        ``importable`` is found but can not be imported or the requested
+        item could not be retrieved from the imported module.
+    """
+    imported = doImport(importable)
+    if isinstance(imported, types.ModuleType):
+        raise TypeError(f"Import of {importable} returned a module and not a type.")
+    return imported
