@@ -256,3 +256,6 @@ def getLogger(name: Optional[str] = None, logger: logging.Logger = None) -> Lsst
     elif name:
         logger = logger.getChild(name)
     return LsstLogAdapter(logger, {})
+
+
+LsstLoggers = Union[logging.Logger, LsstLogAdapter]

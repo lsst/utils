@@ -12,6 +12,9 @@
 
 """Utilities for measuring execution time.
 """
+
+from __future__ import annotations
+
 __all__ = ["logInfo", "timeMethod", "time_this"]
 
 import functools
@@ -30,7 +33,11 @@ from typing import (
     MutableMapping,
     Optional,
     Tuple,
+    TYPE_CHECKING,
 )
+
+if TYPE_CHECKING:
+    from .logging import LsstLoggers
 
 
 def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
@@ -249,7 +256,7 @@ def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping
 
 
 @contextmanager
-def time_this(log: Optional[logging.Logger] = None, msg: Optional[str] = None,
+def time_this(log: Optional[LsstLoggers] = None, msg: Optional[str] = None,
               level: int = logging.DEBUG, prefix: Optional[str] = "timer",
               args: Iterable[Any] = ()) -> Iterator[None]:
     """Time the enclosed block and issue a log message.
