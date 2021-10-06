@@ -13,7 +13,7 @@
 import unittest
 import itertools
 
-from lsst.utils.iteration import isplit, iterable, chunk_iterable
+from lsst.utils.iteration import isplit, ensure_iterable, chunk_iterable
 
 
 class IterationTestCase(unittest.TestCase):
@@ -33,7 +33,7 @@ class IterationTestCase(unittest.TestCase):
         )
 
         for data, is_iterable in test_data:
-            iterator = iterable(data)
+            iterator = ensure_iterable(data)
             if not is_iterable:
                 # Turn into a list so we can check against the
                 # expected result.

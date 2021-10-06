@@ -14,7 +14,7 @@ from __future__ import annotations
 
 """Utilities relating to iterators."""
 
-__all__ = ["chunk_iterable", "iterable", "isplit"]
+__all__ = ["chunk_iterable", "ensure_iterable", "isplit"]
 
 import itertools
 from collections.abc import Mapping
@@ -51,10 +51,10 @@ def chunk_iterable(data: Iterable[Any], chunk_size: int = 1_000) -> Iterator[Tup
         yield chunk
 
 
-def iterable(a: Any) -> Iterable[Any]:
-    """Make input iterable.
+def ensure_iterable(a: Any) -> Iterable[Any]:
+    """Ensure that the input is iterable.
 
-    There are three cases, when the input is:
+    There are multiple cases, when the input is:
 
     - iterable, but not a `str`  or Mapping -> iterate over elements
       (e.g. ``[i for i in a]``)
