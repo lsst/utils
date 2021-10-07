@@ -88,7 +88,7 @@ class TestInstropection(unittest.TestCase):
             self.assertEqual(get_full_type_name(item), typeName)
 
     def testUnderscores(self):
-        # Underscores are filtered out unless they can't be either
+        # Underscores are filtered out unless they can't be, either
         # because __init__.py did not import it or there is a clash with
         # the non-underscore version.
         for test_name in ("import_test.two._four.simple.Simple",

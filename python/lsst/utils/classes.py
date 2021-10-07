@@ -53,7 +53,7 @@ _T = TypeVar("_T", bound="Type")
 
 
 def immutable(cls: _T) -> _T:
-    """Decorate a class to simulates a simple form of immutability.
+    """Decorate a class to simulate a simple form of immutability.
 
     A class decorated as `immutable` may only set each of its attributes once;
     any attempts to set an already-set attribute will raise `AttributeError`.
@@ -108,7 +108,7 @@ _R = TypeVar("_R")
 
 
 def cached_getter(func: Callable[[_S], _R]) -> Callable[[_S], _R]:
-    """Decorate a method to caches the result.
+    """Decorate a method to cache the result.
 
     Only works on methods that take only ``self``
     as an argument, and returns the cached result on subsequent calls.
