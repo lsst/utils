@@ -22,6 +22,7 @@ import logging
 import resource
 import time
 import datetime
+import traceback
 from contextlib import contextmanager
 
 from typing import (
@@ -72,6 +73,39 @@ def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
     metadata[name].append(value)
 
 
+def _find_outside_stacklevel() -> int:
+    """Find the stack level corresponding to caller code outside of this
+    module.
+
+    This can be passed directly to `logging.Logger.log()` to ensure
+    that log messages are issued as if they are coming from caller code.
+
+    Returns
+    -------
+    stacklevel : `int`
+        The stack level to use to refer to a caller outside of this module.
+        A ``stacklevel`` of ``1`` corresponds to the caller of this internal
+        function and that is the default expected by `logging.Logger.log()`.
+
+    Notes
+    -----
+    Intended to be called from the function that is going to issue a log
+    message. The result should be passed into `~logging.Logger.log` via the
+    keyword parameter ``stacklevel``.
+    """
+    stacklevel = 1  # the default for `Logger.log`
+    stack = traceback.extract_stack()
+    for i, s in enumerate(reversed(stack)):
+        if "lsst/utils" not in s.filename:
+            # 0 will be this function.
+            # 1 will be the caller which will be the default for `Logger.log`
+            # and so does not need adjustment.
+            stacklevel = i
+            break
+
+    return stacklevel
+
+
 def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = logging.DEBUG,
              metadata: Optional[MutableMapping] = None,
              logger: Optional[logging.Logger] = None) -> None:
@@ -115,7 +149,10 @@ def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = loggi
             _add_to_metadata(metadata, name, value)
         strList.append(f"{name}={value}")
     if logger is not None:
-        logging.getLogger("timer." + logger.name).log(logLevel, "; ".join(strList))
+        # Want the file associated with this log message to be that
+        # of the caller.
+        stacklevel = _find_outside_stacklevel()
+        logging.getLogger("timer." + logger.name).log(logLevel, "; ".join(strList), stacklevel=stacklevel)
 
 
 def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,

@@ -13,11 +13,14 @@ import unittest
 import logging
 import time
 import datetime
+import os.path
 from dataclasses import dataclass
 
 from lsst.utils.timer import timeMethod, logPairs, time_this
 
 log = logging.getLogger("test_timer")
+
+THIS_FILE = os.path.basename(__file__)
 
 # Only use this in a single test but needs to be associated
 # with the function up front.
@@ -66,6 +69,7 @@ class TestTimeMethod(unittest.TestCase):
             logPairs(None, pairs, logLevel=logging.INFO, logger=logger, metadata=metadata)
         self.assertEqual(len(cm.output), 1, cm.output)
         self.assertTrue(cm.output[0].endswith("name1=0; name2=1"), cm.output)
+        self.assertEqual(cm.records[0].filename, THIS_FILE, "log message should originate from here")
         self.assertEqual(metadata, {"name1": [0], "name2": [1]})
 
     def assertTimer(self, duration, task):
@@ -81,8 +85,9 @@ class TestTimeMethod(unittest.TestCase):
 
         if has_logger:
             counter += 1
-            with self.assertLogs("timer.task", level=logging.DEBUG):
+            with self.assertLogs("timer.task", level=logging.DEBUG) as cm:
                 task.sleeper(duration)
+            self.assertEqual(cm.records[0].filename, THIS_FILE, "log message should originate from here")
 
         if has_metadata:
             self.assertEqual(len(task.metadata["sleeperStartUserTime"]), counter)
@@ -117,8 +122,9 @@ class TestTimeMethod(unittest.TestCase):
         decorated_sleeper_nothing(self, duration)
 
         # Use a function decorated for logging.
-        with self.assertLogs("timer.test_timer", level=logging.DEBUG):
+        with self.assertLogs("timer.test_timer", level=logging.DEBUG) as cm:
             decorated_sleeper_logger(self, duration)
+        self.assertEqual(cm.records[0].filename, THIS_FILE, "log message should originate from here")
 
         # And adjust the log level
         with self.assertLogs("timer.test_timer", level=logging.INFO):
@@ -143,7 +149,7 @@ class TimerTestCase(unittest.TestCase):
                 pass
         self.assertEqual(cm.records[0].name, "timer")
         self.assertEqual(cm.records[0].levelname, "DEBUG")
-        self.assertEqual(cm.records[0].filename, "test_timer.py")
+        self.assertEqual(cm.records[0].filename, THIS_FILE)
 
         with self.assertLogs(level="DEBUG") as cm:
             with time_this(prefix=None):
@@ -151,7 +157,7 @@ class TimerTestCase(unittest.TestCase):
         self.assertEqual(cm.records[0].name, "root")
         self.assertEqual(cm.records[0].levelname, "DEBUG")
         self.assertIn("Took", cm.output[0])
-        self.assertEqual(cm.records[0].filename, "test_timer.py")
+        self.assertEqual(cm.records[0].filename, THIS_FILE)
 
         # Change logging level
         with self.assertLogs(level="INFO") as cm:
