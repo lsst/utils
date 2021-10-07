@@ -37,8 +37,12 @@ logging.addLevelName(VERBOSE, "VERBOSE")
 
 class _F:
     """
-    Format, supporting str.format() syntax
-    see using-custom-message-objects in logging-cookbook.html
+    Format, supporting `str.format()` syntax.
+
+    Notes
+    -----
+    This follows the recommendation from
+    https://docs.python.org/3/howto/logging-cookbook.html#using-custom-message-objects
     """
     def __init__(self, fmt: str, /, *args: Any, **kwargs: Any):
         self.fmt = fmt
