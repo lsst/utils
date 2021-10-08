@@ -36,3 +36,13 @@ Python API reference
 .. automodapi:: lsst.utils.tests
    :no-main-docstr:
    :no-inherited-members:
+.. automodapi:: lsst.utils.logging
+   :no-main-docstr:
+.. automodapi:: lsst.utils.iteration
+   :no-main-docstr:
+.. automodapi:: lsst.utils.classes
+   :no-main-docstr:
+.. automodapi:: lsst.utils.introspection
+   :no-main-docstr:
+.. automodapi:: lsst.utils.timer
+   :no-main-docstr:

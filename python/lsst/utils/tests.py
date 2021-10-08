@@ -13,7 +13,7 @@
 
 __all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
            "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
-           "debugger", "classParameters", "methodParameters"]
+           "debugger", "classParameters", "methodParameters", "temporaryDirectory"]
 
 import contextlib
 import gc
