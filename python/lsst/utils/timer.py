@@ -22,7 +22,7 @@ import logging
 import resource
 import time
 import datetime
-import traceback
+import inspect
 from contextlib import contextmanager
 
 from typing import (
@@ -94,14 +94,20 @@ def _find_outside_stacklevel() -> int:
     keyword parameter ``stacklevel``.
     """
     stacklevel = 1  # the default for `Logger.log`
-    stack = traceback.extract_stack()
-    for i, s in enumerate(reversed(stack)):
-        if "lsst/utils" not in s.filename:
+    for i, s in enumerate(inspect.stack()):
+        module = inspect.getmodule(s.frame)
+        if module is None:
+            # Stack frames sometimes hang around so explicilty delete.
+            del s
+            continue
+        if not module.__name__.startswith("lsst.utils"):
             # 0 will be this function.
             # 1 will be the caller which will be the default for `Logger.log`
             # and so does not need adjustment.
             stacklevel = i
             break
+        # Stack frames sometimes hang around so explicilty delete.
+        del s
 
     return stacklevel
 
