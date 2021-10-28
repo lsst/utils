@@ -1,0 +1,2 @@
+Add support for building via CMake in addition to eupspkg (allows inclusion as submodule into
+other CMake projects, e.g. Qserv)
