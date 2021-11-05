@@ -15,7 +15,7 @@
 import logging
 import unittest
 
-from lsst.utils.logging import getLogger
+from lsst.utils.logging import getLogger, trace_set_at
 
 
 class TestLogging(unittest.TestCase):
@@ -64,6 +64,29 @@ class TestLogging(unittest.TestCase):
         self.assertEqual(child.getEffectiveLevel(), root.getEffectiveLevel())
         child.setLevel(root.DEBUG)
         self.assertNotEqual(child.getEffectiveLevel(), root.getEffectiveLevel())
+
+    def testTraceSetAt(self):
+        log_name = "lsst.afw"
+        trace_set_at(log_name, 2)
+        trace2_log = getLogger(f"TRACE2.{log_name}")
+        trace3_log = getLogger(f"TRACE3.{log_name}")
+        self.assertEqual(trace2_log.getEffectiveLevel(), logging.DEBUG)
+        self.assertEqual(trace3_log.getEffectiveLevel(), logging.INFO)
+
+        # Check that child loggers are affected.
+        log_name = "lsst.daf"
+        child3_log = getLogger("TRACE3.lsst.daf")
+        child2_log = getLogger("TRACE2.lsst.daf")
+        self.assertEqual(child3_log.getEffectiveLevel(), logging.WARNING)
+        self.assertEqual(child2_log.getEffectiveLevel(), logging.WARNING)
+        trace_set_at("lsst", 2)
+        self.assertEqual(child3_log.getEffectiveLevel(), logging.INFO)
+        self.assertEqual(child2_log.getEffectiveLevel(), logging.DEBUG)
+
+        # Also check the root logger.
+        trace_set_at("", 3)
+        self.assertEqual(trace3_log.getEffectiveLevel(), logging.INFO)
+        self.assertEqual(getLogger("TRACE3.test").getEffectiveLevel(), logging.DEBUG)
 
 
 if __name__ == "__main__":

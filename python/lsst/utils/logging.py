@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-__all__ = ("TRACE", "VERBOSE", "getLogger", "LsstLogAdapter")
+__all__ = ("TRACE", "VERBOSE", "getLogger", "LsstLogAdapter", "trace_set_at")
 
 import logging
 from logging import LoggerAdapter
@@ -33,6 +33,40 @@ logging.addLevelName(TRACE, "TRACE")
 # Verbose logging is midway between INFO and DEBUG.
 VERBOSE = (logging.INFO + logging.DEBUG) // 2
 logging.addLevelName(VERBOSE, "VERBOSE")
+
+
+def trace_set_at(name: str, number: int) -> None:
+    """Adjusts logging level to display messages with the trace number being
+    less than or equal to the provided value.
+
+    Parameters
+    ----------
+    name : `str`
+        Name of the logger.
+    number : `int`
+        The trace number threshold for display.
+
+    Notes
+    -----
+    Loggers ``TRACE0.`` to ``TRACE5.`` are set. All loggers above
+    the specified threshold are set to ``INFO`` and those below the threshold
+    are set to ``DEBUG``.  The expectation is that ``TRACE`` loggers only
+    issue ``DEBUG`` log messages.
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+       lsst.utils.logging.trace_set_at("lsst.afw", 3)
+
+    This will set loggers ``TRACE0.lsst.afw`` to ``TRACE3.lsst.afw`` to
+    ``DEBUG`` and ``TRACE4.lsst.afw`` and ``TRACE5.lsst.afw`` to ``INFO``.
+    """
+    for i in range(6):
+        level = logging.INFO if i > number else logging.DEBUG
+        log_name = f"TRACE{i}.{name}" if name else f"TRACE{i}"
+        logging.getLogger(log_name).setLevel(level)
 
 
 class _F:
