@@ -65,7 +65,8 @@ def trace_set_at(name: str, number: int) -> None:
     """
     for i in range(6):
         level = logging.INFO if i > number else logging.DEBUG
-        logging.getLogger(f"TRACE{i}.{name}").setLevel(level)
+        log_name = f"TRACE{i}.{name}" if name else f"TRACE{i}"
+        logging.getLogger(log_name).setLevel(level)
 
 
 class _F:
