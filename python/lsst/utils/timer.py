@@ -114,7 +114,7 @@ def _find_outside_stacklevel() -> int:
 
 def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = logging.DEBUG,
              metadata: Optional[MutableMapping] = None,
-             logger: Optional[logging.Logger] = None) -> None:
+             logger: Optional[logging.Logger] = None, stacklevel: Optional[int] = None) -> None:
     """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``
 
     Parameters
@@ -137,6 +137,12 @@ def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = loggi
         Metadata object to write entries to.  Ignored if `None`.
     logger : `logging.Logger`
         Log object to write entries to.  Ignored if `None`.
+    stacklevel : `int`, optional
+        The stack level to pass to the logger to adjust which stack frame
+        is used to report the file information. If `None` the stack level
+        is computed such that it is reported as the first package outside
+        of the utils package. If a value is given here it is adjusted by
+        1 to account for this caller.
     """
     if obj is not None:
         if metadata is None:
@@ -160,12 +166,17 @@ def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = loggi
         # message will be issued.
         timer_logger = logging.getLogger("timer." + logger.name)
         if timer_logger.isEnabledFor(logLevel):
-            stacklevel = _find_outside_stacklevel()
+            if stacklevel is None:
+                stacklevel = _find_outside_stacklevel()
+            else:
+                # Account for the caller stack.
+                stacklevel += 1
             timer_logger.log(logLevel, "; ".join(strList), stacklevel=stacklevel)
 
 
 def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
-            metadata: Optional[MutableMapping] = None, logger: Optional[logging.Logger] = None) -> None:
+            metadata: Optional[MutableMapping] = None, logger: Optional[logging.Logger] = None,
+            stacklevel: Optional[int] = None) -> None:
     """Log timer information to ``obj.metadata`` and ``obj.log``.
 
     Parameters
@@ -190,6 +201,12 @@ def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
         Metadata object to write entries to, overriding ``obj.metadata``.
     logger : `logging.Logger`
         Log object to write entries to, overriding ``obj.log``.
+    stacklevel : `int`, optional
+        The stack level to pass to the logger to adjust which stack frame
+        is used to report the file information. If `None` the stack level
+        is computed such that it is reported as the first package outside
+        of the utils package. If a value is given here it is adjusted by
+        1 to account for this caller.
 
     Notes
     -----
@@ -215,6 +232,10 @@ def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
         # Log messages already have timestamps.
         utcStr = datetime.datetime.utcnow().isoformat()
         _add_to_metadata(metadata, name=prefix + "Utc", value=utcStr)
+    if stacklevel is not None:
+        # Account for the caller of this routine not knowing that we
+        # are going one down in the stack.
+        stacklevel += 1
     logPairs(obj=obj,
              pairs=[
                  (prefix + "CpuTime", cpuTime),
@@ -230,7 +251,8 @@ def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
              ],
              logLevel=logLevel,
              metadata=metadata,
-             logger=logger)
+             logger=logger,
+             stacklevel=stacklevel)
 
 
 def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping] = None,
@@ -285,13 +307,18 @@ def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping
     def decorator_timer(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(self: Any, *args: Any, **keyArgs: Any) -> Any:
+            # Adjust the stacklevel to account for the wrappers.
+            # stacklevel 1 would make the log message come from this function
+            # but we want it to come from the file that defined the method
+            # so need to increment by 1 to get to the caller.
+            stacklevel = 2
             logInfo(obj=self, prefix=func.__name__ + "Start", metadata=metadata, logger=logger,
-                    logLevel=logLevel)
+                    logLevel=logLevel, stacklevel=stacklevel)
             try:
                 res = func(self, *args, **keyArgs)
             finally:
                 logInfo(obj=self, prefix=func.__name__ + "End", metadata=metadata, logger=logger,
-                        logLevel=logLevel)
+                        logLevel=logLevel, stacklevel=stacklevel)
             return res
         return wrapper
 
