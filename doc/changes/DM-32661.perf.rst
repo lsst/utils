@@ -1,0 +1,1 @@
+Fixed an optimization when using `lsst.utils.TemplateMeta` classes with `isintance` or `issubclass`.
