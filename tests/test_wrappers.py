@@ -168,6 +168,28 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
         self.assertIsInstance(d, self.Example)
         self.assertEqual(set(self.Example.__subclasses__()), set([self.ExampleF, self.ExampleD]))
 
+        # To test fallback code path, ensure that there are multiple
+        # examples to check.
+        class ExampleSub(self.ExampleD):
+            # A subclass that is not itself registered.
+            pass
+
+        class Example2(metaclass=lsst.utils.TemplateMeta):
+            # A new independent class.
+            pass
+
+        class Example2I:
+            # Something that will be registered in independent hierarchy.
+            pass
+
+        Example2.register(np.int32, Example2I)
+
+        sub = ExampleSub()
+        self.assertIsInstance(sub, self.Example)
+        self.assertNotIsInstance(sub, Example2)
+        self.assertTrue(issubclass(ExampleSub, self.Example))
+        self.assertFalse(issubclass(ExampleSub, Example2))
+
     def testConstruction(self):
         self.register()
         f1 = self.Example(dtype=np.float32)
