@@ -306,7 +306,7 @@ def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping
 
     def decorator_timer(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(self: Any, *args: Any, **keyArgs: Any) -> Any:
+        def timeMethod_wrapper(self: Any, *args: Any, **keyArgs: Any) -> Any:
             # Adjust the stacklevel to account for the wrappers.
             # stacklevel 1 would make the log message come from this function
             # but we want it to come from the file that defined the method
@@ -320,7 +320,7 @@ def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping
                 logInfo(obj=self, prefix=func.__name__ + "End", metadata=metadata, logger=logger,
                         logLevel=logLevel, stacklevel=stacklevel)
             return res
-        return wrapper
+        return timeMethod_wrapper
 
     if _func is None:
         return decorator_timer
