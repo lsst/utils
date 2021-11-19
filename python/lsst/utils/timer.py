@@ -156,9 +156,12 @@ def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = loggi
         strList.append(f"{name}={value}")
     if logger is not None:
         # Want the file associated with this log message to be that
-        # of the caller.
-        stacklevel = _find_outside_stacklevel()
-        logging.getLogger("timer." + logger.name).log(logLevel, "; ".join(strList), stacklevel=stacklevel)
+        # of the caller. This is expensive so only do it if we know the
+        # message will be issued.
+        timer_logger = logging.getLogger("timer." + logger.name)
+        if timer_logger.isEnabledFor(logLevel):
+            stacklevel = _find_outside_stacklevel()
+            timer_logger.log(logLevel, "; ".join(strList), stacklevel=stacklevel)
 
 
 def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
