@@ -16,7 +16,7 @@ import datetime
 import os.path
 from dataclasses import dataclass
 
-from lsst.utils.timer import timeMethod, logPairs, time_this
+from lsst.utils.timer import timeMethod, logPairs, time_this, logInfo
 
 log = logging.getLogger("test_timer")
 
@@ -71,6 +71,36 @@ class TestTimeMethod(unittest.TestCase):
         self.assertTrue(cm.output[0].endswith("name1=0; name2=1"), cm.output)
         self.assertEqual(cm.records[0].filename, THIS_FILE, "log message should originate from here")
         self.assertEqual(metadata, {"name1": [0], "name2": [1]})
+
+        # Call it again with an explicit stack level.
+        # Force it to come from lsst.utils.
+        with self.assertLogs(level=logging.INFO) as cm:
+            logPairs(None, pairs, logLevel=logging.INFO, logger=logger, metadata=metadata, stacklevel=0)
+        self.assertEqual(cm.records[0].filename, "timer.py")
+
+        # Check that the log message is filtered by default.
+        with self.assertLogs(level=logging.INFO) as cm:
+            logPairs(None, pairs, logger=logger, metadata=metadata)
+            logger.info("Message")
+        self.assertEqual(len(cm.records), 1)
+
+    def testLogInfo(self):
+        metadata = {}
+        logger = logging.getLogger("testLogInfo")
+        with self.assertLogs(level=logging.INFO) as cm:
+            logInfo(None, prefix="Prefix", metadata=metadata, logger=logger, logLevel=logging.INFO)
+        self.assertEqual(cm.records[0].filename, THIS_FILE)
+        self.assertIn("PrefixUtc", metadata)
+
+        # Again with no log output.
+        logInfo(None, prefix="Prefix", metadata=metadata)
+        self.assertEqual(len(metadata["PrefixUtc"]), 2)
+
+        # With an explicit stacklevel.
+        with self.assertLogs(level=logging.INFO) as cm:
+            logInfo(None, prefix="Prefix", metadata=metadata, logger=logger, logLevel=logging.INFO,
+                    stacklevel=0)
+        self.assertEqual(cm.records[0].filename, "timer.py")
 
     def assertTimer(self, duration, task):
         # Call it twice to test the "add" functionality.
