@@ -306,7 +306,7 @@ class TemplateMeta(type):
     def __subclasscheck__(cls, subclass):
         # Special method hook for the issubclass built-in: we return true for
         # any registered type or true subclass thereof.
-        if subclass in cls._registry:
+        if subclass in cls._registry.values():
             return True
         for v in cls._registry.values():
             if issubclass(subclass, v):
@@ -316,7 +316,7 @@ class TemplateMeta(type):
     def __instancecheck__(cls, instance):
         # Special method hook for the isinstance built-in: we return true for
         # an instance of any registered type or true subclass thereof.
-        if type(instance) in cls._registry:
+        if type(instance) in cls._registry.values():
             return True
         for v in cls._registry.values():
             if isinstance(instance, v):
