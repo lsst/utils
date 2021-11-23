@@ -60,7 +60,7 @@ def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
         try:
             # PropertySet should always prefer LongLong for integers
             metadata.addLongLong(name, value)  # type: ignore
-        except TypeError:
+        except (TypeError, AttributeError):
             metadata.add(name, value)  # type: ignore
     except AttributeError:
         pass
