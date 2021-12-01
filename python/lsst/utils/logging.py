@@ -26,6 +26,11 @@ from typing import (
     Union,
 )
 
+try:
+    import lsst.log.utils as logUtils
+except ImportError:
+    logUtils = None
+
 # log level for trace (verbose debug).
 TRACE = 5
 logging.addLevelName(TRACE, "TRACE")
@@ -62,11 +67,21 @@ def trace_set_at(name: str, number: int) -> None:
 
     This will set loggers ``TRACE0.lsst.afw`` to ``TRACE3.lsst.afw`` to
     ``DEBUG`` and ``TRACE4.lsst.afw`` and ``TRACE5.lsst.afw`` to ``INFO``.
+
+    Notes
+    -----
+    If ``lsst.log`` is installed, this function will also call
+    `lsst.log.utils.traceSetAt` to ensure that non-Python loggers are
+    also configured correctly.
     """
     for i in range(6):
         level = logging.INFO if i > number else logging.DEBUG
         log_name = f"TRACE{i}.{name}" if name else f"TRACE{i}"
         logging.getLogger(log_name).setLevel(level)
+
+    # if lsst log is available also set the trace loggers there.
+    if logUtils is not None:
+        logUtils.traceSetAt(name, number)
 
 
 class _F:
