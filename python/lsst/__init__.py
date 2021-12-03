@@ -8,6 +8,7 @@
 #
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
+"""Top-level LSST package definition."""
 
 import pkgutil
 __path__ = pkgutil.extend_path(__path__, __name__)

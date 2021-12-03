@@ -8,6 +8,7 @@
 #
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
+"""General LSST Utilities."""
 
 from .get_caller_name import *
 from .doImport import *

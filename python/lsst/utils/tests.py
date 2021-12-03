@@ -84,7 +84,6 @@ def sort_tests(tests) -> unittest.TestSuite:
         A combined `~unittest.TestSuite` with
         `~lsst.utils.tests.MemoryTestCase` at the end.
     """
-
     suite = unittest.TestSuite()
     memtests = []
     for test_suite in tests:
@@ -157,20 +156,22 @@ class ExecutablesTestCase(unittest.TestCase):
     must subclass this class in their own test file and invoke
     the create_executable_tests() class method to register the tests.
     """
+
     TESTS_DISCOVERED = -1
 
     @classmethod
     def setUpClass(cls) -> None:
         """Abort testing if automated test creation was enabled and
-        no tests were found."""
-
+        no tests were found.
+        """
         if cls.TESTS_DISCOVERED == 0:
             raise RuntimeError("No executables discovered.")
 
     def testSanity(self) -> None:
-        """This test exists to ensure that there is at least one test to be
+        """Ensure that there is at least one test to be
         executed. This allows the test runner to trigger the class set up
-        machinery to test whether there are some executables to test."""
+        machinery to test whether there are some executables to test.
+        """
         pass
 
     def assertExecutable(self, executable: str, root_dir: Optional[str] = None,
@@ -198,7 +199,6 @@ class ExecutablesTestCase(unittest.TestCase):
         AssertionError
             The executable did not return 0 exit status.
         """
-
         if root_dir is not None and not os.path.isabs(executable):
             executable = os.path.join(root_dir, executable)
 
@@ -287,7 +287,6 @@ class ExecutablesTestCase(unittest.TestCase):
         --------
         >>> cls.create_executable_tests(__file__)
         """
-
         # Get the search directory from the reference file
         ref_dir = os.path.abspath(os.path.dirname(ref_file))
 
@@ -329,7 +328,6 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
 
     Parameters
     ----------
-
     ext : `str`
         File name extension, e.g. ``.fits``.
     expectOutput : `bool`, optional
@@ -339,13 +337,13 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
 
     Returns
     -------
-    `str`
+    path : `str`
         Path for a temporary file. The path is a combination of the caller's
         file path and the name of the top-level function
 
-    Notes
-    -----
-    ::
+    Examples
+    --------
+    .. code-block:: python
 
         # file tests/testFoo.py
         import unittest
@@ -423,7 +421,7 @@ class TestCase(unittest.TestCase):
 
 
 def inTestCase(func: Callable) -> Callable:
-    """A decorator to add a free function to our custom TestCase class, while
+    """Add a free function to our custom TestCase class, while
     also making it available as a free function.
     """
     setattr(TestCase, func.__name__, func)
@@ -431,7 +429,7 @@ def inTestCase(func: Callable) -> Callable:
 
 
 def debugger(*exceptions):
-    """Decorator to enter the debugger when there's an uncaught exception
+    """Enter the debugger when there's an uncaught exception
 
     To use, just slap a ``@debugger()`` on your function.
 
@@ -823,7 +821,7 @@ def classParameters(**settings: Sequence[Any]) -> Callable:
 
 
 def methodParameters(**settings: Sequence[Any]) -> Callable:
-    """Method decorator for unit tests
+    """Iterate over supplied settings to create subtests automatically.
 
     This decorator iterates over the supplied settings, using
     ``TestCase.subTest`` to communicate the values in the event of a failure.
@@ -836,13 +834,15 @@ def methodParameters(**settings: Sequence[Any]) -> Callable:
 
     Examples
     --------
-    ::
+    .. code-block:: python
 
         @methodParameters(foo=[1, 2], bar=[3, 4])
         def testSomething(self, foo, bar):
             ...
 
-    will run::
+    will run:
+
+    .. code-block:: python
 
         testSomething(foo=1, bar=3)
         testSomething(foo=2, bar=4)
@@ -872,12 +872,15 @@ def _cartesianProduct(settings: Mapping[str, Sequence[Any]]) -> Mapping[str, Seq
         Parameter combinations covering the cartesian product (all possible
         combinations) of the input parameters.
 
-    Example
-    -------
+    Examples
+    --------
+    .. code-block:: python
 
         cartesianProduct({"foo": [1, 2], "bar": ["black", "white"]})
 
-    returns:
+    will return:
+
+    .. code-block:: python
 
         {"foo": [1, 1, 2, 2], "bar": ["black", "white", "black", "white"]}
     """
@@ -902,13 +905,15 @@ def classParametersProduct(**settings: Sequence[Any]) -> Callable:
 
     Examples
     --------
-    ::
+    .. code-block:: python
 
         @classParametersProduct(foo=[1, 2], bar=[3, 4])
         class MyTestCase(unittest.TestCase):
             ...
 
     will generate four classes, as if you wrote::
+
+    .. code-block:: python
 
         class MyTestCase_1_3(unittest.TestCase):
             foo = 1
@@ -936,7 +941,7 @@ def classParametersProduct(**settings: Sequence[Any]) -> Callable:
 
 
 def methodParametersProduct(**settings: Sequence[Any]) -> Callable:
-    """Method decorator for unit tests
+    """Iterate over cartesian product creating sub tests.
 
     This decorator iterates over the cartesian product of the supplied
     settings, using `~unittest.TestCase.subTest` to communicate the values in
