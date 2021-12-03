@@ -51,13 +51,6 @@ def trace_set_at(name: str, number: int) -> None:
     number : `int`
         The trace number threshold for display.
 
-    Notes
-    -----
-    Loggers ``TRACE0.`` to ``TRACE5.`` are set. All loggers above
-    the specified threshold are set to ``INFO`` and those below the threshold
-    are set to ``DEBUG``.  The expectation is that ``TRACE`` loggers only
-    issue ``DEBUG`` log messages.
-
     Examples
     --------
 
@@ -70,6 +63,11 @@ def trace_set_at(name: str, number: int) -> None:
 
     Notes
     -----
+    Loggers ``TRACE0.`` to ``TRACE5.`` are set. All loggers above
+    the specified threshold are set to ``INFO`` and those below the threshold
+    are set to ``DEBUG``.  The expectation is that ``TRACE`` loggers only
+    issue ``DEBUG`` log messages.
+
     If ``lsst.log`` is installed, this function will also call
     `lsst.log.utils.traceSetAt` to ensure that non-Python loggers are
     also configured correctly.
