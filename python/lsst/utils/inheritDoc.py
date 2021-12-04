@@ -15,7 +15,7 @@ from typing import Callable, Type
 
 
 def inheritDoc(klass: Type) -> Callable:
-    """Extends existing documentation for a method that exists in another
+    """Extend existing documentation for a method that exists in another
     class and extend it with any additional documentation defined.
 
     This decorator takes a class from which to draw documentation from as an
@@ -34,8 +34,7 @@ def inheritDoc(klass: Type) -> Callable:
         Intermediate decorator used in the documentation process.
     """
     def tmpDecorator(method: Type) -> Callable:
-        """Decorator to update the documentation from a class with the same
-        method.
+        """Update the documentation from a class with the same method.
         """
         methodName = method.__name__
         if not hasattr(klass, methodName):

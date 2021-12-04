@@ -41,7 +41,7 @@ logging.addLevelName(VERBOSE, "VERBOSE")
 
 
 def trace_set_at(name: str, number: int) -> None:
-    """Adjusts logging level to display messages with the trace number being
+    """Adjust logging level to display messages with the trace number being
     less than or equal to the provided value.
 
     Parameters
@@ -51,16 +51,8 @@ def trace_set_at(name: str, number: int) -> None:
     number : `int`
         The trace number threshold for display.
 
-    Notes
-    -----
-    Loggers ``TRACE0.`` to ``TRACE5.`` are set. All loggers above
-    the specified threshold are set to ``INFO`` and those below the threshold
-    are set to ``DEBUG``.  The expectation is that ``TRACE`` loggers only
-    issue ``DEBUG`` log messages.
-
     Examples
     --------
-
     .. code-block:: python
 
        lsst.utils.logging.trace_set_at("lsst.afw", 3)
@@ -70,6 +62,11 @@ def trace_set_at(name: str, number: int) -> None:
 
     Notes
     -----
+    Loggers ``TRACE0.`` to ``TRACE5.`` are set. All loggers above
+    the specified threshold are set to ``INFO`` and those below the threshold
+    are set to ``DEBUG``.  The expectation is that ``TRACE`` loggers only
+    issue ``DEBUG`` log messages.
+
     If ``lsst.log`` is installed, this function will also call
     `lsst.log.utils.traceSetAt` to ensure that non-Python loggers are
     also configured correctly.
@@ -85,14 +82,14 @@ def trace_set_at(name: str, number: int) -> None:
 
 
 class _F:
-    """
-    Format, supporting `str.format()` syntax.
+    """Format, supporting `str.format()` syntax.
 
     Notes
     -----
     This follows the recommendation from
     https://docs.python.org/3/howto/logging-cookbook.html#using-custom-message-objects
     """
+
     def __init__(self, fmt: str, /, *args: Any, **kwargs: Any):
         self.fmt = fmt
         self.args = args
@@ -135,7 +132,7 @@ class LsstLogAdapter(LoggerAdapter):
 
     @contextmanager
     def temporary_log_level(self, level: Union[int, str]) -> Generator:
-        """A context manager that temporarily sets the level of this logger.
+        """Temporarily set the level of this logger.
 
         Parameters
         ----------
@@ -151,7 +148,7 @@ class LsstLogAdapter(LoggerAdapter):
 
     @property
     def level(self) -> int:
-        """Current level of this logger (``int``)."""
+        """Return current level of this logger (``int``)."""
         return self.logger.level
 
     def getChild(self, name: str) -> LsstLogAdapter:

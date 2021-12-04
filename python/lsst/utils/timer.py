@@ -258,7 +258,7 @@ def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
 def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping] = None,
                logger: Optional[logging.Logger] = None,
                logLevel: int = logging.DEBUG) -> Callable:
-    """Decorator to measure duration of a method.
+    """Measure duration of a method.
 
     Parameters
     ----------

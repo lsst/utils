@@ -22,5 +22,6 @@ _VERSION_REMOVED = "v23"
 
 @deprecated(reason=_REASON, version=_VERSION_REMOVED, category=FutureWarning)
 def demangleType(type_name: str) -> str:
+    """Demangle a C++ type string."""
     import lsst.cpputils
     return lsst.cpputils.demangleType(type_name)
