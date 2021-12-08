@@ -29,4 +29,5 @@ from .._forwarded import _REASON, _VERSION_REMOVED
 def isEnabled() -> bool:
     """Check that backtrace is enabled."""
     from lsst.cpputils import backtrace
+
     return backtrace.isEnabled()

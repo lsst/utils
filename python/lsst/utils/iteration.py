@@ -18,13 +18,7 @@ __all__ = ["chunk_iterable", "ensure_iterable", "isplit"]
 
 import itertools
 from collections.abc import Mapping
-from typing import (
-    Any,
-    Iterable,
-    Iterator,
-    Tuple,
-    TypeVar,
-)
+from typing import Any, Iterable, Iterator, Tuple, TypeVar
 
 
 def chunk_iterable(data: Iterable[Any], chunk_size: int = 1_000) -> Iterator[Tuple[Any, ...]]:
@@ -47,7 +41,7 @@ def chunk_iterable(data: Iterable[Any], chunk_size: int = 1_000) -> Iterator[Tup
         empty and the caller knows it can be sized and indexed.
     """
     it = iter(data)
-    while (chunk := tuple(itertools.islice(it, chunk_size))):
+    while chunk := tuple(itertools.islice(it, chunk_size)):
         yield chunk
 
 
@@ -84,7 +78,7 @@ def ensure_iterable(a: Any) -> Iterable[Any]:
         yield a
 
 
-T = TypeVar('T', str, bytes)
+T = TypeVar("T", str, bytes)
 
 
 def isplit(string: T, sep: T) -> Iterator[T]:

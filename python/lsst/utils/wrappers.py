@@ -17,17 +17,19 @@ import numpy as np
 __all__ = ("continueClass", "inClass", "TemplateMeta")
 
 
-INTRINSIC_SPECIAL_ATTRIBUTES = frozenset((
-    "__qualname__",
-    "__module__",
-    "__metaclass__",
-    "__dict__",
-    "__weakref__",
-    "__class__",
-    "__subclasshook__",
-    "__name__",
-    "__doc__",
-))
+INTRINSIC_SPECIAL_ATTRIBUTES = frozenset(
+    (
+        "__qualname__",
+        "__module__",
+        "__metaclass__",
+        "__dict__",
+        "__weakref__",
+        "__class__",
+        "__subclasshook__",
+        "__name__",
+        "__doc__",
+    )
+)
 
 
 def isAttributeSafeToTransfer(name, value):
@@ -38,8 +40,9 @@ def isAttributeSafeToTransfer(name, value):
     classes, leaving only those explicitly defined in a class decorated by
     `continueClass` or registered with an instance of `TemplateMeta`.
     """
-    if name.startswith("__") and (value is getattr(object, name, None)
-                                  or name in INTRINSIC_SPECIAL_ATTRIBUTES):
+    if name.startswith("__") and (
+        value is getattr(object, name, None) or name in INTRINSIC_SPECIAL_ATTRIBUTES
+    ):
         return False
     return True
 
@@ -115,6 +118,7 @@ def inClass(cls, name=None):
     may only be used if they return an object with a ``__name__`` attribute
     or the ``name`` optional argument is provided.
     """
+
     def decorate(func):
         # Using 'name' instead of 'name1' breaks the closure because
         # assignment signals a strictly local variable.
@@ -131,11 +135,10 @@ def inClass(cls, name=None):
                     # property has fget but no __name__
                     name1 = func.fget.__name__
                 else:
-                    raise ValueError(
-                        "Could not guess attribute name for '{}'.".format(func)
-                    )
+                    raise ValueError("Could not guess attribute name for '{}'.".format(func))
         setattr(cls, name1, func)
         return func
+
     return decorate
 
 
@@ -254,30 +257,24 @@ class TemplateMeta(type):
         # methods) that were defined in the class body so we can copy them
         # to registered subclasses later.
         # We also initialize an empty dict to store the registered subclasses.
-        attrs["_inherited"] = {k: v for k, v in attrs.items()
-                               if isAttributeSafeToTransfer(k, v)}
+        attrs["_inherited"] = {k: v for k, v in attrs.items() if isAttributeSafeToTransfer(k, v)}
         # The special "TEMPLATE_PARAMS" class attribute, if defined, contains
         # names of the template parameters, which we use to set those
         # attributes on registered subclasses and intercept arguments to the
         # constructor.  This line removes it from the dict of things that
         # should be inherited while setting a default of 'dtype' if it's not
         # defined.
-        attrs["TEMPLATE_PARAMS"] = \
-            attrs["_inherited"].pop("TEMPLATE_PARAMS", ("dtype",))
-        attrs["TEMPLATE_DEFAULTS"] = \
-            attrs["_inherited"].pop("TEMPLATE_DEFAULTS",
-                                    (None,)*len(attrs["TEMPLATE_PARAMS"]))
+        attrs["TEMPLATE_PARAMS"] = attrs["_inherited"].pop("TEMPLATE_PARAMS", ("dtype",))
+        attrs["TEMPLATE_DEFAULTS"] = attrs["_inherited"].pop(
+            "TEMPLATE_DEFAULTS", (None,) * len(attrs["TEMPLATE_PARAMS"])
+        )
         attrs["_registry"] = dict()
         self = type.__new__(cls, name, bases, attrs)
 
         if len(self.TEMPLATE_PARAMS) == 0:
-            raise ValueError(
-                "TEMPLATE_PARAMS must be a tuple with at least one element."
-            )
+            raise ValueError("TEMPLATE_PARAMS must be a tuple with at least one element.")
         if len(self.TEMPLATE_DEFAULTS) != len(self.TEMPLATE_PARAMS):
-            raise ValueError(
-                "TEMPLATE_PARAMS and TEMPLATE_DEFAULTS must have same length."
-            )
+            raise ValueError("TEMPLATE_PARAMS and TEMPLATE_DEFAULTS must have same length.")
         return self
 
     def __call__(cls, *args, **kwds):
@@ -324,8 +321,7 @@ class TemplateMeta(type):
         return False
 
     def __subclasses__(cls):
-        """Return a tuple of all classes that inherit from this class.
-        """
+        """Return a tuple of all classes that inherit from this class."""
         # This special method isn't defined as part of the Python data model,
         # but it exists on builtins (including ABCMeta), and it provides useful
         # functionality.
@@ -340,28 +336,23 @@ class TemplateMeta(type):
         if key is None:
             raise ValueError("None may not be used as a key.")
         if subclass in cls._registry.values():
-            raise ValueError(
-                "This subclass has already registered with another key; "
-                "use alias() instead."
-            )
+            raise ValueError("This subclass has already registered with another key; use alias() instead.")
         if cls._registry.setdefault(key, subclass) != subclass:
             if len(cls.TEMPLATE_PARAMS) == 1:
                 d = {cls.TEMPLATE_PARAMS[0]: key}
             else:
                 d = {k: v for k, v in zip(cls.TEMPLATE_PARAMS, key)}
-            raise KeyError(
-                "Another subclass is already registered with {}".format(d)
-            )
+            raise KeyError("Another subclass is already registered with {}".format(d))
         # If the key used to register a class matches the default key,
         # make the static methods available through the ABC
         if cls.TEMPLATE_DEFAULTS:
-            defaults = (cls.TEMPLATE_DEFAULTS[0] if
-                        len(cls.TEMPLATE_DEFAULTS) == 1 else
-                        cls.TEMPLATE_DEFAULTS)
+            defaults = cls.TEMPLATE_DEFAULTS[0] if len(cls.TEMPLATE_DEFAULTS) == 1 else cls.TEMPLATE_DEFAULTS
             if key == defaults:
-                conflictStr = ("Base class has attribute {}"
-                               " which is a {} method of {}."
-                               " Cannot link method to base class.")
+                conflictStr = (
+                    "Base class has attribute {}"
+                    " which is a {} method of {}."
+                    " Cannot link method to base class."
+                )
                 # In the following if statements, the explicit lookup in
                 # __dict__ must be done, as a call to getattr returns the
                 # bound method, which no longer reports as a static or class
@@ -379,25 +370,20 @@ class TemplateMeta(type):
                     isStatic = isinstance(obj, staticmethod)
                     if isBuiltin or isStatic:
                         if hasattr(cls, name):
-                            raise AttributeError(
-                                conflictStr.format(name, "static", subclass))
+                            raise AttributeError(conflictStr.format(name, "static", subclass))
                         setattr(cls, name, obj)
                     # copy over the class methods
                     elif isinstance(obj, classmethod):
                         if hasattr(cls, name):
-                            raise AttributeError(
-                                conflictStr.format(name, "class", subclass))
+                            raise AttributeError(conflictStr.format(name, "class", subclass))
                         setattr(cls, name, getattr(subclass, name))
 
         def setattrSafe(name, value):
             try:
                 currentValue = getattr(subclass, name)
                 if currentValue != value:
-                    msg = ("subclass already has a '{}' attribute with "
-                           "value {} != {}.")
-                    raise ValueError(
-                        msg.format(name, currentValue, value)
-                    )
+                    msg = "subclass already has a '{}' attribute with value {} != {}."
+                    raise ValueError(msg.format(name, currentValue, value))
             except AttributeError:
                 setattr(subclass, name, value)
 
@@ -424,8 +410,7 @@ class TemplateMeta(type):
             raise ValueError("None may not be used as a key.")
         if key in cls._registry:
             raise KeyError("Cannot multiply-register key {}".format(key))
-        primaryKey = tuple(getattr(subclass, p, None)
-                           for p in cls.TEMPLATE_PARAMS)
+        primaryKey = tuple(getattr(subclass, p, None) for p in cls.TEMPLATE_PARAMS)
         if len(primaryKey) == 1:
             # indices are only tuples if there are multiple elements
             primaryKey = primaryKey[0]
@@ -449,8 +434,7 @@ class TemplateMeta(type):
         return key in cls._registry
 
     def keys(cls):
-        """Return an iterable containing all keys (including aliases).
-        """
+        """Return an iterable containing all keys (including aliases)."""
         return cls._registry.keys()
 
     def values(cls):
@@ -460,8 +444,7 @@ class TemplateMeta(type):
         return cls._registry.values()
 
     def items(cls):
-        """Return an iterable of (key, subclass) pairs.
-        """
+        """Return an iterable of (key, subclass) pairs."""
         return cls._registry.items()
 
     def get(cls, key, default=None):

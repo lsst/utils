@@ -9,8 +9,8 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-import sys
 import os
+import sys
 import unittest
 
 import lsst.utils.tests
@@ -28,7 +28,7 @@ class GetPackageDirTestCase(unittest.TestCase):
             getPackageDir("nameOfNonexistendPackage2234q?#!")
 
     def testUnicodeBasics(self):
-        utilsPath = getPackageDir(u"utils")
+        utilsPath = getPackageDir("utils")
         self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "test_getPackageDir.py")))
 
 

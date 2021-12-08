@@ -10,13 +10,12 @@
 # license that can be found in the LICENSE file.
 """General LSST Utilities."""
 
-from .get_caller_name import *
-from .doImport import *
-from .wrappers import *
-from .deprecated import *
-from .inheritDoc import *
-from ._packaging import *
 from ._forwarded import *
+from ._packaging import *
 from .backtrace import *
-
+from .deprecated import *
+from .doImport import *
+from .get_caller_name import *
+from .inheritDoc import *
 from .version import *
+from .wrappers import *

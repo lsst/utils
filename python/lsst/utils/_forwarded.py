@@ -24,4 +24,5 @@ _VERSION_REMOVED = "v23"
 def demangleType(type_name: str) -> str:
     """Demangle a C++ type string."""
     import lsst.cpputils
+
     return lsst.cpputils.demangleType(type_name)

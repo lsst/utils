@@ -19,13 +19,9 @@ __all__ = ["get_class_of", "get_full_type_name", "get_instance_of", "get_caller_
 import builtins
 import inspect
 import types
-from typing import (
-    Any,
-    Union,
-    Type,
-)
+from typing import Any, Type, Union
 
-from .doImport import doImportType, doImport
+from .doImport import doImport, doImportType
 
 
 def get_full_type_name(cls: Any) -> str:
@@ -172,7 +168,7 @@ def get_caller_name(stacklevel: int = 2) -> str:
     stack = inspect.stack()
     start = 0 + stacklevel
     if len(stack) < start + 1:
-        return ''
+        return ""
     parentframe = stack[start][0]
 
     name = []
@@ -180,11 +176,11 @@ def get_caller_name(stacklevel: int = 2) -> str:
     if module:
         name.append(module.__name__)
     # add class name, if any
-    if 'self' in parentframe.f_locals:
-        name.append(type(parentframe.f_locals['self']).__name__)
-    elif 'cls' in parentframe.f_locals:
-        name.append(parentframe.f_locals['cls'].__name__)
+    if "self" in parentframe.f_locals:
+        name.append(type(parentframe.f_locals["self"]).__name__)
+    elif "cls" in parentframe.f_locals:
+        name.append(parentframe.f_locals["cls"].__name__)
     codename = parentframe.f_code.co_name
-    if codename != '<module>':  # top level usually
+    if codename != "<module>":  # top level usually
         name.append(codename)  # function or a method
     return ".".join(name)

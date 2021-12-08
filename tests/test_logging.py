@@ -19,7 +19,6 @@ from lsst.utils.logging import getLogger, trace_set_at
 
 
 class TestLogging(unittest.TestCase):
-
     def testLogLevels(self):
         """Check that the new log levels look reasonable."""
 

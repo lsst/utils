@@ -33,13 +33,14 @@ def inheritDoc(klass: Type) -> Callable:
     decorator : callable
         Intermediate decorator used in the documentation process.
     """
+
     def tmpDecorator(method: Type) -> Callable:
-        """Update the documentation from a class with the same method.
-        """
+        """Update the documentation from a class with the same method."""
         methodName = method.__name__
         if not hasattr(klass, methodName):
             raise AttributeError(f"{klass} has no method named {methodName} to inherit from")
         appendText = method.__doc__ or ""
         method.__doc__ = getattr(klass, methodName).__doc__ + appendText
         return method
+
     return tmpDecorator

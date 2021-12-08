@@ -9,14 +9,14 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-import unittest
-import logging
-import time
 import datetime
+import logging
 import os.path
+import time
+import unittest
 from dataclasses import dataclass
 
-from lsst.utils.timer import timeMethod, logPairs, time_this, logInfo
+from lsst.utils.timer import logInfo, logPairs, time_this, timeMethod
 
 log = logging.getLogger("test_timer")
 
@@ -59,7 +59,6 @@ def decorated_sleeper_metadata(self, duration: float) -> None:
 
 
 class TestTimeMethod(unittest.TestCase):
-
     def testLogPairs(self):
         # Test the non-obj case.
         logger = logging.getLogger("test")
@@ -98,8 +97,9 @@ class TestTimeMethod(unittest.TestCase):
 
         # With an explicit stacklevel.
         with self.assertLogs(level=logging.INFO) as cm:
-            logInfo(None, prefix="Prefix", metadata=metadata, logger=logger, logLevel=logging.INFO,
-                    stacklevel=0)
+            logInfo(
+                None, prefix="Prefix", metadata=metadata, logger=logger, logLevel=logging.INFO, stacklevel=0
+            )
         self.assertEqual(cm.records[0].filename, "timer.py")
 
     def assertTimer(self, duration, task):
@@ -108,10 +108,8 @@ class TestTimeMethod(unittest.TestCase):
         task.sleeper(duration)
         counter = 2
 
-        has_logger = getattr(task, "log", None) is not None \
-            and task.log is not None
-        has_metadata = getattr(task, "metadata", None) is not None \
-            and task.metadata is not None
+        has_logger = getattr(task, "log", None) is not None and task.log is not None
+        has_metadata = getattr(task, "metadata", None) is not None and task.metadata is not None
 
         if has_logger:
             counter += 1
@@ -132,10 +130,12 @@ class TestTimeMethod(unittest.TestCase):
         """Test timer on something that looks like a Task."""
 
         # Call with different parameters.
-        parameters = ((logging.getLogger("task"), {}),
-                      (logging.getLogger("task"), None),
-                      (None, {}),
-                      (None, None))
+        parameters = (
+            (logging.getLogger("task"), {}),
+            (logging.getLogger("task"), None),
+            (None, {}),
+            (None, None),
+        )
 
         duration = 0.1
         for log, metadata in parameters:
@@ -172,7 +172,6 @@ class TestTimeMethod(unittest.TestCase):
 
 
 class TimerTestCase(unittest.TestCase):
-
     def testTimer(self):
         with self.assertLogs(level="DEBUG") as cm:
             with time_this():
@@ -202,8 +201,7 @@ class TimerTestCase(unittest.TestCase):
         test_num = 42
         logname = "test"
         with self.assertLogs(level="DEBUG") as cm:
-            with time_this(log=logging.getLogger(logname),
-                           msg=msg, args=(42,), prefix=None):
+            with time_this(log=logging.getLogger(logname), msg=msg, args=(42,), prefix=None):
                 pass
         self.assertEqual(cm.records[0].name, logname)
         self.assertIn("Took", cm.output[0])
@@ -219,16 +217,14 @@ class TimerTestCase(unittest.TestCase):
 
         # Prefix explicit logger.
         with self.assertLogs(level="DEBUG") as cm:
-            with time_this(log=logging.getLogger(logname),
-                           prefix=prefix):
+            with time_this(log=logging.getLogger(logname), prefix=prefix):
                 pass
         self.assertEqual(cm.records[0].name, f"{prefix}.{logname}")
 
         # Trigger a problem.
         with self.assertLogs(level="ERROR") as cm:
             with self.assertRaises(RuntimeError):
-                with time_this(log=logging.getLogger(logname),
-                               prefix=prefix):
+                with time_this(log=logging.getLogger(logname), prefix=prefix):
                     raise RuntimeError("A problem")
         self.assertEqual(cm.records[0].name, f"{prefix}.{logname}")
         self.assertEqual(cm.records[0].levelname, "ERROR")

@@ -9,11 +9,10 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-import unittest
 import inspect
+import unittest
 
 import lsst.utils.tests
-
 from lsst.utils import doImport, doImportType
 
 

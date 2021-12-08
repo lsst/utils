@@ -11,38 +11,37 @@
 
 """Support code for running unit tests"""
 
-__all__ = ["init", "MemoryTestCase", "ExecutablesTestCase", "getTempFilePath",
-           "TestCase", "assertFloatsAlmostEqual", "assertFloatsNotEqual", "assertFloatsEqual",
-           "debugger", "classParameters", "methodParameters", "temporaryDirectory"]
+__all__ = [
+    "init",
+    "MemoryTestCase",
+    "ExecutablesTestCase",
+    "getTempFilePath",
+    "TestCase",
+    "assertFloatsAlmostEqual",
+    "assertFloatsNotEqual",
+    "assertFloatsEqual",
+    "debugger",
+    "classParameters",
+    "methodParameters",
+    "temporaryDirectory",
+]
 
 import contextlib
+import functools
 import gc
 import inspect
+import itertools
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 import warnings
+from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional, Sequence, Set, Type, Union
+
 import numpy
 import psutil
-import functools
-import tempfile
-import shutil
-import itertools
-
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Mapping,
-    Set,
-    Sequence,
-    Type,
-    Union,
-)
 
 # Initialize the list of open files to an empty set
 open_files = set()
@@ -134,13 +133,16 @@ class MemoryTestCase(unittest.TestCase):
         now_open = _get_open_files()
 
         # Some files are opened out of the control of the stack.
-        now_open = set(f for f in now_open if not f.endswith(".car")
-                       and not f.startswith("/proc/")
-                       and not f.endswith(".ttf")
-                       and not (f.startswith("/var/lib/") and f.endswith("/passwd"))
-                       and not f.endswith("astropy.log")
-                       and not f.endswith("mime/mime.cache")
-                       )
+        now_open = set(
+            f
+            for f in now_open
+            if not f.endswith(".car")
+            and not f.startswith("/proc/")
+            and not f.endswith(".ttf")
+            and not (f.startswith("/var/lib/") and f.endswith("/passwd"))
+            and not f.endswith("astropy.log")
+            and not f.endswith("mime/mime.cache")
+        )
 
         diff = now_open.difference(open_files)
         if diff:
@@ -174,8 +176,13 @@ class ExecutablesTestCase(unittest.TestCase):
         """
         pass
 
-    def assertExecutable(self, executable: str, root_dir: Optional[str] = None,
-                         args: Optional[Sequence[str]] = None, msg: Optional[str] = None) -> None:
+    def assertExecutable(
+        self,
+        executable: str,
+        root_dir: Optional[str] = None,
+        args: Optional[Sequence[str]] = None,
+        msg: Optional[str] = None,
+    ) -> None:
         """Check an executable runs and returns good status.
 
         Prints output to standard out. On bad exit status the test
@@ -218,7 +225,7 @@ class ExecutablesTestCase(unittest.TestCase):
         except subprocess.CalledProcessError as e:
             output = e.output
             failmsg = "Bad exit status from '{}': {}".format(executable, e.returncode)
-        print(output.decode('utf-8'))
+        print(output.decode("utf-8"))
         if failmsg:
             if msg is None:
                 msg = failmsg
@@ -388,8 +395,7 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
         # remove.
         # Use stacklevel 3 so that the warning is reported from the end of the
         # with block
-        warnings.warn("Unexpectedly found pre-existing tempfile named %r" % (outPath,),
-                      stacklevel=3)
+        warnings.warn("Unexpectedly found pre-existing tempfile named %r" % (outPath,), stacklevel=3)
         try:
             os.remove(outPath)
         except OSError:
@@ -447,7 +453,7 @@ def debugger(*exceptions):
     Consider using ``pytest --pdb`` instead of this decorator.
     """
     if not exceptions:
-        exceptions = (Exception, )
+        exceptions = (Exception,)
 
     def decorator(f):
         @functools.wraps(f)
@@ -455,15 +461,23 @@ def debugger(*exceptions):
             try:
                 return f(*args, **kwargs)
             except exceptions:
-                import sys
                 import pdb
+                import sys
+
                 pdb.post_mortem(sys.exc_info()[2])
+
         return wrapper
+
     return decorator
 
 
-def plotImageDiff(lhs: numpy.ndarray, rhs: numpy.ndarray, bad: Optional[numpy.ndarray] = None,
-                  diff: Optional[numpy.ndarray] = None, plotFileName: Optional[str] = None) -> None:
+def plotImageDiff(
+    lhs: numpy.ndarray,
+    rhs: numpy.ndarray,
+    bad: Optional[numpy.ndarray] = None,
+    diff: Optional[numpy.ndarray] = None,
+    plotFileName: Optional[str] = None,
+) -> None:
     """Plot the comparison of two 2-d NumPy arrays.
 
     Parameters
@@ -487,6 +501,7 @@ def plotImageDiff(lhs: numpy.ndarray, rhs: numpy.ndarray, bad: Optional[numpy.nd
     `matplotlib` (including `~lsst.utils`).
     """
     from matplotlib import pyplot
+
     if diff is None:
         diff = lhs - rhs
     pyplot.figure()
@@ -496,24 +511,26 @@ def plotImageDiff(lhs: numpy.ndarray, rhs: numpy.ndarray, bad: Optional[numpy.nd
         badImage[:, :, 0] = 255
         badImage[:, :, 1] = 0
         badImage[:, :, 2] = 0
-        badImage[:, :, 3] = 255*bad
+        badImage[:, :, 3] = 255 * bad
     vmin1 = numpy.minimum(numpy.min(lhs), numpy.min(rhs))
     vmax1 = numpy.maximum(numpy.max(lhs), numpy.max(rhs))
     vmin2 = numpy.min(diff)
     vmax2 = numpy.max(diff)
     for n, (image, title) in enumerate([(lhs, "lhs"), (rhs, "rhs"), (diff, "diff")]):
         pyplot.subplot(2, 3, n + 1)
-        im1 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
-                            vmin=vmin1, vmax=vmax1)
+        im1 = pyplot.imshow(
+            image, cmap=pyplot.cm.gray, interpolation="nearest", origin="lower", vmin=vmin1, vmax=vmax1
+        )
         if bad is not None:
-            pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
+            pyplot.imshow(badImage, alpha=0.2, interpolation="nearest", origin="lower")
         pyplot.axis("off")
         pyplot.title(title)
         pyplot.subplot(2, 3, n + 4)
-        im2 = pyplot.imshow(image, cmap=pyplot.cm.gray, interpolation='nearest', origin='lower',
-                            vmin=vmin2, vmax=vmax2)
+        im2 = pyplot.imshow(
+            image, cmap=pyplot.cm.gray, interpolation="nearest", origin="lower", vmin=vmin2, vmax=vmax2
+        )
         if bad is not None:
-            pyplot.imshow(badImage, alpha=0.2, interpolation='nearest', origin='lower')
+            pyplot.imshow(badImage, alpha=0.2, interpolation="nearest", origin="lower")
         pyplot.axis("off")
         pyplot.title(title)
     pyplot.subplots_adjust(left=0.05, bottom=0.05, top=0.92, right=0.75, wspace=0.05, hspace=0.05)
@@ -528,13 +545,20 @@ def plotImageDiff(lhs: numpy.ndarray, rhs: numpy.ndarray, bad: Optional[numpy.nd
 
 
 @inTestCase
-def assertFloatsAlmostEqual(testCase: unittest.TestCase, lhs: Union[float, numpy.ndarray],
-                            rhs: Union[float, numpy.ndarray],
-                            rtol: Optional[float] = sys.float_info.epsilon,
-                            atol: Optional[float] = sys.float_info.epsilon, relTo: Optional[float] = None,
-                            printFailures: bool = True, plotOnFailure: bool = False,
-                            plotFileName: Optional[str] = None, invert: bool = False,
-                            msg: Optional[str] = None, ignoreNaNs: bool = False) -> None:
+def assertFloatsAlmostEqual(
+    testCase: unittest.TestCase,
+    lhs: Union[float, numpy.ndarray],
+    rhs: Union[float, numpy.ndarray],
+    rtol: Optional[float] = sys.float_info.epsilon,
+    atol: Optional[float] = sys.float_info.epsilon,
+    relTo: Optional[float] = None,
+    printFailures: bool = True,
+    plotOnFailure: bool = False,
+    plotFileName: Optional[str] = None,
+    invert: bool = False,
+    msg: Optional[str] = None,
+    ignoreNaNs: bool = False,
+) -> None:
     """Highly-configurable floating point comparisons for scalars and arrays.
 
     The test assertion will fail if all elements ``lhs`` and ``rhs`` are not
@@ -601,8 +625,10 @@ def assertFloatsAlmostEqual(testCase: unittest.TestCase, lhs: Union[float, numpy
         lhsMask = numpy.isnan(lhs)
         rhsMask = numpy.isnan(rhs)
         if not numpy.all(lhsMask == rhsMask):
-            testCase.fail(f"lhs has {lhsMask.sum()} NaN values and rhs has {rhsMask.sum()} NaN values, "
-                          f"in different locations.")
+            testCase.fail(
+                f"lhs has {lhsMask.sum()} NaN values and rhs has {rhsMask.sum()} NaN values, "
+                f"in different locations."
+            )
         if numpy.all(lhsMask):
             assert numpy.all(rhsMask), "Should be guaranteed by previous if."
             # All operands are fully NaN (either scalar NaNs or arrays of only
@@ -627,7 +653,7 @@ def assertFloatsAlmostEqual(testCase: unittest.TestCase, lhs: Union[float, numpy
             relTo = numpy.maximum(numpy.abs(lhs), numpy.abs(rhs))
         else:
             relTo = numpy.abs(relTo)
-        bad = absDiff > rtol*relTo
+        bad = absDiff > rtol * relTo
         if atol is not None:
             bad = numpy.logical_and(bad, absDiff > atol)
     else:
@@ -647,17 +673,19 @@ def assertFloatsAlmostEqual(testCase: unittest.TestCase, lhs: Union[float, numpy
     if failed:
         if numpy.isscalar(bad):
             if rtol is None:
-                errMsg = ["%s %s %s; diff=%s with atol=%s"
-                          % (lhs, cmpStr, rhs, absDiff, atol)]
+                errMsg = ["%s %s %s; diff=%s with atol=%s" % (lhs, cmpStr, rhs, absDiff, atol)]
             elif atol is None:
-                errMsg = ["%s %s %s; diff=%s/%s=%s with rtol=%s"
-                          % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol)]
+                errMsg = [
+                    "%s %s %s; diff=%s/%s=%s with rtol=%s"
+                    % (lhs, cmpStr, rhs, absDiff, relTo, absDiff / relTo, rtol)
+                ]
             else:
-                errMsg = ["%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
-                          % (lhs, cmpStr, rhs, absDiff, relTo, absDiff/relTo, rtol, atol)]
+                errMsg = [
+                    "%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
+                    % (lhs, cmpStr, rhs, absDiff, relTo, absDiff / relTo, rtol, atol)
+                ]
         else:
-            errMsg = ["%d/%d elements %s with rtol=%s, atol=%s"
-                      % (bad.sum(), bad.size, failStr, rtol, atol)]
+            errMsg = ["%d/%d elements %s with rtol=%s, atol=%s" % (bad.sum(), bad.size, failStr, rtol, atol)]
             if plotOnFailure:
                 if len(lhs.shape) != 2 or len(rhs.shape) != 2:
                     raise ValueError("plotOnFailure is only valid for 2-d arrays")
@@ -680,7 +708,7 @@ def assertFloatsAlmostEqual(testCase: unittest.TestCase, lhs: Union[float, numpy
                         errMsg.append("%s %s %s (diff=%s)" % (a, cmpStr, b, diff))
                 else:
                     for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
-                        errMsg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff/rel))
+                        errMsg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff / rel))
 
     if msg is not None:
         errMsg.append(msg)
@@ -688,8 +716,12 @@ def assertFloatsAlmostEqual(testCase: unittest.TestCase, lhs: Union[float, numpy
 
 
 @inTestCase
-def assertFloatsNotEqual(testCase: unittest.TestCase, lhs: Union[float, numpy.ndarray],
-                         rhs: Union[float, numpy.ndarray], **kwds: Any) -> None:
+def assertFloatsNotEqual(
+    testCase: unittest.TestCase,
+    lhs: Union[float, numpy.ndarray],
+    rhs: Union[float, numpy.ndarray],
+    **kwds: Any,
+) -> None:
     """Fail a test if the given floating point values are equal to within the
     given tolerances.
 
@@ -716,8 +748,12 @@ def assertFloatsNotEqual(testCase: unittest.TestCase, lhs: Union[float, numpy.nd
 
 
 @inTestCase
-def assertFloatsEqual(testCase: unittest.TestCase, lhs: Union[float, numpy.ndarray],
-                      rhs: Union[float, numpy.ndarray], **kwargs: Any) -> None:
+def assertFloatsEqual(
+    testCase: unittest.TestCase,
+    lhs: Union[float, numpy.ndarray],
+    rhs: Union[float, numpy.ndarray],
+    **kwargs: Any,
+) -> None:
     """
     Assert that lhs == rhs (both numeric types, whether scalar or array).
 
@@ -810,6 +846,7 @@ def classParameters(**settings: Sequence[Any]) -> Callable:
 
     Note that the values are embedded in the class name.
     """
+
     def decorator(cls: Type) -> None:
         module = sys.modules[cls.__module__].__dict__
         for params in _settingsIterator(settings):
@@ -817,6 +854,7 @@ def classParameters(**settings: Sequence[Any]) -> Callable:
             bindings = dict(cls.__dict__)
             bindings.update(params)
             module[name] = type(name, (cls,), bindings)
+
     return decorator
 
 
@@ -847,6 +885,7 @@ def methodParameters(**settings: Sequence[Any]) -> Callable:
         testSomething(foo=1, bar=3)
         testSomething(foo=2, bar=4)
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(self: unittest.TestCase, *args: Any, **kwargs: Any) -> None:
@@ -854,7 +893,9 @@ def methodParameters(**settings: Sequence[Any]) -> Callable:
                 kwargs.update(params)
                 with self.subTest(**params):
                     func(self, *args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
