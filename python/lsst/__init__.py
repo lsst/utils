@@ -11,4 +11,5 @@
 """Top-level LSST package definition."""
 
 import pkgutil
+
 __path__ = pkgutil.extend_path(__path__, __name__)

@@ -10,15 +10,14 @@
 # license that can be found in the LICENSE file.
 #
 
-import unittest
 import itertools
+import unittest
 
-from lsst.utils.iteration import isplit, ensure_iterable, chunk_iterable
+from lsst.utils.iteration import chunk_iterable, ensure_iterable, isplit
 
 
 class IterationTestCase(unittest.TestCase):
-    """Tests for `iterable` helper.
-    """
+    """Tests for `iterable` helper."""
 
     def testIterable(self):
         test_data = (

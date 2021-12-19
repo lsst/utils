@@ -17,15 +17,15 @@ from __future__ import annotations
 
 __all__ = ["logInfo", "timeMethod", "time_this"]
 
+import datetime
 import functools
+import inspect
 import logging
 import resource
 import time
-import datetime
-import inspect
 from contextlib import contextmanager
-
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Collection,
@@ -34,7 +34,6 @@ from typing import (
     MutableMapping,
     Optional,
     Tuple,
-    TYPE_CHECKING,
 )
 
 if TYPE_CHECKING:
@@ -112,9 +111,14 @@ def _find_outside_stacklevel() -> int:
     return stacklevel
 
 
-def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = logging.DEBUG,
-             metadata: Optional[MutableMapping] = None,
-             logger: Optional[logging.Logger] = None, stacklevel: Optional[int] = None) -> None:
+def logPairs(
+    obj: Any,
+    pairs: Collection[Tuple[str, Any]],
+    logLevel: int = logging.DEBUG,
+    metadata: Optional[MutableMapping] = None,
+    logger: Optional[logging.Logger] = None,
+    stacklevel: Optional[int] = None,
+) -> None:
     """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``
 
     Parameters
@@ -174,9 +178,14 @@ def logPairs(obj: Any, pairs: Collection[Tuple[str, Any]], logLevel: int = loggi
             timer_logger.log(logLevel, "; ".join(strList), stacklevel=stacklevel)
 
 
-def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
-            metadata: Optional[MutableMapping] = None, logger: Optional[logging.Logger] = None,
-            stacklevel: Optional[int] = None) -> None:
+def logInfo(
+    obj: Any,
+    prefix: str,
+    logLevel: int = logging.DEBUG,
+    metadata: Optional[MutableMapping] = None,
+    logger: Optional[logging.Logger] = None,
+    stacklevel: Optional[int] = None,
+) -> None:
     """Log timer information to ``obj.metadata`` and ``obj.log``.
 
     Parameters
@@ -236,28 +245,34 @@ def logInfo(obj: Any, prefix: str, logLevel: int = logging.DEBUG,
         # Account for the caller of this routine not knowing that we
         # are going one down in the stack.
         stacklevel += 1
-    logPairs(obj=obj,
-             pairs=[
-                 (prefix + "CpuTime", cpuTime),
-                 (prefix + "UserTime", res.ru_utime),
-                 (prefix + "SystemTime", res.ru_stime),
-                 (prefix + "MaxResidentSetSize", int(res.ru_maxrss)),
-                 (prefix + "MinorPageFaults", int(res.ru_minflt)),
-                 (prefix + "MajorPageFaults", int(res.ru_majflt)),
-                 (prefix + "BlockInputs", int(res.ru_inblock)),
-                 (prefix + "BlockOutputs", int(res.ru_oublock)),
-                 (prefix + "VoluntaryContextSwitches", int(res.ru_nvcsw)),
-                 (prefix + "InvoluntaryContextSwitches", int(res.ru_nivcsw)),
-             ],
-             logLevel=logLevel,
-             metadata=metadata,
-             logger=logger,
-             stacklevel=stacklevel)
+    logPairs(
+        obj=obj,
+        pairs=[
+            (prefix + "CpuTime", cpuTime),
+            (prefix + "UserTime", res.ru_utime),
+            (prefix + "SystemTime", res.ru_stime),
+            (prefix + "MaxResidentSetSize", int(res.ru_maxrss)),
+            (prefix + "MinorPageFaults", int(res.ru_minflt)),
+            (prefix + "MajorPageFaults", int(res.ru_majflt)),
+            (prefix + "BlockInputs", int(res.ru_inblock)),
+            (prefix + "BlockOutputs", int(res.ru_oublock)),
+            (prefix + "VoluntaryContextSwitches", int(res.ru_nvcsw)),
+            (prefix + "InvoluntaryContextSwitches", int(res.ru_nivcsw)),
+        ],
+        logLevel=logLevel,
+        metadata=metadata,
+        logger=logger,
+        stacklevel=stacklevel,
+    )
 
 
-def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping] = None,
-               logger: Optional[logging.Logger] = None,
-               logLevel: int = logging.DEBUG) -> Callable:
+def timeMethod(
+    _func: Optional[Any] = None,
+    *,
+    metadata: Optional[MutableMapping] = None,
+    logger: Optional[logging.Logger] = None,
+    logLevel: int = logging.DEBUG,
+) -> Callable:
     """Measure duration of a method.
 
     Parameters
@@ -312,14 +327,27 @@ def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping
             # but we want it to come from the file that defined the method
             # so need to increment by 1 to get to the caller.
             stacklevel = 2
-            logInfo(obj=self, prefix=func.__name__ + "Start", metadata=metadata, logger=logger,
-                    logLevel=logLevel, stacklevel=stacklevel)
+            logInfo(
+                obj=self,
+                prefix=func.__name__ + "Start",
+                metadata=metadata,
+                logger=logger,
+                logLevel=logLevel,
+                stacklevel=stacklevel,
+            )
             try:
                 res = func(self, *args, **keyArgs)
             finally:
-                logInfo(obj=self, prefix=func.__name__ + "End", metadata=metadata, logger=logger,
-                        logLevel=logLevel, stacklevel=stacklevel)
+                logInfo(
+                    obj=self,
+                    prefix=func.__name__ + "End",
+                    metadata=metadata,
+                    logger=logger,
+                    logLevel=logLevel,
+                    stacklevel=stacklevel,
+                )
             return res
+
         return timeMethod_wrapper
 
     if _func is None:
@@ -329,9 +357,13 @@ def timeMethod(_func: Optional[Any] = None, *, metadata: Optional[MutableMapping
 
 
 @contextmanager
-def time_this(log: Optional[LsstLoggers] = None, msg: Optional[str] = None,
-              level: int = logging.DEBUG, prefix: Optional[str] = "timer",
-              args: Iterable[Any] = ()) -> Iterator[None]:
+def time_this(
+    log: Optional[LsstLoggers] = None,
+    msg: Optional[str] = None,
+    level: int = logging.DEBUG,
+    prefix: Optional[str] = "timer",
+    args: Iterable[Any] = (),
+) -> Iterator[None]:
     """Time the enclosed block and issue a log message.
 
     Parameters
@@ -380,5 +412,4 @@ def time_this(log: Optional[LsstLoggers] = None, msg: Optional[str] = None,
 
         # Specify stacklevel to ensure the message is reported from the
         # caller (1 is this file, 2 is contextlib, 3 is user)
-        log.log(level, msg + "%sTook %.4f seconds", *args,
-                ": " if msg else "", end - start, stacklevel=3)
+        log.log(level, msg + "%sTook %.4f seconds", *args, ": " if msg else "", end - start, stacklevel=3)

@@ -6,6 +6,5 @@ def okay():
 
 
 class Container:
-
     def inside():
         return "1"

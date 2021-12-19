@@ -17,14 +17,8 @@ from __future__ import annotations
 
 __all__ = ["Singleton", "cached_getter", "immutable"]
 
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Type,
-    TypeVar,
-)
 import functools
+from typing import Any, Callable, Dict, Type, TypeVar
 
 
 class Singleton(type):
@@ -78,10 +72,12 @@ def immutable(cls: _T) -> _T:
     ``__deepcopy__`` to return ``self``.  This is not done by the decorator, as
     it has no way of checking for recursive immutability.
     """
+
     def __setattr__(self: _T, name: str, value: Any) -> None:  # noqa: N807
         if hasattr(self, name):
             raise AttributeError(f"{cls.__name__} instances are immutable.")
         object.__setattr__(self, name, value)
+
     # mypy says the variable here has signature (str, Any) i.e. no "self";
     # I think it's just confused by descriptor stuff.
     cls.__setattr__ = __setattr__  # type: ignore
@@ -89,16 +85,19 @@ def immutable(cls: _T) -> _T:
     def __getstate__(self: _T) -> dict:  # noqa: N807
         # Disable default state-setting when unpickled.
         return {}
+
     cls.__getstate__ = __getstate__
 
     def __setstate__(self: _T, state: Any) -> None:  # noqa: N807
         # Disable default state-setting when copied.
         # Sadly what works for pickle doesn't work for copy.
         assert not state
+
     cls.__setstate__ = __setstate__
 
     def __copy__(self: _T) -> _T:  # noqa: N807
         return self
+
     cls.__copy__ = __copy__
     return cls
 

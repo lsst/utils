@@ -10,9 +10,9 @@
 # license that can be found in the LICENSE file.
 
 import unittest
-import lsst.utils.tests
 
 import lsst.utils
+import lsst.utils.tests
 
 
 class DeprecatedTestCase(lsst.utils.tests.TestCase):
@@ -20,14 +20,16 @@ class DeprecatedTestCase(lsst.utils.tests.TestCase):
         def old(x):
             """Docstring"""
             return x + 1
+
         # Use an unusual category
         old = lsst.utils.deprecate_pybind11(
-            old, reason="For testing.", version="unknown",
-            category=PendingDeprecationWarning)
+            old, reason="For testing.", version="unknown", category=PendingDeprecationWarning
+        )
         with self.assertWarnsRegex(
-                PendingDeprecationWarning,
-                r"Call to deprecated function \(or staticmethod\) old\. \(For testing\.\) "
-                "-- Deprecated since version unknown.$"):
+            PendingDeprecationWarning,
+            r"Call to deprecated function \(or staticmethod\) old\. \(For testing\.\) "
+            "-- Deprecated since version unknown.$",
+        ):
             # Check that the function still works
             self.assertEqual(old(3), 4)
         self.assertIn("Docstring", old.__doc__)

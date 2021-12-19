@@ -13,7 +13,7 @@ __all__ = ("doImport", "doImportType")
 
 import importlib
 import types
-from typing import Type, List, Optional, Union
+from typing import List, Optional, Type, Union
 
 
 def doImport(importable: str) -> Union[types.ModuleType, Type]:
@@ -43,8 +43,9 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
     if not isinstance(importable, str):
         raise TypeError(f"Unhandled type of importable, val: {importable}")
 
-    def tryImport(module: str, fromlist: List[str],
-                  previousError: Optional[str]) -> Union[types.ModuleType, Type]:
+    def tryImport(
+        module: str, fromlist: List[str], previousError: Optional[str]
+    ) -> Union[types.ModuleType, Type]:
         pytype = importlib.import_module(module)
         # Can have functions inside classes inside modules
         for f in fromlist:

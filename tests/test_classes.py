@@ -9,13 +9,13 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-import unittest
-import logging
-import functools
 import copy
+import functools
+import logging
 import pickle
+import unittest
 
-from lsst.utils.classes import Singleton, immutable, cached_getter
+from lsst.utils.classes import Singleton, cached_getter, immutable
 
 log = logging.getLogger("test_classes")
 
@@ -55,10 +55,8 @@ class SingletonTestCase(unittest.TestCase):
 
 
 class ImmutabilityTestCase(unittest.TestCase):
-
     @immutable
     class Immutable:
-
         def __init__(self, name: str, number: int):
             self.name = name
             self.number = number
@@ -86,9 +84,9 @@ class ImmutabilityTestCase(unittest.TestCase):
 
 
 class CacheTestCase(unittest.TestCase):
-
     class Cached1:
         """Cached getter using cached_getter. This can use slots."""
+
         __slots__ = ("value", "_cached_cache_value")
 
         def __init__(self, value: int):

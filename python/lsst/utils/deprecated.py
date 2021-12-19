@@ -9,20 +9,15 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-__all__ = ['deprecate_pybind11', 'suppress_deprecations']
+__all__ = ["deprecate_pybind11", "suppress_deprecations"]
 
-import deprecated.sphinx
 import functools
 import unittest.mock
 import warnings
-
 from contextlib import contextmanager
+from typing import Any, Iterator, Type
 
-from typing import (
-    Any,
-    Iterator,
-    Type,
-)
+import deprecated.sphinx
 
 
 def deprecate_pybind11(obj: Any, reason: str, version: str, category: Type[Warning] = FutureWarning) -> Any:
@@ -74,10 +69,7 @@ def deprecate_pybind11(obj: Any, reason: str, version: str, category: Type[Warni
     # This has been fixed upstream at
     # https://github.com/python/typeshed/pull/593
     # and will pass once that is released.
-    return deprecated.sphinx.deprecated(
-        reason=reason,
-        version=version,
-        category=category)(internal)
+    return deprecated.sphinx.deprecated(reason=reason, version=version, category=category)(internal)
 
 
 @contextmanager

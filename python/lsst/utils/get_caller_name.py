@@ -12,12 +12,16 @@
 __all__ = ["get_caller_name"]
 
 from deprecated.sphinx import deprecated
+
 from .introspection import get_caller_name as caller_name
 
 
-@deprecated(reason="get_caller_name has moved to `lsst.utils.introspection.get_caller_name`."
-            " Will be removed in v26.",
-            version="v24", category=FutureWarning)
+@deprecated(
+    reason="get_caller_name has moved to `lsst.utils.introspection.get_caller_name`."
+    " Will be removed in v26.",
+    version="v24",
+    category=FutureWarning,
+)
 def get_caller_name(skip: int = 2) -> str:
     """Get the name of the caller method.
 

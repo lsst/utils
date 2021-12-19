@@ -9,13 +9,12 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-import sys
-import unittest
 import os.path
+import sys
 import time
+import unittest
 
 import lsst.utils.tests
-
 
 """
 This file contains tests for lsst.utils.tests.getTempFilePath.
@@ -112,7 +111,6 @@ class TestExpected(unittest.TestCase):
 
 
 class TestNameClash1(unittest.TestCase):
-
     def testClash(self):
         """Create the temp file and pause before trying to delete it."""
         with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
@@ -123,7 +121,6 @@ class TestNameClash1(unittest.TestCase):
 
 
 class TestNameClash2(unittest.TestCase):
-
     def testClash(self):
         """Pause a little before trying to create the temp file. The pause
         time is less than the time that TestNameClash1 is pausing."""
@@ -135,7 +132,6 @@ class TestNameClash2(unittest.TestCase):
 
 
 class TestNameClash3(unittest.TestCase):
-
     def testClash(self):
         """Create temp file and remove it without pauses."""
         with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:

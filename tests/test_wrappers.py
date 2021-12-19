@@ -9,14 +9,14 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-import numpy as np
 import unittest
-import lsst.utils.tests
+
 import lsst.utils
+import lsst.utils.tests
+import numpy as np
 
 
-class MockClass:   # continued class needs to be at module scope
-
+class MockClass:  # continued class needs to be at module scope
     def method1(self):
         return self
 
@@ -34,11 +34,9 @@ class MockClass:   # continued class needs to be at module scope
 
 
 class DecoratorsTestCase(lsst.utils.tests.TestCase):
-
     def setUp(self):
         @lsst.utils.continueClass
         class MockClass:
-
             def method1a(self):
                 return self
 
@@ -101,9 +99,7 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
     """
 
     def setUp(self):
-
         class Example(metaclass=lsst.utils.TemplateMeta):
-
             def method1(self):
                 return self
 
@@ -226,13 +222,11 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
         self.register()
         self.assertIn(np.float32, self.Example)
         self.assertEqual(self.Example[np.float32], self.ExampleF)
-        self.assertEqual(set(self.Example.keys()),
-                         set([np.float32, np.float64]))
-        self.assertEqual(set(self.Example.values()),
-                         set([self.ExampleF, self.ExampleD]))
-        self.assertEqual(set(self.Example.items()),
-                         set([(np.float32, self.ExampleF),
-                              (np.float64, self.ExampleD)]))
+        self.assertEqual(set(self.Example.keys()), set([np.float32, np.float64]))
+        self.assertEqual(set(self.Example.values()), set([self.ExampleF, self.ExampleD]))
+        self.assertEqual(
+            set(self.Example.items()), set([(np.float32, self.ExampleF), (np.float64, self.ExampleD)])
+        )
         self.assertEqual(len(self.Example), 2)
         self.assertEqual(set(iter(self.Example)), set([np.float32, np.float64]))
         self.assertEqual(self.Example.get(np.float64), self.ExampleD)
@@ -281,7 +275,6 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
     """
 
     def setUp(self):
-
         class Example(metaclass=lsst.utils.TemplateMeta):
 
             TEMPLATE_PARAMS = ("d", "u")
@@ -364,9 +357,10 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
         d = self.Example3D()
         self.assertIsInstance(f, self.Example)
         self.assertIsInstance(d, self.Example)
-        self.assertEqual(set(self.Example.__subclasses__()),
-                         set([self.Example2F, self.Example2D,
-                              self.Example3F, self.Example3D]))
+        self.assertEqual(
+            set(self.Example.__subclasses__()),
+            set([self.Example2F, self.Example2D, self.Example3F, self.Example3D]),
+        )
 
     def testConstruction(self):
         self.register()
@@ -382,21 +376,28 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
         self.register()
         self.assertIn((2, np.float32), self.Example)
         self.assertEqual(self.Example[2, np.float32], self.Example2F)
-        self.assertEqual(set(self.Example.keys()),
-                         set([(2, np.float32), (2, np.float64),
-                              (3, np.float32), (3, np.float64)]))
-        self.assertEqual(set(self.Example.values()),
-                         set([self.Example2F, self.Example2D,
-                              self.Example3F, self.Example3D]))
-        self.assertEqual(set(self.Example.items()),
-                         set([((2, np.float32), self.Example2F),
-                              ((2, np.float64), self.Example2D),
-                              ((3, np.float32), self.Example3F),
-                              ((3, np.float64), self.Example3D)]))
+        self.assertEqual(
+            set(self.Example.keys()),
+            set([(2, np.float32), (2, np.float64), (3, np.float32), (3, np.float64)]),
+        )
+        self.assertEqual(
+            set(self.Example.values()), set([self.Example2F, self.Example2D, self.Example3F, self.Example3D])
+        )
+        self.assertEqual(
+            set(self.Example.items()),
+            set(
+                [
+                    ((2, np.float32), self.Example2F),
+                    ((2, np.float64), self.Example2D),
+                    ((3, np.float32), self.Example3F),
+                    ((3, np.float64), self.Example3D),
+                ]
+            ),
+        )
         self.assertEqual(len(self.Example), 4)
-        self.assertEqual(set(iter(self.Example)),
-                         set([(2, np.float32), (2, np.float64),
-                              (3, np.float32), (3, np.float64)]))
+        self.assertEqual(
+            set(iter(self.Example)), set([(2, np.float32), (2, np.float64), (3, np.float32), (3, np.float64)])
+        )
         self.assertEqual(self.Example.get((3, np.float64)), self.Example3D)
         self.assertEqual(self.Example.get((2, np.int32), False), False)
 
@@ -418,9 +419,10 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
 
 
 class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
-    """ Test to determine if static and class methods from a class which is
+    """Test to determine if static and class methods from a class which is
     registered as a default type in a type ABC are properly copied.
     """
+
     def setUp(self):
         class Example(metaclass=lsst.utils.TemplateMeta):
 
@@ -450,7 +452,7 @@ class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
 
         # Add in a built in function to ExampleF to mimic how pybind11 treats
         # static methods from c++
-        setattr(ExampleF, 'pow', pow)
+        setattr(ExampleF, "pow", pow)
 
         Example.register(np.float32, ExampleF)
         Example.register(np.int32, ExampleI)
@@ -461,10 +463,10 @@ class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
     def testMethodCopyForDefaultType(self):
         # Check that the methods for the default type were transfered and that
         # the regular method was not
-        self.assertTrue(hasattr(self.Example, 'staticCall'))
-        self.assertTrue(hasattr(self.Example, 'pow'))
-        self.assertTrue(hasattr(self.Example, 'classCall'))
-        self.assertFalse(hasattr(self.Example, 'regularCall'))
+        self.assertTrue(hasattr(self.Example, "staticCall"))
+        self.assertTrue(hasattr(self.Example, "pow"))
+        self.assertTrue(hasattr(self.Example, "classCall"))
+        self.assertFalse(hasattr(self.Example, "regularCall"))
 
         # Verify the default static and class method defaults return the
         # correct values
