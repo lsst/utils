@@ -30,7 +30,6 @@ import logging
 import pickle as pickle
 import re
 import yaml
-from collections.abc import Mapping
 from functools import lru_cache
 
 from .versions import getRuntimeVersions
@@ -259,7 +258,7 @@ def getCondaPackages():
     return packages
 
 
-class Packages:
+class Packages(dict):
     """A table of packages and their versions.
 
     There are a few different types of packages, and their versions are
@@ -314,10 +313,10 @@ class Packages:
                ".pickle": "pickle",
                ".yaml": "yaml"}
 
-    def __init__(self, packages):
-        assert isinstance(packages, Mapping)
-        self._packages = packages
-        self._names = set(packages.keys())
+    def __setstate__(self, state):
+        # This only seems to be called for old pickle files where
+        # the data was stored in _packages.
+        self.update(state["_packages"])
 
     @classmethod
     def fromSystem(cls):
@@ -421,53 +420,23 @@ class Packages:
             # relatively small.
             ff.write(self.toBytes(self.formats[ext]))
 
-    def __len__(self):
-        return len(self._packages)
-
     def __str__(self):
         ss = "%s({\n" % self.__class__.__name__
         # Sort alphabetically by module name, for convenience in reading
-        ss += ",\n".join("%s: %s" % (repr(prod), repr(self._packages[prod])) for
-                         prod in sorted(self._names))
+        ss += ",\n".join(f"{prod!r}:{self[prod]!r}" for prod in sorted(self))
         ss += ",\n})"
         return ss
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, repr(self._packages))
-
-    def __contains__(self, pkg):
-        return pkg in self._packages
-
-    def __iter__(self):
-        return iter(self._packages)
-
-    def __eq__(self, other):
-        if not isinstance(other, type(self)):
-            return False
-
-        return self._packages == other._packages
-
-    def update(self, other):
-        """Update packages with contents of another set of packages.
-
-        Parameters
-        ----------
-        other : `Packages`
-            Other packages to merge with self.
-
-        Notes
-        -----
-        No check is made to see if we're clobbering anything.
-        """
-        self._packages.update(other._packages)
-        self._names.update(other._names)
+        # Default repr() does not report the class name.
+        return f"{self.__class__.__name__}({super().__repr__()})"
 
     def extra(self, other):
         """Get packages in self but not in another `Packages` object.
 
         Parameters
         ----------
-        other : `Packages`
+        other : `Packages` or `Mapping`
             Other packages to compare against.
 
         Returns
@@ -476,7 +445,7 @@ class Packages:
             Extra packages. Keys (type `str`) are package names; values
             (type `str`) are their versions.
         """
-        return {pkg: self._packages[pkg] for pkg in self._names - other._names}
+        return {pkg: self[pkg] for pkg in self.keys() - other.keys()}
 
     def missing(self, other):
         """Get packages in another `Packages` object but missing from self.
@@ -492,7 +461,7 @@ class Packages:
             Missing packages. Keys (type `str`) are package names; values
             (type `str`) are their versions.
         """
-        return {pkg: other._packages[pkg] for pkg in other._names - self._names}
+        return {pkg: other[pkg] for pkg in other.keys() - self.keys()}
 
     def difference(self, other):
         """Get packages in symmetric difference of self and another `Packages`
@@ -509,15 +478,15 @@ class Packages:
             Packages in symmetric difference.  Keys (type `str`) are package
             names; values (type `str`) are their versions.
         """
-        return {pkg: (self._packages[pkg], other._packages[pkg]) for
-                pkg in self._names & other._names if self._packages[pkg] != other._packages[pkg]}
+        return {pkg: (self[pkg], other[pkg]) for
+                pkg in self.keys() & other.keys() if self[pkg] != other[pkg]}
 
 
 # Register YAML representers
 
 def pkg_representer(dumper, data):
     """Represent Packages as a simple dict"""
-    return dumper.represent_mapping("lsst.base.Packages", data._packages,
+    return dumper.represent_mapping("lsst.base.Packages", data,
                                     flow_style=None)
 
 

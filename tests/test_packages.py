@@ -24,7 +24,11 @@ import os
 import unittest
 import tempfile
 
+from collections.abc import Mapping
+
 import lsst.base
+
+TESTDIR = os.path.abspath(os.path.dirname(__file__))
 
 
 class PackagesTestCase(unittest.TestCase):
@@ -89,6 +93,11 @@ class PackagesTestCase(unittest.TestCase):
     def testPackages(self):
         """Test the Packages class"""
         packages = lsst.base.Packages.fromSystem()
+        self.assertIsInstance(packages, Mapping)
+
+        # Check that stringification is not crashing.
+        self.assertTrue(str(packages).startswith("Packages({"))
+        self.assertTrue(repr(packages).startswith("Packages({"))
 
         # Test pickling and YAML
         new = self._writeTempFile(packages, ".pickle")
@@ -102,6 +111,10 @@ class PackagesTestCase(unittest.TestCase):
         self.assertEqual(new, packages)
         self.assertEqual(new_pkl, new)
         self.assertEqual(new, new_yaml)
+
+        # Dict compatibility.
+        for k, v in new.items():
+            self.assertEqual(new[k], v)
 
         with self.assertRaises(ValueError):
             self._writeTempFile(packages, ".txt")
@@ -138,12 +151,23 @@ class PackagesTestCase(unittest.TestCase):
         extra = new.extra(packages)
         self.assertGreater(len(extra), 0)  # 'new' has extra stuff compared to 'packages'
         self.assertIn("smtpd", extra)
+        self.assertIn("smtpd", new)
 
-        packages.update(new)  # Should now be identical
-        self.assertDictEqual(packages.difference(new), {})
-        self.assertDictEqual(packages.missing(new), {})
-        self.assertDictEqual(packages.extra(new), {})
-        self.assertEqual(len(packages), len(new))
+        # Run with both a Packages and a dict
+        for new_pkg in (new, dict(new)):
+            packages.update(new_pkg)  # Should now be identical
+            self.assertDictEqual(packages.difference(new_pkg), {})
+            self.assertDictEqual(packages.missing(new_pkg), {})
+            self.assertDictEqual(packages.extra(new_pkg), {})
+            self.assertEqual(len(packages), len(new_pkg))
+
+        # Loop over keys to check iterator.
+        keys = {k for k in new}
+        self.assertEqual(keys, set(dict(new).keys()))
+
+        # Loop over values to check that we do get them all.
+        values = {v for v in new.values()}
+        self.assertEqual(values, set(dict(new).values()))
 
         # Serialize via bytes
         for format in ("pickle", "yaml"):
@@ -160,6 +184,18 @@ class PackagesTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             some_yaml = b"list: [1, 2]"
             lsst.base.Packages.fromBytes(some_yaml, "yaml")
+
+    def testBackwardsCompatibility(self):
+        """Test if we can read old data files."""
+
+        # Pickle contents changed when moving to dict base class.
+        packages_p = lsst.base.Packages.read(os.path.join(TESTDIR, "data", "v1.pickle"))
+
+        # YAML format is unchanged when moving from special class to dict
+        # but test anyway.
+        packages_y = lsst.base.Packages.read(os.path.join(TESTDIR, "data", "v1.yaml"))
+
+        self.assertEqual(packages_p, packages_y)
 
 
 if __name__ == "__main__":
