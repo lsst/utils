@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-__all__ = ["logInfo", "timeMethod", "time_this"]
+__all__ = ["logInfo", "timeMethod", "time_this", "get_mem_usage"]
 
 import datetime
 import functools
@@ -35,6 +35,8 @@ from typing import (
     Optional,
     Tuple,
 )
+
+import psutil
 
 if TYPE_CHECKING:
     from .logging import LsstLoggers
@@ -109,6 +111,34 @@ def _find_outside_stacklevel() -> int:
         del s
 
     return stacklevel
+
+
+def get_mem_usage(include_children: bool = False) -> int:
+    """Report current memory usage.
+
+    Parameters
+    ----------
+    include_children : `bool`, optional
+        Flag indicating if memory usage by child processes (if any) should be
+        included in the report. Be default, only memory usage of the calling
+        process is reported.
+
+    Returns
+    -------
+    mem : `int`
+        Memory usage expressed in bytes.
+
+    Notes
+    -----
+    Function reports current memory usage using resident set size as a proxy.
+    As such the value it reports is capped at available physical RAM and may
+    not reflect the actual memory allocated to the process.
+    """
+    proc = psutil.Process()
+    usage = proc.memory_info().rss
+    if include_children:
+        usage += sum([child.memory_info().rss for child in proc.children()])
+    return usage
 
 
 def logPairs(
@@ -363,6 +393,9 @@ def time_this(
     level: int = logging.DEBUG,
     prefix: Optional[str] = "timer",
     args: Iterable[Any] = (),
+    mem_usage: bool = False,
+    mem_child: bool = False,
+    mem_units: str = "B",
 ) -> Iterator[None]:
     """Time the enclosed block and issue a log message.
 
@@ -384,6 +417,13 @@ def time_this(
     args : iterable of any
         Additional parameters passed to the log command that should be
         written to ``msg``.
+    mem_usage : `bool`, optional
+        Flag indicating whether to include the memory usage in the report.
+        Defaults, to False.
+    mem_child : `bool`, optional
+        Flag indication whether to include memory usage of the child processes.
+    mem_units : {"B", "KB", "MB", "GB"}, optional
+        Units to use when reporting the memory usage. Defaults to bytes ("B").
     """
     if log is None:
         log = logging.getLogger()
@@ -393,11 +433,15 @@ def time_this(
 
     success = False
     start = time.time()
+    if mem_usage:
+        mem_start = get_mem_usage(include_children=mem_child)
     try:
         yield
         success = True
     finally:
         end = time.time()
+        if mem_usage:
+            mem_end = get_mem_usage(include_children=mem_child)
 
         # The message is pre-inserted to allow the logger to expand
         # the additional args provided. Make that easier by converting
@@ -412,4 +456,26 @@ def time_this(
 
         # Specify stacklevel to ensure the message is reported from the
         # caller (1 is this file, 2 is contextlib, 3 is user)
-        log.log(level, msg + "%sTook %.4f seconds", *args, ": " if msg else "", end - start, stacklevel=3)
+        if mem_usage:
+            scales = {
+                "B": (1.0, "%d"),
+                "KB": (float(2**10), "%.1f"),
+                "MB": (float(2**20), "%.2f"),
+                "GB": (float(2**30), "%.3f"),
+            }
+            if mem_units not in scales:
+                mem_units = "B"
+            scale, fmt = scales[mem_units]
+            report = f"%sTook %.4f seconds; memory usage {fmt} {mem_units} (increment: {fmt} {mem_units})"
+            log.log(
+                level,
+                msg + report,
+                *args,
+                ": " if msg else "",
+                end - start,
+                mem_end / scale,
+                (mem_end - mem_start) / scale,
+                stacklevel=3,
+            )
+        else:
+            log.log(level, msg + "%sTook %.4f seconds", *args, ": " if msg else "", end - start, stacklevel=3)

@@ -188,6 +188,38 @@ class TimerTestCase(unittest.TestCase):
         self.assertIn("Took", cm.output[0])
         self.assertEqual(cm.records[0].filename, THIS_FILE)
 
+        # Report memory usage.
+        with self.assertLogs(level="DEBUG") as cm:
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True):
+                pass
+        self.assertEqual(cm.records[0].name, "root")
+        self.assertEqual(cm.records[0].levelname, "DEBUG")
+        self.assertIn("Took", cm.output[0])
+        self.assertIn("memory", cm.output[0])
+        self.assertIn("increment", cm.output[0])
+
+        # Report memory usage, use different, but known memory units.
+        with self.assertLogs(level="DEBUG") as cm:
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_units="GB"):
+                pass
+        self.assertEqual(cm.records[0].name, "root")
+        self.assertEqual(cm.records[0].levelname, "DEBUG")
+        self.assertIn("Took", cm.output[0])
+        self.assertIn("memory", cm.output[0])
+        self.assertIn("increment", cm.output[0])
+        self.assertIn(" GB", cm.output[0])
+
+        # Report memory usage, use unknown memory units.
+        with self.assertLogs(level="DEBUG") as cm:
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_units="foo"):
+                pass
+        self.assertEqual(cm.records[0].name, "root")
+        self.assertEqual(cm.records[0].levelname, "DEBUG")
+        self.assertIn("Took", cm.output[0])
+        self.assertIn("memory", cm.output[0])
+        self.assertIn("increment", cm.output[0])
+        self.assertIn(" B", cm.output[0])
+
         # Change logging level
         with self.assertLogs(level="INFO") as cm:
             with time_this(level=logging.INFO, prefix=None):
