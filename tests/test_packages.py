@@ -171,12 +171,20 @@ class PackagesTestCase(unittest.TestCase):
 
         # Pickle contents changed when moving to dict base class.
         packages_p = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v1.pickle"))
+        self.assertIsInstance(packages_p, lsst.utils.packages.Packages)
 
         # YAML format is unchanged when moving from special class to dict
         # but test anyway.
         packages_y = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v1.yaml"))
 
         self.assertEqual(packages_p, packages_y)
+
+        # Now check that we can read the version 2 files that were
+        # written with Packages inheriting from dict but still in `base`.
+        packages_p2 = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v2.pickle"))
+        packages_y2 = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v2.yaml"))
+        self.assertEqual(packages_p2, packages_y2)
+        self.assertIsInstance(packages_p2, lsst.utils.packages.Packages)
 
 
 if __name__ == "__main__":
