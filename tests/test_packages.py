@@ -11,9 +11,8 @@
 #
 
 import os
-import unittest
 import tempfile
-
+import unittest
 from collections.abc import Mapping
 
 import lsst.utils.packages
@@ -35,7 +34,7 @@ class PackagesTestCase(unittest.TestCase):
     def testPython(self):
         """Test that we get the right version for this python package"""
         versions = lsst.utils.packages.getPythonPackages()
-        expected = (lsst.utils.version.__version__)
+        expected = lsst.utils.version.__version__
         self.assertEqual(versions["utils"], expected)
 
     def testEnvironment(self):
@@ -85,10 +84,10 @@ class PackagesTestCase(unittest.TestCase):
         new_pkl = self._writeTempFile(packages, ".pkl")
         new_yaml = self._writeTempFile(packages, ".yaml")
 
-        self.assertIsInstance(new, lsst.utils.packages.Packages,
-                              f"Checking type ({type(new)}) from pickle")
-        self.assertIsInstance(new_yaml, lsst.utils.packages.Packages,
-                              f"Checking type ({type(new_yaml)}) from YAML")
+        self.assertIsInstance(new, lsst.utils.packages.Packages, f"Checking type ({type(new)}) from pickle")
+        self.assertIsInstance(
+            new_yaml, lsst.utils.packages.Packages, f"Checking type ({type(new_yaml)}) from YAML"
+        )
         self.assertEqual(new, packages)
         self.assertEqual(new_pkl, new)
         self.assertEqual(new, new_yaml)
@@ -119,6 +118,7 @@ class PackagesTestCase(unittest.TestCase):
         # change
         # Shouldn't be used by anything we've previously imported
         import smtpd  # noqa: F401
+
         new = lsst.utils.packages.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'

@@ -13,22 +13,28 @@
 """
 Determine which packages are being used in the system and their versions
 """
-import os
-import sys
 import hashlib
 import importlib
-import subprocess
+import io
 import logging
+import os
 import pickle as pickle
 import re
-import yaml
-import io
+import subprocess
+import sys
 from functools import lru_cache
+
+import yaml
 
 log = logging.getLogger(__name__)
 
-__all__ = ["getVersionFromPythonModule", "getPythonPackages", "getEnvironmentPackages",
-           "getCondaPackages", "Packages"]
+__all__ = [
+    "getVersionFromPythonModule",
+    "getPythonPackages",
+    "getEnvironmentPackages",
+    "getCondaPackages",
+    "Packages",
+]
 
 
 # Packages used at build-time (e.g., header-only)
@@ -74,8 +80,7 @@ def getVersionFromPythonModule(module):
         deps = module.__dependency_versions__
         buildtime = BUILDTIME & set(deps.keys())
         if buildtime:
-            version += " with " + " ".join("%s=%s" % (pkg, deps[pkg])
-                                           for pkg in sorted(buildtime))
+            version += " with " + " ".join("%s=%s" % (pkg, deps[pkg]) for pkg in sorted(buildtime))
     return str(version)
 
 
@@ -119,7 +124,7 @@ def getPythonPackages():
         # "from .version import *"
         for ending in (".version", "._version"):
             if name.endswith(ending):
-                name = name[:-len(ending)]
+                name = name[: -len(ending)]
                 if name in packages:
                     assert ver == packages[name]
             elif name in packages:
@@ -191,8 +196,14 @@ def getEnvironmentPackages():
             # get the git revision and an indication if the working copy is
             # clean
             revCmd = ["git", "--git-dir=" + gitDir, "--work-tree=" + prod.dir, "rev-parse", "HEAD"]
-            diffCmd = ["git", "--no-pager", "--git-dir=" + gitDir, "--work-tree=" + prod.dir, "diff",
-                       "--patch"]
+            diffCmd = [
+                "git",
+                "--no-pager",
+                "--git-dir=" + gitDir,
+                "--work-tree=" + prod.dir,
+                "diff",
+                "--patch",
+            ]
             try:
                 rev = subprocess.check_output(revCmd).decode().strip()
                 diff = subprocess.check_output(diffCmd)
@@ -227,6 +238,7 @@ def getCondaPackages():
 
     try:
         import json
+
         from conda.cli.python_api import Commands, run_command
     except ImportError:
         return {}
@@ -300,9 +312,7 @@ class Packages(dict):
     This is essentially a wrapper around a dict with some conveniences.
     """
 
-    formats = {".pkl": "pickle",
-               ".pickle": "pickle",
-               ".yaml": "yaml"}
+    formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml"}
 
     def __setstate__(self, state):
         # This only seems to be called for old pickle files where
@@ -469,8 +479,7 @@ class Packages(dict):
             Packages in symmetric difference.  Keys (type `str`) are package
             names; values (type `str`) are their versions.
         """
-        return {pkg: (self[pkg], other[pkg]) for
-                pkg in self.keys() & other.keys() if self[pkg] != other[pkg]}
+        return {pkg: (self[pkg], other[pkg]) for pkg in self.keys() & other.keys() if self[pkg] != other[pkg]}
 
 
 class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
@@ -493,10 +502,10 @@ class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
 
 # Register YAML representers
 
+
 def pkg_representer(dumper, data):
     """Represent Packages as a simple dict"""
-    return dumper.represent_mapping("lsst.utils.packages.Packages", data,
-                                    flow_style=None)
+    return dumper.represent_mapping("lsst.utils.packages.Packages", data, flow_style=None)
 
 
 yaml.add_representer(Packages, pkg_representer)
