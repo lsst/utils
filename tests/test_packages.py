@@ -1,32 +1,22 @@
-#!/usr/bin/env python
+# This file is part of utils.
 #
-# LSST Data Management System
-# Copyright 2016 AURA/LSST.
+# Developed for the LSST Data Management System.
+# This product includes software developed by the LSST Project
+# (https://www.lsst.org).
+# See the COPYRIGHT file at the top-level directory of this distribution
+# for details of code ownership.
 #
-# This product includes software developed by the
-# LSST Project (http://www.lsst.org/).
+# Use of this source code is governed by a 3-clause BSD-style
+# license that can be found in the LICENSE file.
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the LSST License Statement and
-# the GNU General Public License along with this program.  If not,
-# see <https://www.lsstcorp.org/LegalNotices/>.
-#
+
 import os
 import unittest
 import tempfile
 
 from collections.abc import Mapping
 
-import lsst.base
+import lsst.utils.packages
 
 TESTDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -44,9 +34,9 @@ class PackagesTestCase(unittest.TestCase):
 
     def testPython(self):
         """Test that we get the right version for this python package"""
-        versions = lsst.base.getPythonPackages()
-        expected = (lsst.base.version.__version__)
-        self.assertEqual(versions["base"], expected)
+        versions = lsst.utils.packages.getPythonPackages()
+        expected = (lsst.utils.version.__version__)
+        self.assertEqual(versions["utils"], expected)
 
     def testEnvironment(self):
         """Test getting versions from the environment
@@ -55,16 +45,7 @@ class PackagesTestCase(unittest.TestCase):
         from the environment are dependencies of this package, and so all we
         can do is test that this doesn't fall over.
         """
-        lsst.base.getEnvironmentPackages()
-
-    def testRuntime(self):
-        """Test getting versions from runtime libraries
-
-        Unfortunately, none of the products that we get runtime versions from
-        are dependencies of this package, and so all we can do is test that
-        this doesn't fall over.
-        """
-        lsst.base.getRuntimeVersions()
+        lsst.utils.packages.getEnvironmentPackages()
 
     def testConda(self):
         """Test getting versions from conda environement
@@ -72,7 +53,7 @@ class PackagesTestCase(unittest.TestCase):
         We do not rely on being run in a conda environment so all we can do is
         test that this doesn't fall over.
         """
-        lsst.base.getCondaPackages()
+        lsst.utils.packages.getCondaPackages()
 
     def _writeTempFile(self, packages, suffix):
         """Write packages to a temp file using the supplied suffix and read
@@ -85,14 +66,14 @@ class PackagesTestCase(unittest.TestCase):
         temp.close()  # We don't use the fd, just want a filename
         try:
             packages.write(tempName)
-            new = lsst.base.Packages.read(tempName)
+            new = lsst.utils.packages.Packages.read(tempName)
         finally:
             os.unlink(tempName)
         return new
 
     def testPackages(self):
         """Test the Packages class"""
-        packages = lsst.base.Packages.fromSystem()
+        packages = lsst.utils.packages.Packages.fromSystem()
         self.assertIsInstance(packages, Mapping)
 
         # Check that stringification is not crashing.
@@ -104,9 +85,9 @@ class PackagesTestCase(unittest.TestCase):
         new_pkl = self._writeTempFile(packages, ".pkl")
         new_yaml = self._writeTempFile(packages, ".yaml")
 
-        self.assertIsInstance(new, lsst.base.Packages,
+        self.assertIsInstance(new, lsst.utils.packages.Packages,
                               f"Checking type ({type(new)}) from pickle")
-        self.assertIsInstance(new_yaml, lsst.base.Packages,
+        self.assertIsInstance(new_yaml, lsst.utils.packages.Packages,
                               f"Checking type ({type(new_yaml)}) from YAML")
         self.assertEqual(new, packages)
         self.assertEqual(new_pkl, new)
@@ -121,7 +102,7 @@ class PackagesTestCase(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             # .txt extension is not recognized
-            lsst.base.Packages.read("something.txt")
+            lsst.utils.packages.Packages.read("something.txt")
 
         # 'packages' and 'new' should have identical content
         self.assertDictEqual(packages.difference(new), {})
@@ -138,7 +119,7 @@ class PackagesTestCase(unittest.TestCase):
         # change
         # Shouldn't be used by anything we've previously imported
         import smtpd  # noqa: F401
-        new = lsst.base.Packages.fromSystem()
+        new = lsst.utils.packages.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
         missing = packages.missing(new)
@@ -172,28 +153,28 @@ class PackagesTestCase(unittest.TestCase):
         # Serialize via bytes
         for format in ("pickle", "yaml"):
             asbytes = new.toBytes(format)
-            from_bytes = lsst.base.Packages.fromBytes(asbytes, format)
+            from_bytes = lsst.utils.packages.Packages.fromBytes(asbytes, format)
             self.assertEqual(from_bytes, new)
 
         with self.assertRaises(ValueError):
             new.toBytes("unknown_format")
 
         with self.assertRaises(ValueError):
-            lsst.base.Packages.fromBytes(from_bytes, "unknown_format")
+            lsst.utils.packages.Packages.fromBytes(from_bytes, "unknown_format")
 
         with self.assertRaises(TypeError):
             some_yaml = b"list: [1, 2]"
-            lsst.base.Packages.fromBytes(some_yaml, "yaml")
+            lsst.utils.packages.Packages.fromBytes(some_yaml, "yaml")
 
     def testBackwardsCompatibility(self):
         """Test if we can read old data files."""
 
         # Pickle contents changed when moving to dict base class.
-        packages_p = lsst.base.Packages.read(os.path.join(TESTDIR, "data", "v1.pickle"))
+        packages_p = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v1.pickle"))
 
         # YAML format is unchanged when moving from special class to dict
         # but test anyway.
-        packages_y = lsst.base.Packages.read(os.path.join(TESTDIR, "data", "v1.yaml"))
+        packages_y = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v1.yaml"))
 
         self.assertEqual(packages_p, packages_y)
 

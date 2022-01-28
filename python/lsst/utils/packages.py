@@ -1,4 +1,4 @@
-# This file is part of base.
+# This file is part of utils.
 #
 # Developed for the LSST Data Management System.
 # This product includes software developed by the LSST Project
@@ -6,18 +6,10 @@
 # See the COPYRIGHT file at the top-level directory of this distribution
 # for details of code ownership.
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Use of this source code is governed by a 3-clause BSD-style
+# license that can be found in the LICENSE file.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Determine which packages are being used in the system and their versions
 """
@@ -31,8 +23,6 @@ import pickle as pickle
 import re
 import yaml
 from functools import lru_cache
-
-from .versions import getRuntimeVersions
 
 log = logging.getLogger(__name__)
 
@@ -288,7 +278,7 @@ class Packages(dict):
 
     .. code-block:: python
 
-        from lsst.base import Packages
+        from lsst.utils.packages import Packages
         pkgs = Packages.fromSystem()
         print("Current packages:", pkgs)
         old = Packages.read("/path/to/packages.pickle")
@@ -332,7 +322,6 @@ class Packages(dict):
         packages = {}
         packages.update(getPythonPackages())
         packages.update(getCondaPackages())
-        packages.update(getRuntimeVersions())
         packages.update(getEnvironmentPackages())  # Should be last, to override products with LOCAL versions
         return cls(packages)
 
@@ -486,7 +475,7 @@ class Packages(dict):
 
 def pkg_representer(dumper, data):
     """Represent Packages as a simple dict"""
-    return dumper.represent_mapping("lsst.base.Packages", data,
+    return dumper.represent_mapping("lsst.utils.packages.Packages", data,
                                     flow_style=None)
 
 
@@ -498,4 +487,7 @@ def pkg_constructor(loader, node):
 
 
 for loader in (yaml.Loader, yaml.CLoader, yaml.UnsafeLoader, yaml.SafeLoader, yaml.FullLoader):
+    yaml.add_constructor("lsst.utils.packages.Packages", pkg_constructor, Loader=loader)
+
+    # Register the old name with YAML.
     yaml.add_constructor("lsst.base.Packages", pkg_constructor, Loader=loader)
