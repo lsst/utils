@@ -46,3 +46,5 @@ Python API reference
    :no-main-docstr:
 .. automodapi:: lsst.utils.timer
    :no-main-docstr:
+.. automodapi:: lsst.utils.packages
+   :no-main-docstr:
