@@ -269,8 +269,8 @@ class Packages(dict):
     There are a few different types of packages, and their versions are
     collected in different ways:
 
-    1. Run-time libraries (e.g., cfitsio, fftw): we get their version from
-       interrogating the dynamic library
+    1. Installed Conda packages are obtained via the Conda API. Conda is
+       not required.
     2. Python modules (e.g., afw, numpy; galsim is also in this group even
        though we only use it through the library, because no version
        information is currently provided through the library): we get their
@@ -311,7 +311,7 @@ class Packages(dict):
 
     Notes
     -----
-    This is essentially a wrapper around a dict with some conveniences.
+    This is a wrapper around a dict with some convenience methods.
     """
 
     formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml", ".json": "json"}
@@ -325,12 +325,14 @@ class Packages(dict):
     def fromSystem(cls) -> Packages:
         """Construct a `Packages` by examining the system.
 
-        Determine packages by examining python's `sys.modules`, runtime
-        libraries and EUPS.
+        Determine packages by examining python's `sys.modules`, conda
+        libraries and EUPS. EUPS packages take precedence over conda and
+        general python packages.
 
         Returns
         -------
         packages : `Packages`
+            All version package information that could be obtained.
         """
         packages = {}
         packages.update(getPythonPackages())
@@ -349,6 +351,11 @@ class Packages(dict):
         format : `str`
             The format of those bytes. Can be ``yaml``, ``json``, or
             ``pickle``.
+
+        Returns
+        -------
+        packages : `Packages`
+            The package information read from the input data.
         """
         if format == "pickle":
             file = io.BytesIO(data)
@@ -377,6 +384,7 @@ class Packages(dict):
         Returns
         -------
         packages : `Packages`
+            The packages information read from the file.
         """
         _, ext = os.path.splitext(filename)
         if ext not in cls.formats:
@@ -466,7 +474,7 @@ class Packages(dict):
 
         Returns
         -------
-        missing : `dict`
+        missing : `dict` [`str`, `str]
             Missing packages. Keys (type `str`) are package names; values
             (type `str`) are their versions.
         """
@@ -483,7 +491,7 @@ class Packages(dict):
 
         Returns
         -------
-        difference : `dict`
+        difference : `dict` [`str, `tuple` [`str`, `str]]
             Packages in symmetric difference.  Keys (type `str`) are package
             names; values (type `tuple`[`str, `str`]) are their versions.
         """
