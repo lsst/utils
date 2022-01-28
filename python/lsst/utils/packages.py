@@ -240,7 +240,6 @@ def getCondaPackages() -> Dict[str, str]:
     Returns empty result if a conda environment is not in use or can not
     be queried.
     """
-
     try:
         from conda.cli.python_api import Commands, run_command
     except ImportError:
@@ -492,7 +491,7 @@ class Packages(dict):
 
 
 class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
-    """This class replaces the default unpickler.
+    """Replacement for the default unpickler.
 
     It is required so that users of this API can read pickle files
     created when the `~lsst.utils.packages.Packages` class was in a different
