@@ -27,7 +27,7 @@ jobs:
       - name: Install eups and any other conda packages
         shell: bash -l {0}
         run: |
-          conda install -y -q eups
+          conda install -y -q eups conda
 
       - name: Install dependencies
         shell: bash -l {0}
