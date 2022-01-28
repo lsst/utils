@@ -76,6 +76,7 @@ class PackagesTestCase(unittest.TestCase):
         new = self._writeTempFile(packages, ".pickle")
         new_pkl = self._writeTempFile(packages, ".pkl")
         new_yaml = self._writeTempFile(packages, ".yaml")
+        new_json = self._writeTempFile(packages, ".json")
 
         self.assertIsInstance(new, lsst.utils.packages.Packages, f"Checking type ({type(new)}) from pickle")
         self.assertIsInstance(
@@ -84,6 +85,7 @@ class PackagesTestCase(unittest.TestCase):
         self.assertEqual(new, packages)
         self.assertEqual(new_pkl, new)
         self.assertEqual(new, new_yaml)
+        self.assertEqual(new, new_json)
 
         # Dict compatibility.
         for k, v in new.items():

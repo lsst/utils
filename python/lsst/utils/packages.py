@@ -16,6 +16,7 @@ Determine which packages are being used in the system and their versions
 import hashlib
 import importlib
 import io
+import json
 import logging
 import os
 import pickle as pickle
@@ -237,8 +238,6 @@ def getCondaPackages():
     """
 
     try:
-        import json
-
         from conda.cli.python_api import Commands, run_command
     except ImportError:
         return {}
@@ -312,7 +311,7 @@ class Packages(dict):
     This is essentially a wrapper around a dict with some conveniences.
     """
 
-    formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml"}
+    formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml", ".json": "json"}
 
     def __setstate__(self, state):
         # This only seems to be called for old pickle files where
@@ -345,13 +344,16 @@ class Packages(dict):
         data : `bytes`
             The serialized form of this object in bytes.
         format : `str`
-            The format of those bytes. Can be ``yaml`` or ``pickle``.
+            The format of those bytes. Can be ``yaml``, ``json``, or
+            ``pickle``.
         """
         if format == "pickle":
             file = io.BytesIO(data)
             new = _BackwardsCompatibilityUnpickler(file).load()
         elif format == "yaml":
             new = yaml.load(data, Loader=yaml.SafeLoader)
+        elif format == "json":
+            new = cls(json.loads(data))
         else:
             raise ValueError(f"Unexpected serialization format given: {format}")
         if not isinstance(new, cls):
@@ -366,8 +368,8 @@ class Packages(dict):
         ----------
         filename : `str`
             Filename from which to read. The format is determined from the
-            file extension.  Currently support ``.pickle``, ``.pkl``
-            and ``.yaml``.
+            file extension.  Currently support ``.pickle``, ``.pkl``,
+            ``.json``, and ``.yaml``.
 
         Returns
         -------
@@ -389,7 +391,8 @@ class Packages(dict):
         Parameters
         ----------
         format : `str`
-            Format to use when serializing. Can be ``yaml`` or ``pickle``.
+            Format to use when serializing. Can be ``yaml``, ``json``,
+            or ``pickle``.
 
         Returns
         -------
@@ -400,6 +403,8 @@ class Packages(dict):
             return pickle.dumps(self)
         elif format == "yaml":
             return yaml.dump(self).encode("utf-8")
+        elif format == "json":
+            return json.dumps(self).encode("utf-8")
         else:
             raise ValueError(f"Unexpected serialization format requested: {format}")
 
@@ -411,7 +416,7 @@ class Packages(dict):
         filename : `str`
             Filename to which to write. The format of the data file
             is determined from the file extension. Currently supports
-            ``.pickle`` and ``.yaml``
+            ``.pickle``, ``.json``, and ``.yaml``
         """
         _, ext = os.path.splitext(filename)
         if ext not in self.formats:
