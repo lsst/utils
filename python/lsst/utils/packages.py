@@ -22,6 +22,7 @@ import logging
 import pickle as pickle
 import re
 import yaml
+import io
 from functools import lru_cache
 
 log = logging.getLogger(__name__)
@@ -337,7 +338,8 @@ class Packages(dict):
             The format of those bytes. Can be ``yaml`` or ``pickle``.
         """
         if format == "pickle":
-            new = pickle.loads(data)
+            file = io.BytesIO(data)
+            new = _BackwardsCompatibilityUnpickler(file).load()
         elif format == "yaml":
             new = yaml.load(data, Loader=yaml.SafeLoader)
         else:
@@ -469,6 +471,24 @@ class Packages(dict):
         """
         return {pkg: (self[pkg], other[pkg]) for
                 pkg in self.keys() & other.keys() if self[pkg] != other[pkg]}
+
+
+class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
+    """This class replaces the default unpickler.
+
+    It is required so that users of this API can read pickle files
+    created when the `~lsst.utils.packages.Packages` class was in a different
+    package and known as ``lsst.base.Packages``. If this unpickler is being
+    used then we know for sure that we must return a
+    `~lsst.utils.packages.Packages` instance.
+    """
+
+    def find_class(self, module, name):
+        """Return the class that should be used for unpickling.
+
+        This is always known to be the class in this package.
+        """
+        return Packages
 
 
 # Register YAML representers
