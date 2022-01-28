@@ -11,11 +11,11 @@
 #
 
 import os
-import tempfile
 import unittest
 from collections.abc import Mapping
 
 import lsst.utils.packages
+import lsst.utils.tests
 
 TESTDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -58,16 +58,9 @@ class PackagesTestCase(unittest.TestCase):
         """Write packages to a temp file using the supplied suffix and read
         back.
         """
-        # Can't use lsst.utils.tests.getTempFilePath because we're its
-        # dependency
-        temp = tempfile.NamedTemporaryFile(prefix="packages.", suffix=suffix, delete=False)
-        tempName = temp.name
-        temp.close()  # We don't use the fd, just want a filename
-        try:
+        with lsst.utils.tests.getTempFilePath(suffix) as tempName:
             packages.write(tempName)
             new = lsst.utils.packages.Packages.read(tempName)
-        finally:
-            os.unlink(tempName)
         return new
 
     def testPackages(self):
