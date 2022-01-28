@@ -9,6 +9,7 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 #
+from __future__ import annotations
 
 """
 Determine which packages are being used in the system and their versions
@@ -23,7 +24,10 @@ import pickle as pickle
 import re
 import subprocess
 import sys
+import types
+from collections.abc import Mapping
 from functools import lru_cache
+from typing import Any, Dict, Tuple, Type
 
 import yaml
 
@@ -51,7 +55,7 @@ PYTHON = set(["galsim"])
 ENVIRONMENT = set(["astrometry_net", "astrometry_net_data", "minuit2", "xpa"])
 
 
-def getVersionFromPythonModule(module):
+def getVersionFromPythonModule(module: types.ModuleType) -> str:
     """Determine the version of a python module.
 
     Parameters
@@ -85,7 +89,7 @@ def getVersionFromPythonModule(module):
     return str(version)
 
 
-def getPythonPackages():
+def getPythonPackages() -> Dict[str, str]:
     """Get imported python packages and their versions.
 
     Returns
@@ -103,9 +107,9 @@ def getPythonPackages():
     We don't include any module for which we cannot determine a version.
     """
     # Attempt to import libraries that only report their version in python
-    for module in PYTHON:
+    for module_name in PYTHON:
         try:
-            importlib.import_module(module)
+            importlib.import_module(module_name)
         except Exception:
             pass  # It's not available, so don't care
 
@@ -147,7 +151,7 @@ _eups = None  # Singleton Eups object
 
 
 @lru_cache(maxsize=1)
-def getEnvironmentPackages():
+def getEnvironmentPackages() -> Dict[str, str]:
     """Get products and their versions from the environment.
 
     Returns
@@ -222,7 +226,7 @@ def getEnvironmentPackages():
 
 
 @lru_cache(maxsize=1)
-def getCondaPackages():
+def getCondaPackages() -> Dict[str, str]:
     """Get products and their versions from the conda environment.
 
     Returns
@@ -313,13 +317,13 @@ class Packages(dict):
 
     formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml", ".json": "json"}
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Dict[str, Any]) -> None:
         # This only seems to be called for old pickle files where
         # the data was stored in _packages.
         self.update(state["_packages"])
 
     @classmethod
-    def fromSystem(cls):
+    def fromSystem(cls) -> Packages:
         """Construct a `Packages` by examining the system.
 
         Determine packages by examining python's `sys.modules`, runtime
@@ -336,7 +340,7 @@ class Packages(dict):
         return cls(packages)
 
     @classmethod
-    def fromBytes(cls, data, format):
+    def fromBytes(cls, data: bytes, format: str) -> Packages:
         """Construct the object from a byte representation.
 
         Parameters
@@ -361,7 +365,7 @@ class Packages(dict):
         return new
 
     @classmethod
-    def read(cls, filename):
+    def read(cls, filename: str) -> Packages:
         """Read packages from filename.
 
         Parameters
@@ -384,7 +388,7 @@ class Packages(dict):
             data = ff.read()
         return cls.fromBytes(data, cls.formats[ext])
 
-    def toBytes(self, format):
+    def toBytes(self, format: str) -> bytes:
         """Convert the object to a serialized bytes form using the
         specified format.
 
@@ -408,7 +412,7 @@ class Packages(dict):
         else:
             raise ValueError(f"Unexpected serialization format requested: {format}")
 
-    def write(self, filename):
+    def write(self, filename: str) -> None:
         """Write to file.
 
         Parameters
@@ -426,18 +430,18 @@ class Packages(dict):
             # relatively small.
             ff.write(self.toBytes(self.formats[ext]))
 
-    def __str__(self):
+    def __str__(self) -> str:
         ss = "%s({\n" % self.__class__.__name__
         # Sort alphabetically by module name, for convenience in reading
         ss += ",\n".join(f"{prod!r}:{self[prod]!r}" for prod in sorted(self))
         ss += ",\n})"
         return ss
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # Default repr() does not report the class name.
         return f"{self.__class__.__name__}({super().__repr__()})"
 
-    def extra(self, other):
+    def extra(self, other: Mapping) -> Dict[str, str]:
         """Get packages in self but not in another `Packages` object.
 
         Parameters
@@ -453,7 +457,7 @@ class Packages(dict):
         """
         return {pkg: self[pkg] for pkg in self.keys() - other.keys()}
 
-    def missing(self, other):
+    def missing(self, other: Mapping) -> Dict[str, str]:
         """Get packages in another `Packages` object but missing from self.
 
         Parameters
@@ -469,7 +473,7 @@ class Packages(dict):
         """
         return {pkg: other[pkg] for pkg in other.keys() - self.keys()}
 
-    def difference(self, other):
+    def difference(self, other: Mapping) -> Dict[str, Tuple[str, str]]:
         """Get packages in symmetric difference of self and another `Packages`
         object.
 
@@ -482,7 +486,7 @@ class Packages(dict):
         -------
         difference : `dict`
             Packages in symmetric difference.  Keys (type `str`) are package
-            names; values (type `str`) are their versions.
+            names; values (type `tuple`[`str, `str`]) are their versions.
         """
         return {pkg: (self[pkg], other[pkg]) for pkg in self.keys() & other.keys() if self[pkg] != other[pkg]}
 
@@ -497,7 +501,7 @@ class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
     `~lsst.utils.packages.Packages` instance.
     """
 
-    def find_class(self, module, name):
+    def find_class(self, module: str, name: str) -> Type:
         """Return the class that should be used for unpickling.
 
         This is always known to be the class in this package.
@@ -508,7 +512,7 @@ class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
 # Register YAML representers
 
 
-def pkg_representer(dumper, data):
+def pkg_representer(dumper: yaml.Dumper, data: Any) -> yaml.MappingNode:
     """Represent Packages as a simple dict"""
     return dumper.represent_mapping("lsst.utils.packages.Packages", data, flow_style=None)
 
@@ -516,7 +520,7 @@ def pkg_representer(dumper, data):
 yaml.add_representer(Packages, pkg_representer)
 
 
-def pkg_constructor(loader, node):
+def pkg_constructor(loader: yaml.constructor.SafeConstructor, node: yaml.Node) -> Any:
     yield Packages(loader.construct_mapping(node, deep=True))
 
 
