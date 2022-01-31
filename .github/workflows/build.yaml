@@ -17,24 +17,54 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Update pip/wheel infrastructure
-        run: |
-          python -m pip install --upgrade pip
-          pip install wheel
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.8
+          channels: conda-forge,defaults
+          channel-priority: strict
+          show-channel-urls: true
 
-      - name: Install dependencies
+      - name: Install eups and any other conda packages
+        shell: bash -l {0}
         run: |
-          pip install -r requirements.txt
+          conda install -y -q eups conda
 
       # We have two cores so we can speed up the testing with xdist
       - name: Install pytest packages
-        run: pip install pytest pytest-flake8 pytest-xdist pytest-openfiles pytest-cov
+        shell: bash -l {0}
+        run: conda install -y -q pytest pytest-flake8 pytest-xdist pytest-openfiles pytest-cov
+
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          pip install -r requirements.txt
+
+      - name: List installed packages
+        shell: bash -l {0}
+        run: |
+          conda list
+          pip list -v
 
       - name: Build and install
+        shell: bash -l {0}
         run: pip install -v -e .
 
+      - name: Setup EUPS test package
+        shell: bash -l {0}
+        run: |
+          mkdir -p test_package/ups
+          touch test_package/ups/test_package.table
+          mkdir test_package/.git
+          cp -r .git test_package/.git/
+
       - name: Run tests
-        run: pytest -r a -v -n 3 --open-files --cov=tests --cov=lsst.utils --cov-report=xml --cov-report=term
+        shell: bash -l {0}
+        run: |
+          cd test_package
+          setup -k -r .
+          cd -
+          eups list
+          pytest -r a -v -n 3 --open-files --cov=tests --cov=lsst.utils --cov-report=xml --cov-report=term
 
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v2
