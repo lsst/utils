@@ -146,7 +146,7 @@ class PackagesTestCase(unittest.TestCase):
         self.assertEqual(values, set(dict(new).values()))
 
         # Serialize via bytes
-        for format in ("pickle", "yaml"):
+        for format in ("pickle", "yaml", "json"):
             asbytes = new.toBytes(format)
             from_bytes = lsst.utils.packages.Packages.fromBytes(asbytes, format)
             self.assertEqual(from_bytes, new)
