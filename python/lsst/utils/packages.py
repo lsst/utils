@@ -20,7 +20,7 @@ import io
 import json
 import logging
 import os
-import pickle as pickle
+import pickle
 import re
 import subprocess
 import sys
