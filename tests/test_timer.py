@@ -16,6 +16,7 @@ import time
 import unittest
 from dataclasses import dataclass
 
+from astropy import units as u
 from lsst.utils.timer import logInfo, logPairs, time_this, timeMethod
 
 log = logging.getLogger("test_timer")
@@ -186,6 +187,8 @@ class TimerTestCase(unittest.TestCase):
         self.assertEqual(cm.records[0].name, "root")
         self.assertEqual(cm.records[0].levelname, "DEBUG")
         self.assertIn("Took", cm.output[0])
+        self.assertNotIn(": Took", cm.output[0])
+        self.assertNotIn("; ", cm.output[0])
         self.assertEqual(cm.records[0].filename, THIS_FILE)
 
         # Report memory usage.
@@ -196,29 +199,49 @@ class TimerTestCase(unittest.TestCase):
         self.assertEqual(cm.records[0].levelname, "DEBUG")
         self.assertIn("Took", cm.output[0])
         self.assertIn("memory", cm.output[0])
-        self.assertIn("increment", cm.output[0])
+        self.assertIn("delta", cm.output[0])
+        self.assertIn("peak delta", cm.output[0])
+        self.assertIn("byte", cm.output[0])
 
-        # Report memory usage, use different, but known memory units.
+        # Report memory usage including child processes.
         with self.assertLogs(level="DEBUG") as cm:
-            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_units="GB"):
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_child=True):
                 pass
         self.assertEqual(cm.records[0].name, "root")
         self.assertEqual(cm.records[0].levelname, "DEBUG")
         self.assertIn("Took", cm.output[0])
         self.assertIn("memory", cm.output[0])
-        self.assertIn("increment", cm.output[0])
-        self.assertIn(" GB", cm.output[0])
+        self.assertIn("delta", cm.output[0])
+        self.assertIn("peak delta", cm.output[0])
+        self.assertIn("byte", cm.output[0])
 
-        # Report memory usage, use unknown memory units.
+        # Report memory usage, use non-default, but a valid memory unit.
         with self.assertLogs(level="DEBUG") as cm:
-            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_units="foo"):
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_unit=u.kilobyte):
                 pass
         self.assertEqual(cm.records[0].name, "root")
         self.assertEqual(cm.records[0].levelname, "DEBUG")
         self.assertIn("Took", cm.output[0])
         self.assertIn("memory", cm.output[0])
-        self.assertIn("increment", cm.output[0])
-        self.assertIn(" B", cm.output[0])
+        self.assertIn("delta", cm.output[0])
+        self.assertIn("peak delta", cm.output[0])
+        self.assertIn("kbyte", cm.output[0])
+
+        # Report memory usage, use an invalid memory unit.
+        with self.assertLogs(level="DEBUG") as cm:
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_unit=u.gram):
+                pass
+        self.assertEqual(cm.records[0].name, "lsst.utils.timer")
+        self.assertEqual(cm.records[0].levelname, "WARNING")
+        self.assertIn("Invalid", cm.output[0])
+        self.assertIn("byte", cm.output[0])
+        self.assertEqual(cm.records[1].name, "root")
+        self.assertEqual(cm.records[1].levelname, "DEBUG")
+        self.assertIn("Took", cm.output[1])
+        self.assertIn("memory", cm.output[1])
+        self.assertIn("delta", cm.output[1])
+        self.assertIn("peak delta", cm.output[1])
+        self.assertIn("byte", cm.output[1])
 
         # Change logging level
         with self.assertLogs(level="INFO") as cm:
