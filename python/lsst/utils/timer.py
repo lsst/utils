@@ -36,8 +36,15 @@ from typing import (
     Tuple,
 )
 
+from astropy import units as u
+
+from .usage import get_current_mem_usage, get_peak_mem_usage
+
 if TYPE_CHECKING:
     from .logging import LsstLoggers
+
+
+_LOG = logging.getLogger(__name__)
 
 
 def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
@@ -363,6 +370,10 @@ def time_this(
     level: int = logging.DEBUG,
     prefix: Optional[str] = "timer",
     args: Iterable[Any] = (),
+    mem_usage: bool = False,
+    mem_child: bool = False,
+    mem_unit: u.Quantity = u.byte,
+    mem_fmt: str = ".0f",
 ) -> Iterator[None]:
     """Time the enclosed block and issue a log message.
 
@@ -384,6 +395,16 @@ def time_this(
     args : iterable of any
         Additional parameters passed to the log command that should be
         written to ``msg``.
+    mem_usage : `bool`, optional
+        Flag indicating whether to include the memory usage in the report.
+        Defaults, to False.
+    mem_child : `bool`, optional
+        Flag indication whether to include memory usage of the child processes.
+    mem_unit : `astropy.units.Unit`, optional
+        Unit to use when reporting the memory usage. Defaults to bytes.
+    mem_fmt : `str`, optional
+        Format specifier to use when displaying values related to memory usage.
+        Defaults to '.0f'.
     """
     if log is None:
         log = logging.getLogger()
@@ -393,6 +414,10 @@ def time_this(
 
     success = False
     start = time.time()
+    if mem_usage:
+        current_usages_start = get_current_mem_usage()
+        peak_usages_start = get_peak_mem_usage()
+
     try:
         yield
         success = True
@@ -405,6 +430,10 @@ def time_this(
         if msg is None:
             msg = ""
 
+        # Convert user provided parameters (if any) to mutable sequence to make
+        # mypy stop complaining when additional parameters will be added below.
+        params = list(args) if args else []
+
         if not success:
             # Something went wrong so change the log level to indicate
             # this.
@@ -412,4 +441,30 @@ def time_this(
 
         # Specify stacklevel to ensure the message is reported from the
         # caller (1 is this file, 2 is contextlib, 3 is user)
-        log.log(level, msg + "%sTook %.4f seconds", *args, ": " if msg else "", end - start, stacklevel=3)
+        params += (": " if msg else "", end - start)
+        msg += "%sTook %.4f seconds"
+        if mem_usage and log.isEnabledFor(level):
+            current_usages_end = get_current_mem_usage()
+            peak_usages_end = get_peak_mem_usage()
+
+            current_deltas = [end - start for end, start in zip(current_usages_end, current_usages_start)]
+            peak_deltas = [end - start for end, start in zip(peak_usages_end, peak_usages_start)]
+
+            current_usage = current_usages_end[0]
+            current_delta = current_deltas[0]
+            peak_delta = peak_deltas[0]
+            if mem_child:
+                current_usage += current_usages_end[1]
+                current_delta += current_deltas[1]
+                peak_delta += peak_deltas[1]
+
+            if not mem_unit.is_equivalent(u.byte):
+                _LOG.warning("Invalid memory unit '%s', using '%s' instead", mem_unit, u.byte)
+                mem_unit = u.byte
+
+            msg += (
+                f"; current memory usage: {current_usage.to(mem_unit):{mem_fmt}}"
+                f", delta: {current_delta.to(mem_unit):{mem_fmt}}"
+                f", peak delta: {peak_delta.to(mem_unit):{mem_fmt}}"
+            )
+        log.log(level, msg, *params, stacklevel=3)
