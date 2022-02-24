@@ -12,14 +12,38 @@
 """Utilities for measuring resource consumption.
 """
 
+__all__ = ["get_current_mem_usage", "get_peak_mem_usage"]
+
 import platform
 import resource
 from typing import Tuple
 
+import astropy.units as u
 import psutil
-from astropy import units as u
 
-__all__ = ["get_current_mem_usage", "get_peak_mem_usage"]
+
+def _get_rusage_unit() -> u.Unit:
+    """Return the unit to use for memory usage returned by getrusage.
+
+    Returns
+    -------
+    unit : `astropy.units.Uni`
+        The unit that should be applied to the memory usage numbers
+        returned by `resource.getrusage`.
+    """
+    system = platform.system().lower()
+    if system == "darwin":
+        # MacOS uses bytes
+        return u.byte
+    elif "solaris" in system or "sunos" in system:
+        # Solaris and SunOS use pages
+        return resource.getpagesize() * u.byte
+    else:
+        # Assume Linux/FreeBSD etc, which use kibibytes
+        return u.kibibyte
+
+
+_RUSAGE_MEMORY_UNIT = _get_rusage_unit()
 
 
 def get_current_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
@@ -62,10 +86,6 @@ def get_peak_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
     a proxy. As such the value it reports is capped at available physical RAM
     and may not reflect the actual maximal value.
     """
-    # Units getrusage(2) uses to report the maximum resident set size are
-    # platform dependent (kilobytes on Linux, bytes on OSX).
-    unit = u.kibibyte if platform.system() == "Linux" else u.byte
-
-    peak_main = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * unit
-    peak_child = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * unit
+    peak_main = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * _RUSAGE_MEMORY_UNIT
+    peak_child = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * _RUSAGE_MEMORY_UNIT
     return peak_main, peak_child
