@@ -14,9 +14,11 @@
 
 __all__ = ["get_current_mem_usage", "get_peak_mem_usage"]
 
+import dataclasses
 import platform
 import resource
-from typing import Tuple
+import time
+from typing import Dict, Tuple, Union
 
 import astropy.units as u
 import psutil
@@ -89,3 +91,57 @@ def get_peak_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
     peak_main = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * _RUSAGE_MEMORY_UNIT
     peak_child = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * _RUSAGE_MEMORY_UNIT
     return peak_main, peak_child
+
+
+@dataclasses.dataclass(frozen=True)
+class _UsageInfo:
+    """Summary of process usage."""
+
+    cpuTime: float
+    userTime: float
+    systemTime: float
+    maxResidentSetSize: int
+    """Maximum resident set size in bytes."""
+    minorPageFaults: int
+    majorPageFaults: int
+    blockInputs: int
+    blockOutputs: int
+    voluntaryContextSwitches: int
+    involuntaryContextSwitches: int
+
+    def dict(self) -> Dict[str, Union[float, int]]:
+        return dataclasses.asdict(self)
+
+
+def _get_current_rusage(for_children: bool = False) -> _UsageInfo:
+    """Get information about this (or the child) process.
+
+    Parameters
+    ----------
+    for_children : `bool`, optional
+        Whether the information should be requested for child processes.
+        Default is for the current process.
+
+    Returns
+    -------
+    info : `_UsageInfo`
+        The information obtained from the process.
+    """
+    who = resource.RUSAGE_CHILDREN if for_children else resource.RUSAGE_SELF
+    res = resource.getrusage(who)
+
+    # Convert the memory usage to a quantity.
+    max_rss = res.ru_maxrss * _RUSAGE_MEMORY_UNIT
+
+    return _UsageInfo(
+        cpuTime=time.process_time(),
+        userTime=res.ru_utime,
+        systemTime=res.ru_stime,
+        maxResidentSetSize=int(max_rss.to_value(u.byte)),
+        minorPageFaults=res.ru_minflt,
+        majorPageFaults=res.ru_majflt,
+        blockInputs=res.ru_inblock,
+        blockOutputs=res.ru_oublock,
+        voluntaryContextSwitches=res.ru_nvcsw,
+        involuntaryContextSwitches=res.ru_nivcsw,
+    )
