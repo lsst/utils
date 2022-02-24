@@ -40,8 +40,9 @@ def get_current_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
     not reflect the actual memory allocated to the process and its children.
     """
     proc = psutil.Process()
-    usage_main = proc.memory_info().rss * u.byte
-    usage_child = sum([child.memory_info().rss for child in proc.children()]) * u.byte
+    with proc.oneshot():
+        usage_main = proc.memory_info().rss * u.byte
+        usage_child = sum([child.memory_info().rss for child in proc.children()]) * u.byte
     return usage_main, usage_child
 
 
