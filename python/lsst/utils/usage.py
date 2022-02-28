@@ -24,28 +24,28 @@ import astropy.units as u
 import psutil
 
 
-def _get_rusage_unit() -> u.Unit:
-    """Return the unit to use for memory usage returned by getrusage.
+def _get_rusage_multiplier() -> int:
+    """Return the multiplier to use for memory usage returned by getrusage.
 
     Returns
     -------
-    unit : `astropy.units.Uni`
-        The unit that should be applied to the memory usage numbers
-        returned by `resource.getrusage`.
+    unit : `int`
+        The multiplier that should be applied to the memory usage numbers
+        returned by `resource.getrusage` to convert them to bytes.
     """
     system = platform.system().lower()
     if system == "darwin":
         # MacOS uses bytes
-        return u.byte
+        return 1
     elif "solaris" in system or "sunos" in system:
         # Solaris and SunOS use pages
-        return resource.getpagesize() * u.byte
+        return resource.getpagesize()
     else:
         # Assume Linux/FreeBSD etc, which use kibibytes
-        return u.kibibyte
+        return 1024
 
 
-_RUSAGE_MEMORY_UNIT = _get_rusage_unit()
+_RUSAGE_MEMORY_MULTIPLIER = _get_rusage_multiplier()
 
 
 def get_current_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
@@ -88,8 +88,8 @@ def get_peak_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
     a proxy. As such the value it reports is capped at available physical RAM
     and may not reflect the actual maximal value.
     """
-    peak_main = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * _RUSAGE_MEMORY_UNIT
-    peak_child = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * _RUSAGE_MEMORY_UNIT
+    peak_main = _get_current_rusage().maxResidentSetSize * u.byte
+    peak_child = _get_current_rusage(for_children=True).maxResidentSetSize * u.byte
     return peak_main, peak_child
 
 
@@ -98,8 +98,11 @@ class _UsageInfo:
     """Summary of process usage."""
 
     cpuTime: float
+    """CPU time in seconds."""
     userTime: float
+    """User time in seconds."""
     systemTime: float
+    """System time in seconds."""
     maxResidentSetSize: int
     """Maximum resident set size in bytes."""
     minorPageFaults: int
@@ -130,14 +133,14 @@ def _get_current_rusage(for_children: bool = False) -> _UsageInfo:
     who = resource.RUSAGE_CHILDREN if for_children else resource.RUSAGE_SELF
     res = resource.getrusage(who)
 
-    # Convert the memory usage to a quantity.
-    max_rss = res.ru_maxrss * _RUSAGE_MEMORY_UNIT
+    # Convert the memory usage to bytes.
+    max_rss = res.ru_maxrss * _RUSAGE_MEMORY_MULTIPLIER
 
     return _UsageInfo(
         cpuTime=time.process_time(),
         userTime=res.ru_utime,
         systemTime=res.ru_stime,
-        maxResidentSetSize=int(max_rss.to_value(u.byte)),
+        maxResidentSetSize=max_rss,
         minorPageFaults=res.ru_minflt,
         majorPageFaults=res.ru_majflt,
         blockInputs=res.ru_inblock,
