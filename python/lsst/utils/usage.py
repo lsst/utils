@@ -12,14 +12,40 @@
 """Utilities for measuring resource consumption.
 """
 
+__all__ = ["get_current_mem_usage", "get_peak_mem_usage"]
+
+import dataclasses
 import platform
 import resource
-from typing import Tuple
+import time
+from typing import Dict, Tuple, Union
 
+import astropy.units as u
 import psutil
-from astropy import units as u
 
-__all__ = ["get_current_mem_usage", "get_peak_mem_usage"]
+
+def _get_rusage_multiplier() -> int:
+    """Return the multiplier to use for memory usage returned by getrusage.
+
+    Returns
+    -------
+    unit : `int`
+        The multiplier that should be applied to the memory usage numbers
+        returned by `resource.getrusage` to convert them to bytes.
+    """
+    system = platform.system().lower()
+    if system == "darwin":
+        # MacOS uses bytes
+        return 1
+    elif "solaris" in system or "sunos" in system:
+        # Solaris and SunOS use pages
+        return resource.getpagesize()
+    else:
+        # Assume Linux/FreeBSD etc, which use kibibytes
+        return 1024
+
+
+_RUSAGE_MEMORY_MULTIPLIER = _get_rusage_multiplier()
 
 
 def get_current_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
@@ -40,8 +66,9 @@ def get_current_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
     not reflect the actual memory allocated to the process and its children.
     """
     proc = psutil.Process()
-    usage_main = proc.memory_info().rss * u.byte
-    usage_child = sum([child.memory_info().rss for child in proc.children()]) * u.byte
+    with proc.oneshot():
+        usage_main = proc.memory_info().rss * u.byte
+        usage_child = sum([child.memory_info().rss for child in proc.children()]) * u.byte
     return usage_main, usage_child
 
 
@@ -61,10 +88,63 @@ def get_peak_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
     a proxy. As such the value it reports is capped at available physical RAM
     and may not reflect the actual maximal value.
     """
-    # Units getrusage(2) uses to report the maximum resident set size are
-    # platform dependent (kilobytes on Linux, bytes on OSX).
-    unit = u.kibibyte if platform.system() == "Linux" else u.byte
-
-    peak_main = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * unit
-    peak_child = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * unit
+    peak_main = _get_current_rusage().maxResidentSetSize * u.byte
+    peak_child = _get_current_rusage(for_children=True).maxResidentSetSize * u.byte
     return peak_main, peak_child
+
+
+@dataclasses.dataclass(frozen=True)
+class _UsageInfo:
+    """Summary of process usage."""
+
+    cpuTime: float
+    """CPU time in seconds."""
+    userTime: float
+    """User time in seconds."""
+    systemTime: float
+    """System time in seconds."""
+    maxResidentSetSize: int
+    """Maximum resident set size in bytes."""
+    minorPageFaults: int
+    majorPageFaults: int
+    blockInputs: int
+    blockOutputs: int
+    voluntaryContextSwitches: int
+    involuntaryContextSwitches: int
+
+    def dict(self) -> Dict[str, Union[float, int]]:
+        return dataclasses.asdict(self)
+
+
+def _get_current_rusage(for_children: bool = False) -> _UsageInfo:
+    """Get information about this (or the child) process.
+
+    Parameters
+    ----------
+    for_children : `bool`, optional
+        Whether the information should be requested for child processes.
+        Default is for the current process.
+
+    Returns
+    -------
+    info : `_UsageInfo`
+        The information obtained from the process.
+    """
+    who = resource.RUSAGE_CHILDREN if for_children else resource.RUSAGE_SELF
+    res = resource.getrusage(who)
+
+    # Convert the memory usage to bytes.
+    max_rss = res.ru_maxrss * _RUSAGE_MEMORY_MULTIPLIER
+
+    return _UsageInfo(
+        cpuTime=time.process_time(),
+        userTime=res.ru_utime,
+        systemTime=res.ru_stime,
+        maxResidentSetSize=max_rss,
+        minorPageFaults=res.ru_minflt,
+        majorPageFaults=res.ru_majflt,
+        blockInputs=res.ru_inblock,
+        blockOutputs=res.ru_oublock,
+        voluntaryContextSwitches=res.ru_nvcsw,
+        involuntaryContextSwitches=res.ru_nivcsw,
+    )

@@ -21,7 +21,6 @@ import datetime
 import functools
 import inspect
 import logging
-import resource
 import time
 from contextlib import contextmanager
 from typing import (
@@ -38,7 +37,7 @@ from typing import (
 
 from astropy import units as u
 
-from .usage import get_current_mem_usage, get_peak_mem_usage
+from .usage import _get_current_rusage, get_current_mem_usage, get_peak_mem_usage
 
 if TYPE_CHECKING:
     from .logging import LsstLoggers
@@ -232,13 +231,18 @@ def logInfo(
       timestamps).
     - ``CpuTime``: System + User CPU time (seconds). This should only be used
         in differential measurements; the time reference point is undefined.
-    - ``MaxRss``: maximum resident set size.
+    - ``MaxRss``: maximum resident set size. Always in bytes.
 
     All logged resource information is only for the current process; child
     processes are excluded.
+
+    The metadata will be updated with a ``__version__`` field to indicate the
+    version of the items stored. If there is no version number it is assumed
+    to be version 0.
+
+    * Version 0: ``MaxResidentSetSize`` units are platform-dependent.
+    * Version 1: ``MaxResidentSetSize`` will be stored in bytes.
     """
-    cpuTime = time.process_time()
-    res = resource.getrusage(resource.RUSAGE_SELF)
     if metadata is None and obj is not None:
         try:
             metadata = obj.metadata
@@ -248,24 +252,19 @@ def logInfo(
         # Log messages already have timestamps.
         utcStr = datetime.datetime.utcnow().isoformat()
         _add_to_metadata(metadata, name=prefix + "Utc", value=utcStr)
+
+        # Force a version number into the metadata.
+        # v1: Ensure that max_rss field is always bytes.
+        metadata["__version__"] = 1
     if stacklevel is not None:
         # Account for the caller of this routine not knowing that we
         # are going one down in the stack.
         stacklevel += 1
+
+    usage = _get_current_rusage()
     logPairs(
         obj=obj,
-        pairs=[
-            (prefix + "CpuTime", cpuTime),
-            (prefix + "UserTime", res.ru_utime),
-            (prefix + "SystemTime", res.ru_stime),
-            (prefix + "MaxResidentSetSize", int(res.ru_maxrss)),
-            (prefix + "MinorPageFaults", int(res.ru_minflt)),
-            (prefix + "MajorPageFaults", int(res.ru_majflt)),
-            (prefix + "BlockInputs", int(res.ru_inblock)),
-            (prefix + "BlockOutputs", int(res.ru_oublock)),
-            (prefix + "VoluntaryContextSwitches", int(res.ru_nvcsw)),
-            (prefix + "InvoluntaryContextSwitches", int(res.ru_nivcsw)),
-        ],
+        pairs=[(prefix + k[0].upper() + k[1:], v) for k, v in usage.dict().items()],
         logLevel=logLevel,
         metadata=metadata,
         logger=logger,

@@ -1,0 +1,2 @@
+The values for max resident set size stored in metadata are now consistently reported as bytes.
+Previously the units were platform specific (kibibytes on Liux and bytes on macOS).

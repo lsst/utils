@@ -91,6 +91,8 @@ class TestTimeMethod(unittest.TestCase):
             logInfo(None, prefix="Prefix", metadata=metadata, logger=logger, logLevel=logging.INFO)
         self.assertEqual(cm.records[0].filename, THIS_FILE)
         self.assertIn("PrefixUtc", metadata)
+        self.assertIn("PrefixMaxResidentSetSize", metadata)
+        self.assertEqual(metadata["__version__"], 1)
 
         # Again with no log output.
         logInfo(None, prefix="Prefix", metadata=metadata)
