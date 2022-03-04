@@ -151,8 +151,15 @@ _eups = None  # Singleton Eups object
 
 
 @lru_cache(maxsize=1)
-def getEnvironmentPackages() -> Dict[str, str]:
+def getEnvironmentPackages(include_all: bool = False) -> Dict[str, str]:
     """Get products and their versions from the environment.
+
+    Parameters
+    ----------
+    include_all : `bool`
+        If `False` only returns locally-setup packages. If `True` all set
+        up packages are returned with a version that includes any associated
+        non-current tags.
 
     Returns
     -------
@@ -165,7 +172,7 @@ def getEnvironmentPackages() -> Dict[str, str]:
     We use EUPS to determine the version of certain products (those that don't
     provide a means to determine the version any other way) and to check if
     uninstalled packages are being used. We only report the product/version
-    for these packages.
+    for these packages unless ``include_all`` is `True`.
     """
     try:
         from eups import Eups
@@ -193,6 +200,10 @@ def getEnvironmentPackages() -> Dict[str, str]:
     # is clean).
     for prod in products:
         if not prod.version.startswith(Product.LocalVersionPrefix):
+            if include_all:
+                tags = {t for t in prod.tags if t != "current"}
+                tag_msg = " (" + " ".join(tags) + ")" if tags else ""
+                packages[prod.name] = prod.version + tag_msg
             continue
         ver = prod.version
 
