@@ -353,7 +353,7 @@ class PeriodicLogger:
         Log level to use when issuing messages.
     """
 
-    LOGGING_INTERVAL = 600.0
+    LOGGING_INTERVAL = 0.0
     """Default interval between log messages."""
 
     def __init__(self, logger: LsstLoggers, interval: Optional[float] = None, level: int = VERBOSE):
