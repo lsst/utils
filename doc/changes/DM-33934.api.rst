@@ -1,0 +1,1 @@
+Add parameter to `~lsst.utils.packages.getEnvironmentPackages` to return all EUPS packages rather than just those that are locally setup.
