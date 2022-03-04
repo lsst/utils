@@ -13,9 +13,10 @@
 """
 
 import logging
+import time
 import unittest
 
-from lsst.utils.logging import getLogger, trace_set_at
+from lsst.utils.logging import PeriodicLogger, getLogger, trace_set_at
 
 
 class TestLogging(unittest.TestCase):
@@ -86,6 +87,38 @@ class TestLogging(unittest.TestCase):
         trace_set_at("", 3)
         self.assertEqual(trace3_log.getEffectiveLevel(), logging.INFO)
         self.assertEqual(getLogger("TRACE3.test").getEffectiveLevel(), logging.DEBUG)
+
+    def test_periodic(self):
+        logger = getLogger("test.periodicity")
+        periodic = PeriodicLogger(logger)
+
+        # First message will not be issued.
+        periodic.log("Message")
+        self.assertEqual(periodic.num_issued, 0)
+
+        # Create a new periodic logger with no delay.
+        # Every message should be issued.
+        periodic = PeriodicLogger(logger, interval=0.0)
+        with self.assertLogs(logger.name, level=logger.VERBOSE) as cm:
+            periodic.log("Message")
+            periodic.log("Message %d", 1)
+        self.assertEqual(len(cm.output), 2)
+        self.assertEqual(periodic.num_issued, 2)
+        self.assertEqual(cm.output[0], f"VERBOSE:{logger.name}:Message")
+        self.assertEqual(cm.output[1], f"VERBOSE:{logger.name}:Message 1")
+
+        # Create a new periodic logger with small delay.
+        # One message should be issued.
+        periodic = PeriodicLogger(logger, interval=0.2, level=logger.INFO)
+        with self.assertLogs(logger.name, level=logger.INFO) as cm:
+            periodic.log("Message")
+            time.sleep(0.5)
+            issued = periodic.log("Message %d", 1)
+            self.assertTrue(issued)
+            issued = periodic.log("Message %d", 2)
+            self.assertFalse(issued)
+        self.assertEqual(periodic.num_issued, 1)
+        self.assertEqual(cm.output[0], f"INFO:{logger.name}:Message 1")
 
 
 if __name__ == "__main__":

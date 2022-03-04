@@ -11,9 +11,10 @@
 
 from __future__ import annotations
 
-__all__ = ("TRACE", "VERBOSE", "getLogger", "LsstLogAdapter", "trace_set_at")
+__all__ = ("TRACE", "VERBOSE", "getLogger", "LsstLogAdapter", "PeriodicLogger", "trace_set_at")
 
 import logging
+import time
 from contextlib import contextmanager
 from logging import LoggerAdapter
 from typing import Any, Generator, List, Optional, Union
@@ -332,3 +333,57 @@ def getLogger(name: Optional[str] = None, logger: logging.Logger = None) -> Lsst
 
 
 LsstLoggers = Union[logging.Logger, LsstLogAdapter]
+
+
+class PeriodicLogger:
+    """Issue log messages if a time threshold has elapsed.
+
+    This class can be used in long-running sections of code where it would
+    be useful to issue a log message periodically to show that the
+    algorithm is progressing.
+
+    Parameters
+    ----------
+    logger : `logging.Logger` or `LsstLogAdapter`
+        Logger to use when issuing a message.
+    interval : `float`
+        The minimum interval between log messages. If `None` the class
+        default will be used.
+    level : `int`, optional
+        Log level to use when issuing messages.
+    """
+
+    LOGGING_INTERVAL = 600.0
+    """Default interval between log messages."""
+
+    def __init__(self, logger: LsstLoggers, interval: Optional[float] = None, level: int = VERBOSE):
+        self.logger = logger
+        self.interval = interval if interval is not None else self.LOGGING_INTERVAL
+        self.level = level
+        self.next_log_time = time.time() + self.interval
+        self.num_issued = 0
+
+    def log(self, msg: str, *args: Any) -> bool:
+        """Issue a log message if the interval has elapsed.
+
+        Parameters
+        ----------
+        msg : `str`
+            Message to issue if the time has been exceeded.
+        *args : Any
+            Parameters to be passed to the log system.
+
+        Returns
+        -------
+        issued : `bool`
+            Returns `True` if a log message was sent to the logging system.
+            Returns `False` if the interval has not yet elapsed. Returning
+            `True` does not indicate whether the log message was in fact
+            issued by the logging system.
+        """
+        if (current_time := time.time()) > self.next_log_time:
+            self.logger.log(self.level, msg, *args)
+            self.next_log_time = current_time + self.interval
+            self.num_issued += 1
+            return True
+        return False

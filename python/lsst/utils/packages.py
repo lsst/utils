@@ -474,7 +474,7 @@ class Packages(dict):
 
         Returns
         -------
-        missing : `dict` [`str`, `str]
+        missing : `dict` [`str`, `str`]
             Missing packages. Keys (type `str`) are package names; values
             (type `str`) are their versions.
         """
@@ -491,9 +491,9 @@ class Packages(dict):
 
         Returns
         -------
-        difference : `dict` [`str, `tuple` [`str`, `str]]
+        difference : `dict` [`str`, `tuple` [`str`, `str`]]
             Packages in symmetric difference.  Keys (type `str`) are package
-            names; values (type `tuple`[`str, `str`]) are their versions.
+            names; values (type `tuple`[`str`, `str`]) are their versions.
         """
         return {pkg: (self[pkg], other[pkg]) for pkg in self.keys() & other.keys() if self[pkg] != other[pkg]}
 
