@@ -90,6 +90,7 @@ class TestLogging(unittest.TestCase):
 
     def test_periodic(self):
         logger = getLogger("test.periodicity")
+        PeriodicLogger.LOGGING_INTERVAL = 600
         periodic = PeriodicLogger(logger)
 
         # First message will not be issued.
