@@ -1,0 +1,1 @@
+Added a new class `lsst.utils.logging.PeriodicLogger` to allow a user to issue log messages after some time interval has elapsed.
