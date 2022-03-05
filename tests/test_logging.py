@@ -99,7 +99,7 @@ class TestLogging(unittest.TestCase):
 
         # Create a new periodic logger with no delay.
         # Every message should be issued.
-        periodic = PeriodicLogger(logger, interval=0.0)
+        periodic = PeriodicLogger(logger, interval=0.0, level=logger.VERBOSE)
         with self.assertLogs(logger.name, level=logger.VERBOSE) as cm:
             periodic.log("Message")
             periodic.log("Message %d", 1)
