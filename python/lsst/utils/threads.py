@@ -17,6 +17,11 @@ __all__ = ["set_thread_envvars", "disable_implicit_threading"]
 
 import os
 
+try:
+    from threadpoolctl import threadpool_limits
+except ImportError:
+    threadpool_limits = None
+
 
 def set_thread_envvars(num_threads: int = 1, override: bool = False) -> None:
     """Set common threading environment variables to the given value.
@@ -60,3 +65,7 @@ def disable_implicit_threading() -> None:
         pass
     else:
         numexpr.utils.set_num_threads(1)
+
+    # Try to set threads for openblas and openmp
+    if threadpool_limits is not None:
+        threadpool_limits(limits=1)
