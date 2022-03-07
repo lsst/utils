@@ -363,6 +363,11 @@ class PeriodicLogger:
         self.next_log_time = time.time() + self.interval
         self.num_issued = 0
 
+        # The stacklevel we need to issue logs is determined by the type
+        # of logger we have been given. A LoggerAdapter has an extra
+        # level of indirection.
+        self._stacklevel = 3 if isinstance(self.logger, LoggerAdapter) else 2
+
     def log(self, msg: str, *args: Any) -> bool:
         """Issue a log message if the interval has elapsed.
 
@@ -382,7 +387,7 @@ class PeriodicLogger:
             issued by the logging system.
         """
         if (current_time := time.time()) > self.next_log_time:
-            self.logger.log(self.level, msg, *args)
+            self.logger.log(self.level, msg, *args, stacklevel=self._stacklevel)
             self.next_log_time = current_time + self.interval
             self.num_issued += 1
             return True
