@@ -106,6 +106,7 @@ class TestLogging(unittest.TestCase):
         self.assertEqual(periodic.num_issued, 2)
         self.assertEqual(cm.output[0], f"VERBOSE:{logger.name}:Message")
         self.assertEqual(cm.output[1], f"VERBOSE:{logger.name}:Message 1")
+        self.assertEqual(cm.records[0].filename, "test_logging.py", str(cm.records[0]))
 
         # Create a new periodic logger with small delay.
         # One message should be issued.
@@ -119,6 +120,13 @@ class TestLogging(unittest.TestCase):
             self.assertFalse(issued)
         self.assertEqual(periodic.num_issued, 1)
         self.assertEqual(cm.output[0], f"INFO:{logger.name}:Message 1")
+
+        # Again with a standard python Logger.
+        pylog = logging.getLogger("python.logger")
+        periodic = PeriodicLogger(pylog, interval=0.0, level=logging.DEBUG)
+        with self.assertLogs(pylog.name, level=logging.DEBUG) as cm:
+            periodic.log("Message")
+        self.assertEqual(cm.records[0].filename, "test_logging.py", str(cm.records[0]))
 
 
 if __name__ == "__main__":
