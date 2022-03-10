@@ -52,7 +52,14 @@ def set_thread_envvars(num_threads: int = 1, override: bool = False) -> None:
 
 
 def disable_implicit_threading() -> None:
-    """Do whatever is necessary to try to prevent implicit threading."""
+    """Do whatever is necessary to try to prevent implicit threading.
+
+    Notes
+    -----
+    Explicitly limits the number of threads allowed to be used by ``numexpr``
+    and attempts to limit the number of threads in all APIs supported by
+    the ``threadpoolctl`` package.
+    """
     # Force one thread and force override.
     set_thread_envvars(1, True)
 
