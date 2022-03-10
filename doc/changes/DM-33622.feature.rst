@@ -1,0 +1,4 @@
+Add ``lsst.utils.threads`` for control of threads.
+Use `lsst.utils.threads.disable_implicit_threading()` to disable implicit threading.
+This function should be used in place of ``lsst.base.disableImplicitThreading()`` in all new code.
+This package now depends on the `threadpoolctl` package.
