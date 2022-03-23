@@ -53,7 +53,9 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
                 pytype = getattr(pytype, f)
             except AttributeError:
                 extra = f"({previousError})" if previousError is not None else ""
-                raise ImportError(f"Could not get attribute '{f}' from '{module}' {extra}")
+                raise ImportError(
+                    f"Could not get attribute '{f}' from '{module}' when importing '{importable}' {extra}"
+                )
         return pytype
 
     # Go through the import path attempting to load the module
