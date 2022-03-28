@@ -11,7 +11,15 @@
 
 from __future__ import annotations
 
-__all__ = ("TRACE", "VERBOSE", "getLogger", "LsstLogAdapter", "PeriodicLogger", "trace_set_at")
+__all__ = (
+    "TRACE",
+    "VERBOSE",
+    "getLogger",
+    "getTraceLogger",
+    "LsstLogAdapter",
+    "PeriodicLogger",
+    "trace_set_at",
+)
 
 import logging
 import time
@@ -68,8 +76,7 @@ def trace_set_at(name: str, number: int) -> None:
     """
     for i in range(6):
         level = logging.INFO if i > number else logging.DEBUG
-        log_name = f"TRACE{i}.{name}" if name else f"TRACE{i}"
-        logging.getLogger(log_name).setLevel(level)
+        getTraceLogger(name, i).setLevel(level)
 
     # if lsst log is available also set the trace loggers there.
     if logUtils is not None:
@@ -333,6 +340,29 @@ def getLogger(name: Optional[str] = None, logger: logging.Logger = None) -> Lsst
 
 
 LsstLoggers = Union[logging.Logger, LsstLogAdapter]
+
+
+def getTraceLogger(logger: Union[str, LsstLoggers], trace_level: int) -> LsstLogAdapter:
+    """Get a logger with the appropriate TRACE name.
+
+    Parameters
+    ----------
+    logger : `logging.Logger` or `LsstLogAdapter` or `lsst.log.Log` or `str`
+        A logger to be used to derive the new trace logger. Can be a logger
+        object that supports the ``name`` property or a string.
+    trace_level : `int`
+        The trace level to use for the logger.
+
+    Returns
+    -------
+    trace_logger : `LsstLogAdapter`
+        A new trace logger. The name will be derived by pre-pending ``TRACEn.``
+        to the name of the supplied logger. If the root logger is given
+        the returned logger will be named ``TRACEn``.
+    """
+    name = getattr(logger, "name", str(logger))
+    trace_name = f"TRACE{trace_level}.{name}" if name else f"TRACE{trace_level}"
+    return getLogger(trace_name)
 
 
 class PeriodicLogger:

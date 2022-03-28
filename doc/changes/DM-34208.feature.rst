@@ -1,0 +1,1 @@
+Added ``lsst.utils.logging.getTraceLogger`` to simplify the creation of a trace logger that uses a ``TRACEn`` prefix for the logger name.
