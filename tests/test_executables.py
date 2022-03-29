@@ -23,7 +23,7 @@ class ExplicitBinaryTester(lsst.utils.tests.ExecutablesTestCase):
         )
 
         # Try a non-existent test
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(unittest.SkipTest):
             self.assertExecutable("testexe-missing.sh")
 
         # Force test to fail, explicit fail message
