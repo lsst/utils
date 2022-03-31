@@ -22,15 +22,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
 
+      - name: Install documenteer
+        run: pip install 'documenteer[pipelines]<0.7'
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
       - name: Build and install
         run: pip install -v .
-
-      - name: Install documenteer
-        run: pip install 'documenteer[pipelines]<0.7'
 
       - name: Build documentation
         working-directory: ./doc
