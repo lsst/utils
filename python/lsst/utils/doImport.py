@@ -83,7 +83,9 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
             # Move element from module to file and try again
             infileComponents.insert(0, moduleComponents.pop())
 
-    raise ModuleNotFoundError(f"Unable to import {importable}")
+    # Fell through without success.
+    extra = f"({previousError})" if previousError is not None else ""
+    raise ModuleNotFoundError(f"Unable to import {importable!r} {extra}")
 
 
 def doImportType(importable: str) -> Type:
