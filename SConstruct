@@ -12,4 +12,4 @@
 # license that can be found in the LICENSE file.
 
 from lsst.sconsUtils import scripts
-scripts.BasicSConstruct("utils", disableCc=True)
+scripts.BasicSConstruct("utils", disableCc=True, noCfgFile=True)
