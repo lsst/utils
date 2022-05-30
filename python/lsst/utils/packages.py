@@ -27,7 +27,7 @@ import sys
 import types
 from collections.abc import Mapping
 from functools import lru_cache
-from typing import Any, Dict, Tuple, Type
+from typing import Any, Dict, Optional, Tuple, Type
 
 import yaml
 
@@ -147,7 +147,7 @@ def getPythonPackages() -> Dict[str, str]:
     return packages
 
 
-_eups = None  # Singleton Eups object
+_eups: Optional[Any] = None  # Singleton Eups object
 
 
 @lru_cache(maxsize=1)
