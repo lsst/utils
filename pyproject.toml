@@ -1,6 +1,56 @@
 [build-system]
-requires = ["lsst-versions"]
+requires = ["setuptools", "lsst-versions"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "lsst-utils"
+description = "Utility functions from Rubin Observatory Data Management for the Legacy Survey of Space and Time (LSST)."
+license = {text = "BSD 3-Clause License"}
+readme = "README.rst"
+authors = [
+    {name="Rubin Observatory Data Management", email="dm-admin@lists.lsst.org"},
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+keywords=["lsst"]
+dependencies = [
+    "numpy >= 1.17",
+    "psutil >= 5.7",
+    "deprecated >= 1.2",
+    "pyyaml >= 5.1",
+    "astropy >= 5.0",
+    "threadpoolctl"
+]
+dynamic = ["version"]
+[project.urls]
+"Homepage" = "https://github.com/lsst/utils"
+[project.optional-dependencies]
+test = [
+    "pytest >= 3.2",
+    "flake8 >= 3.7.5",
+    "pytest-flake8 >= 1.0.4",
+    "pytest-openfiles >= 0.5.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+[tool.setuptools]
+zip-safe = true
+license-files = ["COPYRIGHT", "LICENSE"]
+
+[tool.setuptools.package-data]
+"lsst.utils" = ["py.typed"]
+
+[tool.setuptools.dynamic]
+version = { attr = "lsst_versions.get_lsst_version" }
 
 [tool.towncrier]
     package = "lsst.utils"
@@ -56,3 +106,17 @@ line_length = 110
 
 [tool.lsst_versions]
 write_to = "python/lsst/utils/version.py"
+
+[tool.pytest.ini_options]
+addopts = "--flake8"
+flake8-ignore = ["E133", "E226", "E228", "N802", "N803", "N806", "N812", "N815", "N816", "W503", "E203"]
+
+[tool.pydocstyle]
+convention = "numpy"
+# Our coding style does not require docstrings for magic methods (D105)
+# Our docstyle documents __init__ at the class level (D107)
+# We allow methods to inherit docstrings and this is not compatible with D102.
+# Docstring at the very first line is not required
+# D200, D205 and D400 all complain if the first sentence of the docstring does
+# not fit on one line.
+add-ignore = ["E133", "E226", "E228", "N802", "N803", "N806", "N812", "N815", "N816", "W503", "E203"]
