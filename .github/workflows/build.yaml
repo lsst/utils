@@ -88,5 +88,4 @@ jobs:
   pypi:
     needs: [build_and_test]
     if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - uses: mwittgen/rubin_workflows/.github/workflows/pypi.yaml@main
+    uses: mwittgen/rubin_workflows/.github/workflows/pypi.yaml@main
