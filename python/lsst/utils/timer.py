@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-__all__ = ["logInfo", "timeMethod", "time_this"]
+__all__ = ["profile", "logInfo", "timeMethod", "time_this"]
 
 import datetime
 import functools
@@ -40,6 +40,8 @@ from astropy import units as u
 from .usage import _get_current_rusage, get_current_mem_usage, get_peak_mem_usage
 
 if TYPE_CHECKING:
+    import cProfile
+
     from .logging import LsstLoggers
 
 
@@ -467,3 +469,55 @@ def time_this(
                 f", peak delta: {peak_delta.to(mem_unit):{mem_fmt}}"
             )
         log.log(level, msg, *params, stacklevel=3)
+
+
+@contextmanager
+def profile(filename: str, log: Optional[logging.Logger] = None) -> Iterator[Optional[cProfile.Profile]]:
+    """Profile the enclosed code block.
+
+    Parameters
+    ----------
+    filename : `str`
+        Filename to which to write profile (profiling disabled if `None` or
+        empty).
+    log : `logging.Logger`, optional
+        Log object for logging the profile operations.
+
+    Yields
+    ------
+    prof : `cProfile.Profile` or `None`
+        If profiling is enabled, the context manager returns the
+        `cProfile.Profile` object (otherwise it returns `None`),
+        which allows additional control over profiling.
+
+    Examples
+    --------
+    You can obtain the `cProfile.Profile` object using the "as" clause, e.g.:
+
+    .. code-block:: python
+
+        with profile(filename) as prof:
+            runYourCodeHere()
+
+    The output cumulative profile can be printed with a command-line like:
+
+    .. code-block:: bash
+
+        python -c 'import pstats; \
+            pstats.Stats("<filename>").sort_stats("cumtime").print_stats(30)'
+    """
+    if not filename:
+        # Nothing to do
+        yield None
+        return
+    from cProfile import Profile
+
+    profile = Profile()
+    if log is not None:
+        log.info("Enabling cProfile profiling")
+    profile.enable()
+    yield profile
+    profile.disable()
+    profile.dump_stats(filename)
+    if log is not None:
+        log.info("cProfile stats written to %s", filename)

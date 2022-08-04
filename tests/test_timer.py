@@ -12,12 +12,14 @@
 import datetime
 import logging
 import os.path
+import pstats
+import tempfile
 import time
 import unittest
 from dataclasses import dataclass
 
 from astropy import units as u
-from lsst.utils.timer import logInfo, logPairs, time_this, timeMethod
+from lsst.utils.timer import logInfo, logPairs, profile, time_this, timeMethod
 
 log = logging.getLogger("test_timer")
 
@@ -285,6 +287,24 @@ class TimerTestCase(unittest.TestCase):
                     raise RuntimeError("A problem")
         self.assertEqual(cm.records[0].name, f"{prefix}.{logname}")
         self.assertEqual(cm.records[0].levelname, "ERROR")
+
+
+class ProfileTestCase(unittest.TestCase):
+    def test_profile(self):
+        logger = logging.getLogger("profile")
+
+        with profile(None) as prof:
+            pass
+        self.assertIsNone(prof)
+
+        with tempfile.NamedTemporaryFile() as tmp:
+            with self.assertLogs("profile", level=logging.INFO) as cm:
+                with profile(tmp.name, logger) as prof:
+                    pass
+            self.assertEqual(len(cm.output), 2)
+            self.assertIsNotNone(prof)
+            self.assertTrue(os.path.exists(tmp.name))
+            self.assertIsInstance(pstats.Stats(tmp.name), pstats.Stats),
 
 
 if __name__ == "__main__":
