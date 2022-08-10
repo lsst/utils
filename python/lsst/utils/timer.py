@@ -472,14 +472,16 @@ def time_this(
 
 
 @contextmanager
-def profile(filename: str, log: Optional[logging.Logger] = None) -> Iterator[Optional[cProfile.Profile]]:
-    """Profile the enclosed code block.
+def profile(
+    filename: Optional[str], log: Optional[logging.Logger] = None
+) -> Iterator[Optional[cProfile.Profile]]:
+    """Profile the enclosed code block and save the result to a file.
 
     Parameters
     ----------
-    filename : `str`
+    filename : `str` or `None`
         Filename to which to write profile (profiling disabled if `None` or
-        empty).
+        empty string).
     log : `logging.Logger`, optional
         Log object for logging the profile operations.
 
