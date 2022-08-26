@@ -1,2 +1,0 @@
-A new package `lsst.utils.packages` has been added to allow system package versions to be obtained.
-This code has been relocated from ``lsst.base``.
