@@ -1,1 +1,0 @@
-Add `lsst.logging.set_trace_at` to control TRACE loggers.
