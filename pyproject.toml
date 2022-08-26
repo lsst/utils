@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
     package_dir = "python"
     filename = "doc/lsst.utils/CHANGES.rst"
     directory = "doc/changes"
-    title_format = "lsst_utils {version} {project_date}"
+    title_format = "lsst-utils {version} ({project_date})"
     issue_format = "`{issue} <https://jira.lsstcorp.org/browse/{issue}>`_"
 
 
