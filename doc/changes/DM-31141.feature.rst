@@ -1,1 +1,0 @@
-Add test decorators to operate on cartesian product.
