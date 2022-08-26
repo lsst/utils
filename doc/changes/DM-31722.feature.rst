@@ -1,8 +1,0 @@
-* Several new packages added from ``pipe_base`` and ``daf_butler``:
-  * ``lsst.utils.timer``
-  * ``lsst.utils.classes``
-  * ``lsst.utils.introspection``
-  * ``lsst.utils.iteration``
-  * ``lsst.utils.logging``
-* Added ``lsst.utils.doImportType`` to import a python type from a string and guaranteeing it is not a module.
-* ``lsst.utils.get_caller_name`` is now deprecated in its current location and has been relocated to ``lsst.utils.introspection``.

@@ -1,2 +1,0 @@
-``deprecate_pybind11`` now requires a ``version`` parameter.
-This matches the upstream requirement from ``deprecated.deprecated``
