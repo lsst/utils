@@ -47,5 +47,9 @@ if TYPE_CHECKING:
     Ellipsis = EllipsisType.Ellipsis
 
 else:
-    EllipsisType = type(Ellipsis)
+    try:
+        # Present in Python >= 3.10
+        from types import EllipsisType
+    except ImportError:
+        EllipsisType = type(Ellipsis)
     Ellipsis = Ellipsis
