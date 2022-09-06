@@ -9,6 +9,28 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
+"""
+A type-annotation workaround for ``...`` not having an exposed type in Python.
+
+This module provides ``Ellipsis`` and ``EllipsisType`` symbols that are
+conditionally defined to point to the built-in "``...``" singleton and its type
+(respectively) at runtime, and an enum class and instance if
+`typing.TYPE_CHECKING` is `True` (an approach first suggested
+`here <https://github.com/python/typing/issues/684#issuecomment-548203158>`_).
+Type checkers should recognize enum literals as singletons, making this pair
+behave as expected under ``is`` comparisons and type-narrowing expressions,
+such as::
+
+    v: EllipsisType | int
+    if v is not Ellipsis:
+        v += 2  # type checker should now see v as a pure int
+
+This works best when there is a clear boundary between code that needs to be
+type-checked and can use  ``Ellipsis`` instead of a literal "``...``", and
+calling code that is either not type-checked or uses `typing.Any` to accept
+literal "``...``" values.
+"""
+
 from __future__ import annotations
 
 __all__ = ("Ellipsis", "EllipsisType")
@@ -16,16 +38,7 @@ __all__ = ("Ellipsis", "EllipsisType")
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    # Workaround for `...` not having an exposed type in Python, borrowed from
-    # https://github.com/python/typing/issues/684#issuecomment-548203158
-    # Along with that, we need to either use `Ellipsis` instead of `...` for
-    # the actual sentinal value internally, and tell MyPy to ignore conversions
-    # from `...` to `Ellipsis` at the public-interface boundary.
-    #
-    # `Ellipsis` and `EllipsisType` should be directly imported from this
-    # module by related code that needs them; hopefully that will stay confined
-    # to `lsst.daf.butler.registry`.  Putting these in __all__ is bad for
-    # Sphinx, and probably more confusing than helpful overall.
+
     from enum import Enum
 
     class EllipsisType(Enum):
