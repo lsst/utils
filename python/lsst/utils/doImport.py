@@ -41,7 +41,7 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
         item could not be retrieved from the imported module.
     """
     if not isinstance(importable, str):
-        raise TypeError(f"Unhandled type of importable, val: {importable}")
+        raise TypeError(f"Unhandled type of importable, value: {importable}")
 
     def tryImport(
         module: str, fromlist: List[str], previousError: Optional[str]
