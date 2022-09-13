@@ -142,6 +142,7 @@ class MemoryTestCase(unittest.TestCase):
             and not (f.startswith("/var/lib/") and f.endswith("/passwd"))
             and not f.endswith("astropy.log")
             and not f.endswith("mime/mime.cache")
+            and ".vscode" not in f
         )
 
         diff = now_open.difference(open_files)
