@@ -539,7 +539,7 @@ yaml.add_representer(Packages, pkg_representer)
 
 
 def pkg_constructor(loader: yaml.constructor.SafeConstructor, node: yaml.Node) -> Any:
-    yield Packages(loader.construct_mapping(node, deep=True))
+    yield Packages(loader.construct_mapping(node, deep=True))  # type: ignore
 
 
 for loader in (yaml.Loader, yaml.CLoader, yaml.UnsafeLoader, yaml.SafeLoader, yaml.FullLoader):

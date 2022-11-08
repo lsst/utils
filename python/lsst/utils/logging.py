@@ -307,7 +307,7 @@ class LsstLogAdapter(LoggerAdapter):
         self.logger.removeHandler(handler)
 
 
-def getLogger(name: Optional[str] = None, logger: logging.Logger = None) -> LsstLogAdapter:
+def getLogger(name: Optional[str] = None, logger: Optional[logging.Logger] = None) -> LsstLogAdapter:
     """Get a logger compatible with LSST usage.
 
     Parameters
