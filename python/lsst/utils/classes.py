@@ -37,7 +37,7 @@ class Singleton(type):
     # Signature is intentionally not substitutable for type.__call__ (no *args,
     # **kwargs) to require classes that use this metaclass to have no
     # constructor arguments.
-    def __call__(cls) -> Any:  # type: ignore
+    def __call__(cls) -> Any:
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__()
         return cls._instances[cls]
