@@ -4,4 +4,3 @@ setupRequired(cpputils)
 setupRequired(sconsUtils)
 
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
-envPrepend(MYPYPATH, ${PRODUCT_DIR}/python)
