@@ -17,34 +17,20 @@ from lsst.utils.usage import get_current_mem_usage, get_peak_mem_usage
 
 class UsageTestCase(unittest.TestCase):
     def testGetCurrentMemUsage(self):
-        main1, children1 = get_current_mem_usage()
-        self.assertGreater(main1, 0 * u.byte)
-        self.assertGreaterEqual(children1.value, 0)
+        main, children = get_current_mem_usage()
+        self.assertGreater(main, 0 * u.byte)
+        self.assertGreaterEqual(children, 0 * u.byte)
 
-        self.assertTrue(main1.unit.is_equivalent(u.byte))
-        self.assertTrue(children1.unit.is_equivalent(u.byte))
-
-        # Allocate some memory.
-        arr = [None] * 1_000_000  # noqa: F841
-
-        main2, children2 = get_current_mem_usage()
-        self.assertGreater(main2, main1)
-        self.assertGreaterEqual(children2, children1)
+        self.assertTrue(main.unit.is_equivalent(u.byte))
+        self.assertTrue(children.unit.is_equivalent(u.byte))
 
     def testGetPeakMemUsage(self):
-        main1, child1 = get_peak_mem_usage()
-        self.assertGreater(main1, 0 * u.byte)
-        self.assertGreaterEqual(child1, 0 * u.byte)
+        main, child = get_peak_mem_usage()
+        self.assertGreater(main, 0 * u.byte)
+        self.assertGreaterEqual(child, 0 * u.byte)
 
-        self.assertTrue(main1.unit.is_equivalent(u.byte))
-        self.assertTrue(child1.unit.is_equivalent(u.byte))
-
-        # Allocate some memory.
-        arr = [None] * 2_000_000  # noqa: F841
-
-        main2, child2 = get_peak_mem_usage()
-        self.assertGreater(main2, main1)
-        self.assertGreaterEqual(child2, child1)
+        self.assertTrue(main.unit.is_equivalent(u.byte))
+        self.assertTrue(child.unit.is_equivalent(u.byte))
 
 
 if __name__ == "__main__":
