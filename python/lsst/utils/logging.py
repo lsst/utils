@@ -27,8 +27,6 @@ from contextlib import contextmanager
 from logging import LoggerAdapter
 from typing import Any, Generator, List, Optional, Union
 
-from deprecated.sphinx import deprecated
-
 try:
     import lsst.log.utils as logUtils
 except ImportError:
@@ -168,30 +166,6 @@ class LsstLogAdapter(LoggerAdapter):
         """
         return getLogger(name=name, logger=self.logger)
 
-    @deprecated(
-        reason="Use Python Logger compatible isEnabledFor Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def isDebugEnabled(self) -> bool:
-        return self.isEnabledFor(self.DEBUG)
-
-    @deprecated(
-        reason="Use Python Logger compatible 'name' attribute. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def getName(self) -> str:
-        return self.name
-
-    @deprecated(
-        reason="Use Python Logger compatible .level property. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def getLevel(self) -> int:
-        return self.logger.level
-
     def fatal(self, msg: str, *args: Any, **kwargs: Any) -> None:
         # Python does not provide this method in LoggerAdapter but does
         # not formally deprecated it in favor of critical() either.
@@ -222,55 +196,6 @@ class LsstLogAdapter(LoggerAdapter):
         # There is no other way to achieve this other than a special logger
         # method. For stacklevel discussion see `verbose()`.
         self.log(TRACE, fmt, *args, stacklevel=3)
-
-    @deprecated(
-        reason="Use Python Logger compatible method. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def tracef(self, fmt: str, *args: Any, **kwargs: Any) -> None:
-        # Stacklevel is 4 to account for the deprecation wrapper
-        self.log(TRACE, _F(fmt, *args, **kwargs), stacklevel=4)
-
-    @deprecated(
-        reason="Use Python Logger compatible method. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def debugf(self, fmt: str, *args: Any, **kwargs: Any) -> None:
-        self.log(logging.DEBUG, _F(fmt, *args, **kwargs), stacklevel=4)
-
-    @deprecated(
-        reason="Use Python Logger compatible method. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def infof(self, fmt: str, *args: Any, **kwargs: Any) -> None:
-        self.log(logging.INFO, _F(fmt, *args, **kwargs), stacklevel=4)
-
-    @deprecated(
-        reason="Use Python Logger compatible method. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def warnf(self, fmt: str, *args: Any, **kwargs: Any) -> None:
-        self.log(logging.WARNING, _F(fmt, *args, **kwargs), stacklevel=4)
-
-    @deprecated(
-        reason="Use Python Logger compatible method. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def errorf(self, fmt: str, *args: Any, **kwargs: Any) -> None:
-        self.log(logging.ERROR, _F(fmt, *args, **kwargs), stacklevel=4)
-
-    @deprecated(
-        reason="Use Python Logger compatible method. Will be removed after v23.",
-        version="v23",
-        category=FutureWarning,
-    )
-    def fatalf(self, fmt: str, *args: Any, **kwargs: Any) -> None:
-        self.log(logging.CRITICAL, _F(fmt, *args, **kwargs), stacklevel=4)
 
     def setLevel(self, level: Union[int, str]) -> None:
         """Set the level for the logger, trapping lsst.log values.
