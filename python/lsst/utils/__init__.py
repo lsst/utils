@@ -10,7 +10,6 @@
 # license that can be found in the LICENSE file.
 """General LSST Utilities."""
 
-from ._forwarded import *
 from ._packaging import *
 from .backtrace import *
 from .deprecated import *
