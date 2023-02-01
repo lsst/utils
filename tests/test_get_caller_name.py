@@ -16,7 +16,7 @@ import lsst.utils.tests
 from lsst.utils import get_caller_name
 
 
-class GetCallerNameTestCase(unittest.TestCase):
+class GetCallerNameDeprecatedTestCase(unittest.TestCase):
     """Test get_caller_name
 
     Warning: due to the different ways this can be run
@@ -55,7 +55,7 @@ class GetCallerNameTestCase(unittest.TestCase):
             return get_caller_name(skip)
 
         result = test_func(2)
-        self.assertEqual(result, "{}.GetCallerNameTestCase.test_skip".format(__name__))
+        self.assertEqual(result, "{}.GetCallerNameDeprecatedTestCase.test_skip".format(__name__))
 
         result = test_func(2000000)  # use a large number to avoid details of how the test is run
         self.assertEqual(result, "")
