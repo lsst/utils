@@ -627,7 +627,7 @@ def assertFloatsAlmostEqual(
         if not numpy.all(lhsMask == rhsMask):
             testCase.fail(
                 f"lhs has {lhsMask.sum()} NaN values and rhs has {rhsMask.sum()} NaN values, "
-                f"in different locations."
+                "in different locations."
             )
         if numpy.all(lhsMask):
             assert numpy.all(rhsMask), "Should be guaranteed by previous if."
