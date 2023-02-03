@@ -11,7 +11,6 @@
 """General LSST Utilities."""
 
 from ._packaging import *
-from .backtrace import *
 from .deprecated import *
 from .doImport import *
 from .get_caller_name import *
