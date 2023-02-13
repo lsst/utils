@@ -182,13 +182,21 @@ class LsstLogAdapter(LoggerAdapter):
         """
         return getLogger(name=name, logger=self.logger)
 
+    def _process_stacklevel(self, kwargs: dict[str, Any]) -> int:
+        # Return default stacklevel, taking into account kwargs[stacklevel].
+        stacklevel = self._stacklevel
+        if "stacklevel" in kwargs:
+            stacklevel = stacklevel + kwargs.pop("stacklevel") - 1
+        return stacklevel
+
     def fatal(self, msg: str, *args: Any, **kwargs: Any) -> None:
         # Python does not provide this method in LoggerAdapter but does
         # not formally deprecate it in favor of critical() either.
         # Provide it without deprecation message for consistency with Python.
         # Have to adjust stacklevel on Python 3.10 and older to account
         # for call through self.critical.
-        stacklevel = self._stacklevel + 1 if _OFFSET_STACK else self._stacklevel
+        stacklevel = self._process_stacklevel(kwargs)
+        stacklevel = stacklevel + 1 if _OFFSET_STACK else stacklevel
         self.critical(msg, *args, **kwargs, stacklevel=stacklevel)
 
     def verbose(self, fmt: str, *args: Any, **kwargs: Any) -> None:
@@ -200,9 +208,10 @@ class LsstLogAdapter(LoggerAdapter):
         # There is no other way to achieve this other than a special logger
         # method.
         # Stacklevel is passed in so that the correct line is reported
-        self.log(VERBOSE, fmt, *args, stacklevel=self._stacklevel, **kwargs)
+        stacklevel = self._process_stacklevel(kwargs)
+        self.log(VERBOSE, fmt, *args, **kwargs, stacklevel=stacklevel)
 
-    def trace(self, fmt: str, *args: Any) -> None:
+    def trace(self, fmt: str, *args: Any, **kwargs: Any) -> None:
         """Issue a TRACE level log message.
 
         Arguments are as for `logging.info`.
@@ -210,7 +219,8 @@ class LsstLogAdapter(LoggerAdapter):
         """
         # There is no other way to achieve this other than a special logger
         # method.
-        self.log(TRACE, fmt, *args, stacklevel=self._stacklevel)
+        stacklevel = self._process_stacklevel(kwargs)
+        self.log(TRACE, fmt, *args, **kwargs, stacklevel=stacklevel)
 
     def setLevel(self, level: Union[int, str]) -> None:
         """Set the level for the logger, trapping lsst.log values.

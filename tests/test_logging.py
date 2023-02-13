@@ -39,13 +39,14 @@ class TestLogging(unittest.TestCase):
             root.trace("Trace")
             root.debug("Debug")
             root.verbose("Verbose")
+            root.verbose("Verbose with stacklevel", stacklevel=1)
             root.info("Info")
             root.warning("Warning")
             root.fatal("Fatal")
             root.critical("Critical")
             root.error("Error")
 
-        self.assertEqual(len(cm.records), 8)
+        self.assertEqual(len(cm.records), 9)
 
         # Check that each record has an explicit level name rather than
         # "Level N" and comes from this file (and not the logging.py).
