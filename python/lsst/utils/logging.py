@@ -22,6 +22,7 @@ __all__ = (
 )
 
 import logging
+import sys
 import time
 from contextlib import contextmanager
 from logging import LoggerAdapter
@@ -31,6 +32,15 @@ try:
     import lsst.log.utils as logUtils
 except ImportError:
     logUtils = None
+
+# Python 3.11 understands internal stack frames in the logging.py
+# file and so does not need special offsetting of the stack level
+# when a LoggerAdapter is used.
+if sys.version_info < (3, 11, 0):
+    _OFFSET_STACK = True
+else:
+    _OFFSET_STACK = False
+
 
 # log level for trace (verbose debug).
 TRACE = 5
@@ -130,6 +140,12 @@ class LsstLogAdapter(LoggerAdapter):
     TRACE = TRACE
     VERBOSE = VERBOSE
 
+    # The stack level to use when issuing log messages. For Python 3.11
+    # this is generally 2 (this method and the internal infrastructure).
+    # For older python this would be 3 because of the extra indirection
+    # via LoggingAdapter internals.
+    _stacklevel = 2 if not _OFFSET_STACK else 3
+
     @contextmanager
     def temporary_log_level(self, level: Union[int, str]) -> Generator:
         """Temporarily set the level of this logger.
@@ -168,10 +184,12 @@ class LsstLogAdapter(LoggerAdapter):
 
     def fatal(self, msg: str, *args: Any, **kwargs: Any) -> None:
         # Python does not provide this method in LoggerAdapter but does
-        # not formally deprecated it in favor of critical() either.
+        # not formally deprecate it in favor of critical() either.
         # Provide it without deprecation message for consistency with Python.
-        # stacklevel=5 accounts for the forwarding of LoggerAdapter.
-        self.critical(msg, *args, **kwargs, stacklevel=4)
+        # Have to adjust stacklevel on Python 3.10 and older to account
+        # for call through self.critical.
+        stacklevel = self._stacklevel + 1 if _OFFSET_STACK else self._stacklevel
+        self.critical(msg, *args, **kwargs, stacklevel=stacklevel)
 
     def verbose(self, fmt: str, *args: Any, **kwargs: Any) -> None:
         """Issue a VERBOSE level log message.
@@ -182,10 +200,7 @@ class LsstLogAdapter(LoggerAdapter):
         # There is no other way to achieve this other than a special logger
         # method.
         # Stacklevel is passed in so that the correct line is reported
-        # in the log record and not this line. 3 is this method,
-        # 2 is the level from `self.log` and 1 is the log infrastructure
-        # itself.
-        self.log(VERBOSE, fmt, *args, stacklevel=3, **kwargs)
+        self.log(VERBOSE, fmt, *args, stacklevel=self._stacklevel, **kwargs)
 
     def trace(self, fmt: str, *args: Any) -> None:
         """Issue a TRACE level log message.
@@ -194,8 +209,8 @@ class LsstLogAdapter(LoggerAdapter):
         ``TRACE`` is lower than ``DEBUG``.
         """
         # There is no other way to achieve this other than a special logger
-        # method. For stacklevel discussion see `verbose()`.
-        self.log(TRACE, fmt, *args, stacklevel=3)
+        # method.
+        self.log(TRACE, fmt, *args, stacklevel=self._stacklevel)
 
     def setLevel(self, level: Union[int, str]) -> None:
         """Set the level for the logger, trapping lsst.log values.
@@ -320,8 +335,12 @@ class PeriodicLogger:
 
         # The stacklevel we need to issue logs is determined by the type
         # of logger we have been given. A LoggerAdapter has an extra
-        # level of indirection.
-        self._stacklevel = 3 if isinstance(self.logger, LoggerAdapter) else 2
+        # level of indirection. In Python 3.11 the logging infrastructure
+        # takes care to check for internal logging stack frames so there
+        # is no need for a difference.
+        stack_level = 2
+        offset = 0 if not _OFFSET_STACK else 1
+        self._stacklevel = stack_level + offset if isinstance(self.logger, LoggerAdapter) else stack_level
 
     def log(self, msg: str, *args: Any) -> bool:
         """Issue a log message if the interval has elapsed.
