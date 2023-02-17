@@ -38,7 +38,6 @@ __all__ = ("Ellipsis", "EllipsisType")
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-
     from enum import Enum
 
     class EllipsisType(Enum):

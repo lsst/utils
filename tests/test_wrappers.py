@@ -276,7 +276,6 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
 
     def setUp(self):
         class Example(metaclass=lsst.utils.TemplateMeta):
-
             TEMPLATE_PARAMS = ("d", "u")
             TEMPLATE_DEFAULTS = (2, None)
 
@@ -425,7 +424,6 @@ class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
 
     def setUp(self):
         class Example(metaclass=lsst.utils.TemplateMeta):
-
             TEMPLATE_PARAMS = ("dtype",)
             TEMPLATE_DEFAULTS = (np.float32,)
 
