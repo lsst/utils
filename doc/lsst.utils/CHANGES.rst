@@ -1,3 +1,19 @@
+lsst-utils v25.0.0 (2023-02-17)
+===============================
+
+New Features
+------------
+
+- Added ``lsst.utils.timer.profile`` to allow code blocks to be profiled easily. (`DM-35697 <https://jira.lsstcorp.org/browse/DM-35697>`_)
+
+
+Miscellaneous Changes of Minor Interest
+---------------------------------------
+
+- Moved a module with a typing workaround for the built-in ``Ellipsis`` (``...``) singleton here, from ``daf_butler``. (`DM-36108 <https://jira.lsstcorp.org/browse/DM-36108>`_)
+- Remove selected unit tests for memory reporting functions. (`DM-36960 <https://jira.lsstcorp.org/browse/DM-36960>`_)
+
+
 lsst-utils v24.0.0 (2022-08-26)
 ===============================
 
