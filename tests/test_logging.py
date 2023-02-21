@@ -62,11 +62,15 @@ class TestLogging(unittest.TestCase):
 
         child = root.getChild("child")
         self.assertEqual(child.getEffectiveLevel(), root.getEffectiveLevel())
-        child.setLevel(root.DEBUG)
+
+        # The root logger could be modified by the test environment.
+        # We need to pick a level that is different.
+        child.setLevel(root.getEffectiveLevel() - 5)
         self.assertNotEqual(child.getEffectiveLevel(), root.getEffectiveLevel())
 
     def testTraceSetAt(self):
         log_name = "lsst.afw"
+        root_level = logging.getLogger().getEffectiveLevel()
         trace_set_at(log_name, 2)
         trace2_log = getLogger(f"TRACE2.{log_name}")
         trace3_log = getLogger(f"TRACE3.{log_name}")
@@ -77,8 +81,8 @@ class TestLogging(unittest.TestCase):
         log_name = "lsst.daf"
         child3_log = getLogger("TRACE3.lsst.daf")
         child2_log = getLogger("TRACE2.lsst.daf")
-        self.assertEqual(child3_log.getEffectiveLevel(), logging.WARNING)
-        self.assertEqual(child2_log.getEffectiveLevel(), logging.WARNING)
+        self.assertEqual(child3_log.getEffectiveLevel(), root_level)
+        self.assertEqual(child2_log.getEffectiveLevel(), root_level)
         trace_set_at("lsst", 2)
         self.assertEqual(child3_log.getEffectiveLevel(), logging.INFO)
         self.assertEqual(child2_log.getEffectiveLevel(), logging.DEBUG)
