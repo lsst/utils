@@ -51,6 +51,39 @@ VERBOSE = (logging.INFO + logging.DEBUG) // 2
 logging.addLevelName(VERBOSE, "VERBOSE")
 
 
+def _calculate_base_stacklevel(default: int, offset: int) -> int:
+    """Calculate the default logging stacklevel to use.
+
+    Parameters
+    ----------
+    default : `int`
+        The stacklevel to use in Python 3.11 and newer where the only
+        thing to take into account is the number of levels above the core
+        Python logging infrastructure.
+    offset : `int`
+        The offset to apply for older Python implementations that need to
+        take into account internal call stacks.
+
+    Returns
+    -------
+    stacklevel : `int`
+        The stack level to pass to internal logging APIs that should result
+        in the log messages being reported in caller lines.
+
+    Notes
+    -----
+    In Python 3.11 the logging infrastructure was fixed such that we no
+    longer need to understand that a LoggerAdapter log messages need to
+    have a stack level one higher than a Logger would need. ``stacklevel=1``
+    now always means "log from the caller's line" without the caller having
+    to understand internal implementation details.
+    """
+    stacklevel = default
+    if _OFFSET_STACK:
+        stacklevel += offset
+    return stacklevel
+
+
 def trace_set_at(name: str, number: int) -> None:
     """Adjust logging level to display messages with the trace number being
     less than or equal to the provided value.
@@ -142,9 +175,9 @@ class LsstLogAdapter(LoggerAdapter):
 
     # The stack level to use when issuing log messages. For Python 3.11
     # this is generally 2 (this method and the internal infrastructure).
-    # For older python this would be 3 because of the extra indirection
+    # For older python we need one higher because of the extra indirection
     # via LoggingAdapter internals.
-    _stacklevel = 2 if not _OFFSET_STACK else 3
+    _stacklevel = _calculate_base_stacklevel(2, 1)
 
     @contextmanager
     def temporary_log_level(self, level: Union[int, str]) -> Generator:
@@ -182,12 +215,19 @@ class LsstLogAdapter(LoggerAdapter):
         """
         return getLogger(name=name, logger=self.logger)
 
-    def _process_stacklevel(self, kwargs: dict[str, Any]) -> int:
+    def _process_stacklevel(self, kwargs: dict[str, Any], offset: int = 0) -> int:
         # Return default stacklevel, taking into account kwargs[stacklevel].
         stacklevel = self._stacklevel
         if "stacklevel" in kwargs:
+            # External user expects stacklevel=1 to mean "report from their
+            # line" but the code here is already trying to achieve that by
+            # default. Therefore if an external stacklevel is specified we
+            # adjust their stacklevel request by 1.
             stacklevel = stacklevel + kwargs.pop("stacklevel") - 1
-        return stacklevel
+
+        # The offset can be used to indicate that we have to take into account
+        # additional internal layers before calling python logging.
+        return _calculate_base_stacklevel(stacklevel, offset)
 
     def fatal(self, msg: str, *args: Any, **kwargs: Any) -> None:
         # Python does not provide this method in LoggerAdapter but does
@@ -195,8 +235,7 @@ class LsstLogAdapter(LoggerAdapter):
         # Provide it without deprecation message for consistency with Python.
         # Have to adjust stacklevel on Python 3.10 and older to account
         # for call through self.critical.
-        stacklevel = self._process_stacklevel(kwargs)
-        stacklevel = stacklevel + 1 if _OFFSET_STACK else stacklevel
+        stacklevel = self._process_stacklevel(kwargs, offset=1)
         self.critical(msg, *args, **kwargs, stacklevel=stacklevel)
 
     def verbose(self, fmt: str, *args: Any, **kwargs: Any) -> None:
@@ -348,9 +387,7 @@ class PeriodicLogger:
         # level of indirection. In Python 3.11 the logging infrastructure
         # takes care to check for internal logging stack frames so there
         # is no need for a difference.
-        stack_level = 2
-        offset = 0 if not _OFFSET_STACK else 1
-        self._stacklevel = stack_level + offset if isinstance(self.logger, LoggerAdapter) else stack_level
+        self._stacklevel = _calculate_base_stacklevel(2, 1 if isinstance(self.logger, LoggerAdapter) else 0)
 
     def log(self, msg: str, *args: Any) -> bool:
         """Issue a log message if the interval has elapsed.
