@@ -1,1 +1,0 @@
-Added ``lsst.utils.timer.profile`` to allow code blocks to be profiled easily.
