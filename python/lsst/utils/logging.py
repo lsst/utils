@@ -33,14 +33,6 @@ try:
 except ImportError:
     logUtils = None
 
-# Python 3.11 understands internal stack frames in the logging.py
-# file and so does not need special offsetting of the stack level
-# when a LoggerAdapter is used.
-if sys.version_info < (3, 11, 0):
-    _OFFSET_STACK = True
-else:
-    _OFFSET_STACK = False
-
 
 # log level for trace (verbose debug).
 TRACE = 5
@@ -79,7 +71,7 @@ def _calculate_base_stacklevel(default: int, offset: int) -> int:
     to understand internal implementation details.
     """
     stacklevel = default
-    if _OFFSET_STACK:
+    if sys.version_info < (3, 11, 0):
         stacklevel += offset
     return stacklevel
 
