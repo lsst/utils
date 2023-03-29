@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Optional
+from typing import Iterable, Optional
 
 import numpy as np
 
@@ -51,14 +51,16 @@ def calculate_safe_plotting_limits(
     ymax : `float`
         The value to set the ylim maximum to.
     """
-    if not isinstance(data_series, Sequence):
+    if not isinstance(data_series, Iterable):
         raise ValueError("data_series must be either an iterable, or an iterable of iterables")
 
     # now we're sure we have an iterable, if it's just one make it a list of it
     # lsst.utils.ensure_iterable is not suitable here as we already have one,
     # we would need ensure_iterable_of_iterables here
-    if not isinstance(data_series[0], Sequence):  # we have a single data series, not multiple
-        data_series = [data_series]  # now we can iterate like we had more than one
+    if not isinstance(data_series[0], Iterable):  # np.array are Iterable but not Sequence so isinstance that
+        # we have a single data series, not multiple, wrap in [] so we can
+        # iterate over it as if we were given many
+        data_series = [data_series]  #
 
     mins = []
     maxs = []
