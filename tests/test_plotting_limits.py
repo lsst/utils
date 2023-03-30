@@ -83,6 +83,10 @@ class PlottingLimitsTestCase(unittest.TestCase):
             self.assertAlmostEqual(ymin, self.series1_min - extra, places=4)
             self.assertAlmostEqual(ymax, self.series1_max + extra, places=4)
 
+    def testRaises(self):
+        with self.assertRaises(TypeError):
+            calculate_safe_plotting_limits(1.234)
+
 
 if __name__ == "__main__":
     unittest.main()

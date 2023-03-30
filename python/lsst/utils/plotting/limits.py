@@ -52,7 +52,7 @@ def calculate_safe_plotting_limits(
         The value to set the ylim maximum to.
     """
     if not isinstance(data_series, Iterable):
-        raise ValueError("data_series must be either an iterable, or an iterable of iterables")
+        raise TypeError("data_series must be either an iterable, or an iterable of iterables")
 
     # now we're sure we have an iterable, if it's just one make it a list of it
     # lsst.utils.ensure_iterable is not suitable here as we already have one,
