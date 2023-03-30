@@ -32,7 +32,7 @@ def calculate_safe_plotting_limits(
 
     Parameters
     ----------
-    data_series : `iterable` or `iterable` or `iterable`
+    data_series : `iterable` or `iterable` of `iterable`
         One or more data series which will be going on the same axis, and
         therefore want to have their common plotting limits calculated.
     percentile : `float`, optional
