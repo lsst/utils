@@ -36,7 +36,7 @@ class PlottingLimitsTestCase(unittest.TestCase):
         """Test that a single series works and the outliers exclusion works."""
         # Deliberately test the bounds are the same when using the series
         # itself, and the copy with the outlier values, i.e. using
-        # self.series1_min/max inside the loop depsite changing the series we
+        # self.series1_min/max inside the loop despite changing the series we
         # loop over is the intent here, not a bug.
         for series in [self.series1, self.outliers]:
             ymin, ymax = calculate_safe_plotting_limits(series)

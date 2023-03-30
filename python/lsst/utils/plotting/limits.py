@@ -60,14 +60,14 @@ def calculate_safe_plotting_limits(
     if not isinstance(data_series[0], Iterable):  # np.array are Iterable but not Sequence so isinstance that
         # we have a single data series, not multiple, wrap in [] so we can
         # iterate over it as if we were given many
-        data_series = [data_series]  #
+        data_series = [data_series]
 
     mins = []
     maxs = []
 
     for data in data_series:
         max_val = np.nanpercentile(data, percentile)
-        min_val = np.nanpercentile(data, 100 - percentile)
+        min_val = np.nanpercentile(data, 100.0 - percentile)
 
         if constant_extra is None:
             data_range = max_val - min_val
