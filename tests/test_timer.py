@@ -207,6 +207,19 @@ class TimerTestCase(unittest.TestCase):
         self.assertIn("peak delta", cm.output[0])
         self.assertIn("byte", cm.output[0])
 
+        # Request memory usage but with log level that will not issue it.
+        with self.assertLogs(level="INFO") as cm:
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True):
+                pass
+            # Ensure that a log message is issued.
+            _log = logging.getLogger()
+            _log.info("info")
+        self.assertEqual(cm.records[0].name, "root")
+        self.assertEqual(cm.records[0].levelname, "INFO")
+        all = "\n".join(cm.output)
+        self.assertNotIn("Took", all)
+        self.assertNotIn("memory", all)
+
         # Report memory usage including child processes.
         with self.assertLogs(level="DEBUG") as cm:
             with time_this(level=logging.DEBUG, prefix=None, mem_usage=True, mem_child=True):
