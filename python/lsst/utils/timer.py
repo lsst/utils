@@ -415,6 +415,10 @@ def time_this(
 
     success = False
     start = time.time()
+
+    if mem_usage and not log.isEnabledFor(level):
+        mem_usage = False
+
     if mem_usage:
         current_usages_start = get_current_mem_usage()
         peak_usages_start = get_peak_mem_usage()
@@ -444,7 +448,7 @@ def time_this(
         # caller (1 is this file, 2 is contextlib, 3 is user)
         params += (": " if msg else "", end - start)
         msg += "%sTook %.4f seconds"
-        if mem_usage and log.isEnabledFor(level):
+        if mem_usage:
             current_usages_end = get_current_mem_usage()
             peak_usages_end = get_peak_mem_usage()
 
