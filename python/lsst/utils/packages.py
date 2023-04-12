@@ -127,19 +127,31 @@ def getPythonPackages() -> Dict[str, str]:
         # Remove "foo.bar.version" in favor of "foo.bar"
         # This prevents duplication when the __init__.py includes
         # "from .version import *"
+        modified = False
         for ending in (".version", "._version"):
             if name.endswith(ending):
                 name = name[: -len(ending)]
-                if name in packages:
-                    assert ver == packages[name]
-            elif name in packages:
-                assert ver == packages[name]
+                modified = True
+                break
+
+        # Check if this name has already been registered.
+        # This can happen if x._version is encountered before x.
+        if name in packages:
+            if ver != packages[name]:
+                # There is an inconsistency between this version
+                # and that previously calculated. Raising an exception
+                # would go against the ethos of this package. If this
+                # is the stripped package name we should drop it and
+                # trust the primary version. Else if this was not
+                # the modified version we should use it in preference.
+                if modified:
+                    continue
 
         # Use LSST package names instead of python module names
         # This matches the names we get from the environment (i.e., EUPS)
         # so we can clobber these build-time versions if the environment
         # reveals that we're not using the packages as-built.
-        if "lsst" in name:
+        if name.startswith("lsst."):
             name = name.replace("lsst.", "").replace(".", "_")
 
         packages[name] = ver
