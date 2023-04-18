@@ -236,7 +236,8 @@ class UtilsTestCase(lsst.utils.tests.TestCase):
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
-    pass
+    # Verify that setting ignore_regexps doesn't cause anything to fail.
+    ignore_regexps = [r"\.extension$"]
 
 
 def setup_module(module):
