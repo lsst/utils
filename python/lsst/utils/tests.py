@@ -150,6 +150,7 @@ class MemoryTestCase(unittest.TestCase):
             and not (f.startswith("/var/lib/") and f.endswith("/passwd"))
             and not f.endswith("astropy.log")
             and not f.endswith("mime/mime.cache")
+            and not f.endswith(".sqlite3")
             and not any([re.search(r, f) for r in self.ignore_regexps])
         )
 
