@@ -32,6 +32,7 @@ import gc
 import inspect
 import itertools
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -121,13 +122,20 @@ unittest.defaultTestLoader.suiteClass = suiteClassWrapper
 class MemoryTestCase(unittest.TestCase):
     """Check for resource leaks."""
 
+    ignore_regexps: List[str] = []
+    """List of regexps to ignore when checking for open files."""
+
     @classmethod
     def tearDownClass(cls) -> None:
         """Reset the leak counter when the tests have been completed"""
         init()
 
     def testFileDescriptorLeaks(self) -> None:
-        """Check if any file descriptors are open since init() called."""
+        """Check if any file descriptors are open since init() called.
+
+        Ignores files with certain known path components and any files
+        that match regexp patterns in class property ``ignore_regexps``.
+        """
         gc.collect()
         global open_files
         now_open = _get_open_files()
@@ -142,6 +150,7 @@ class MemoryTestCase(unittest.TestCase):
             and not (f.startswith("/var/lib/") and f.endswith("/passwd"))
             and not f.endswith("astropy.log")
             and not f.endswith("mime/mime.cache")
+            and not any([re.search(r, f) for r in self.ignore_regexps])
         )
 
         diff = now_open.difference(open_files)
