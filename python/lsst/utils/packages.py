@@ -118,11 +118,17 @@ def getPythonPackages() -> Dict[str, str]:
     # subject to race conditions
     moduleNames = list(sys.modules.keys())
     for name in moduleNames:
-        module = sys.modules[name]
         try:
-            ver = getVersionFromPythonModule(module)
+            # This is the Python standard way to find a package version.
+            # It can be slow.
+            ver = importlib.metadata.version(name)
         except Exception:
-            continue  # Can't get a version from it, don't care
+            # Fall back to using the module itself.
+            module = sys.modules[name]
+            try:
+                ver = getVersionFromPythonModule(module)
+            except Exception:
+                continue  # Can't get a version from it, don't care
 
         # Remove "foo.bar.version" in favor of "foo.bar"
         # This prevents duplication when the __init__.py includes
