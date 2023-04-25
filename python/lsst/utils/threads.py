@@ -50,6 +50,12 @@ def set_thread_envvars(num_threads: int = 1, override: bool = False) -> None:
         if override or var not in os.environ:
             os.environ[var] = str(num_threads)
 
+    # Also specify an explicit value for OMP_PROC_BIND to tell OpenMP not to
+    # set CPU affinity.
+    var = "OMP_PROC_BIND"
+    if override or var not in os.environ:
+        os.environ[var] = "false"
+
 
 def disable_implicit_threading() -> None:
     """Do whatever is necessary to try to prevent implicit threading.
