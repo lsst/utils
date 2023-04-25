@@ -36,6 +36,7 @@ class ThreadsTestCase(unittest.TestCase):
 
         disable_implicit_threading()
         self.assertEqual(os.environ["OMP_NUM_THREADS"], "1")
+        self.assertEqual(os.environ["OMP_PROC_BIND"], "false")
 
         # Check that we have only one thread.
         if numexpr:
