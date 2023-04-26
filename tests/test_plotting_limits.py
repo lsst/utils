@@ -13,11 +13,11 @@
 import unittest
 
 import numpy as np
-from lsst.utils.plotting.limits import calculate_safe_plotting_limits
+from lsst.utils.plotting.limits import make_calculate_safe_plotting_limits
 
 
 class PlottingLimitsTestCase(unittest.TestCase):
-    """Tests for `calculate_safe_plotting_limits` function."""
+    """Tests for `make_calculate_safe_plotting_limits` function."""
 
     xs = np.linspace(0, 10, 10000)
     series1 = np.sin(xs + 3.1415 / 2) + 0.75  # min=-0.24999, max=1.74999
@@ -39,7 +39,7 @@ class PlottingLimitsTestCase(unittest.TestCase):
         # self.series1_min/max inside the loop despite changing the series we
         # loop over is the intent here, not a bug.
         for series in [self.series1, self.outliers]:
-            ymin, ymax = calculate_safe_plotting_limits(series)
+            ymin, ymax = make_calculate_safe_plotting_limits()(series)
             self.assertLess(ymin, self.series1_min)
             self.assertGreater(ymin, self.series1_min - 1)
             self.assertLess(ymax, self.series1_max + 1)
@@ -47,7 +47,7 @@ class PlottingLimitsTestCase(unittest.TestCase):
 
     def testMultipleSeries(self):
         """Test that passing multiple several series in works wrt outliers."""
-        ymin, ymax = calculate_safe_plotting_limits([self.series1, self.outliers])
+        ymin, ymax = make_calculate_safe_plotting_limits()([self.series1, self.outliers])
         self.assertLess(ymin, self.series1_min)
         self.assertGreater(ymin, self.series1_min - 1)
         self.assertLess(ymax, self.series1_max + 1)
@@ -55,7 +55,7 @@ class PlottingLimitsTestCase(unittest.TestCase):
 
     def testMultipleSeriesCommonRange(self):
         """Test that passing multiple several series in works wrt outliers."""
-        ymin, ymax = calculate_safe_plotting_limits([self.series1, self.series2])
+        ymin, ymax = make_calculate_safe_plotting_limits()([self.series1, self.series2])
         # lower bound less than the lowest of the two
         self.assertLess(ymin, min(self.series1_min, self.series2_min))
         # lower bound less than the lowest of the two, but not by much
@@ -67,25 +67,31 @@ class PlottingLimitsTestCase(unittest.TestCase):
 
     def testSymmetric(self):
         """Test that the symmetric option works"""
-        ymin, ymax = calculate_safe_plotting_limits([self.series1, self.outliers], symmetric_around_zero=True)
+        ymin, ymax = make_calculate_safe_plotting_limits(symmetric_around_zero=True)(
+            [self.series1, self.outliers]
+        )
         self.assertEqual(ymin, -ymax)
         self.assertGreater(ymax, self.series1_max)
         self.assertLess(ymin, self.series1_min)
 
     def testConstantExtra(self):
         """Test that the constantExtra option works"""
-        strictMin, strictMax = calculate_safe_plotting_limits([self.series1, self.outliers], constant_extra=0)
+        strictMin, strictMax = make_calculate_safe_plotting_limits(constant_extra=0)(
+            [self.series1, self.outliers]
+        )
         self.assertAlmostEqual(strictMin, self.series1_min, places=4)
         self.assertAlmostEqual(strictMax, self.series1_max, places=4)
 
         for extra in [-2.123, -1, 0, 1, 1.5, 23]:
-            ymin, ymax = calculate_safe_plotting_limits([self.series1, self.outliers], constant_extra=extra)
+            ymin, ymax = make_calculate_safe_plotting_limits(constant_extra=extra)(
+                [self.series1, self.outliers]
+            )
             self.assertAlmostEqual(ymin, self.series1_min - extra, places=4)
             self.assertAlmostEqual(ymax, self.series1_max + extra, places=4)
 
     def testRaises(self):
         with self.assertRaises(TypeError):
-            calculate_safe_plotting_limits(1.234)
+            make_calculate_safe_plotting_limits()(1.234)
 
 
 if __name__ == "__main__":
