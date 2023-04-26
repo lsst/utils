@@ -17,6 +17,36 @@ from typing import Callable, Iterable, Optional
 import numpy as np
 
 
+def calculate_safe_plotting_limits(
+    data_series: Sequence,
+    percentile: float = 99.9,
+    constant_extra: Optional[float] = None,
+    symmetric_around_zero: bool = False,
+) -> tuple[float, float]:
+    """Calculate the right limits for plotting for one or more data series.
+
+    Given one or more data series with potential outliers, calculated the
+    values to pass for ymin, ymax so that extreme outliers don't ruin the
+    plot. If you are plotting several series on a single axis, pass them
+    all in and the overall plotting range will be given.
+
+    Parameters
+    ----------
+    data_series : `iterable` or `iterable` of `iterable`
+        One or more data series which will be going on the same axis, and
+        therefore want to have their common plotting limits calculated.
+
+    Returns
+    -------
+    ymin : `float`
+        The value to set the ylim minimum to.
+    ymax : `float`
+        The value to set the ylim maximum to.
+    """
+    localFunc = make_calculate_safe_plotting_limits(percentile, constant_extra, symmetric_around_zero)
+    return localFunc(data_series)
+
+
 def make_calculate_safe_plotting_limits(
     percentile: float = 99.9,
     constant_extra: Optional[float] = None,
