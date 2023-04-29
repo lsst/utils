@@ -97,6 +97,16 @@ class PlottingLimitsClosureTestCase(unittest.TestCase):
             self.assertAlmostEqual(ymin, self.series1_min - extra, places=4)
             self.assertAlmostEqual(ymax, self.series1_max + extra, places=4)
 
+    def testSeriesOfSeries(self):
+        """Test that we can pass a list of series to the accumulator in one."""
+        calculate_safe_plotting_limits_accumulator = make_calculate_safe_plotting_limits()
+        ymin, ymax = calculate_safe_plotting_limits_accumulator([self.series1, self.outliers])
+
+        self.assertLess(ymin, self.series1_min)
+        self.assertGreater(ymin, self.series1_min - 1)
+        self.assertLess(ymax, self.series1_max + 1)
+        self.assertGreater(ymax, self.series1_max)
+
     def testRaises(self):
         with self.assertRaises(TypeError):
             make_calculate_safe_plotting_limits()(1.234)
