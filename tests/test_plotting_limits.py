@@ -49,7 +49,7 @@ class PlottingLimitsClosureTestCase(unittest.TestCase):
         """Test that passing multiple several series in works wrt outliers."""
         calculate_safe_plotting_limits_accumulator = make_calculate_safe_plotting_limits()
         _, _ = calculate_safe_plotting_limits_accumulator(self.series1)
-        ymin, ymax = calculate_safe_plotting_limits_accumulator(self.series1)
+        ymin, ymax = calculate_safe_plotting_limits_accumulator(self.outliers)
 
         self.assertLess(ymin, self.series1_min)
         self.assertGreater(ymin, self.series1_min - 1)
