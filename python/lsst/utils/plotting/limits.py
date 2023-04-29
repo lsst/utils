@@ -12,13 +12,13 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Iterable, Optional
+from typing import Callable, Iterable, Optional
 
 import numpy as np
 
 
 def calculate_safe_plotting_limits(
-    data_series: Sequence,  # a sequence of sequences is still a sequence
+    data_series: Sequence,
     percentile: float = 99.9,
     constant_extra: Optional[float] = None,
     symmetric_around_zero: bool = False,
@@ -26,15 +26,37 @@ def calculate_safe_plotting_limits(
     """Calculate the right limits for plotting for one or more data series.
 
     Given one or more data series with potential outliers, calculated the
-    values to pass for ymin, ymax so that extreme outliers don't ruin the plot.
-    If you are plotting several series on a single axis, pass them all in and
-    the overall plotting range will be given.
+    values to pass for ymin, ymax so that extreme outliers don't ruin the
+    plot. If you are plotting several series on a single axis, pass them
+    all in and the overall plotting range will be given.
 
     Parameters
     ----------
     data_series : `iterable` or `iterable` of `iterable`
         One or more data series which will be going on the same axis, and
         therefore want to have their common plotting limits calculated.
+
+    Returns
+    -------
+    ymin : `float`
+        The value to set the ylim minimum to.
+    ymax : `float`
+        The value to set the ylim maximum to.
+    """
+    localFunc = make_calculate_safe_plotting_limits(percentile, constant_extra, symmetric_around_zero)
+    return localFunc(data_series)
+
+
+def make_calculate_safe_plotting_limits(
+    percentile: float = 99.9,
+    constant_extra: Optional[float] = None,
+    symmetric_around_zero: bool = False,
+) -> Callable[[Sequence], tuple[float, float]]:
+    """Make a ``calculate_safe_plotting_limits`` closure to get the common
+    limits when not all data series are available initially.
+
+    Parameters
+    ----------
     percentile : `float`, optional
         The percentile used to clip the outliers from the data.
     constant_extra : `float`, optional
@@ -44,46 +66,80 @@ def calculate_safe_plotting_limits(
         overrides this behaviour and zero you will get.
     symmetric_around_zero : `bool`, optional
         Make the limits symmetric around zero?
+
     Returns
     -------
-    ymin : `float`
-        The value to set the ylim minimum to.
-    ymax : `float`
-        The value to set the ylim maximum to.
+    calculate_safe_plotting_limits : `callable`
+        The calculate_safe_plotting_limits function to pass the data series to.
     """
-    if not isinstance(data_series, Iterable):
-        raise TypeError("data_series must be either an iterable, or an iterable of iterables")
+    memory: list[Sequence] = []
 
-    # now we're sure we have an iterable, if it's just one make it a list of it
-    # lsst.utils.ensure_iterable is not suitable here as we already have one,
-    # we would need ensure_iterable_of_iterables here
-    if not isinstance(data_series[0], Iterable):  # np.array are Iterable but not Sequence so isinstance that
-        # we have a single data series, not multiple, wrap in [] so we can
-        # iterate over it as if we were given many
-        data_series = [data_series]
+    def calculate_safe_plotting_limits(
+        data_series: Sequence,  # a sequence of sequences is still a sequence
+    ) -> tuple[float, float]:
+        """Calculate the right limits for plotting for one or more data series.
 
-    mins = []
-    maxs = []
+        Given one or more data series with potential outliers, calculated the
+        values to pass for ymin, ymax so that extreme outliers don't ruin the
+        plot. If you are plotting several series on a single axis, pass them
+        all in and the overall plotting range will be given.
 
-    for data in data_series:
-        max_val = np.nanpercentile(data, percentile)
-        min_val = np.nanpercentile(data, 100.0 - percentile)
+        Parameters
+        ----------
+        data_series : `iterable` or `iterable` of `iterable`
+            One or more data series which will be going on the same axis, and
+            therefore want to have their common plotting limits calculated.
 
-        if constant_extra is None:
-            data_range = max_val - min_val
-            constant_extra = 0.05 * data_range
+        Returns
+        -------
+        ymin : `float`
+            The value to set the ylim minimum to.
+        ymax : `float`
+            The value to set the ylim maximum to.
+        """
+        nonlocal constant_extra
+        nonlocal percentile
+        nonlocal symmetric_around_zero
 
-        max_val += constant_extra
-        min_val -= constant_extra
+        if not isinstance(data_series, Iterable):
+            raise TypeError("data_series must be either an iterable, or an iterable of iterables")
 
-        maxs.append(max_val)
-        mins.append(min_val)
+        # now we're sure we have an iterable, if it's just one make it a list
+        # of it lsst.utils.ensure_iterable is not suitable here as we already
+        # have one, we would need ensure_iterable_of_iterables here
 
-    max_val = max(maxs)
-    min_val = min(mins)
+        # np.array are Iterable but not Sequence so isinstance that
+        if not isinstance(data_series[0], Iterable):
+            # we have a single data series, not multiple, wrap in [] so we can
+            # iterate over it as if we were given many
+            data_series = [data_series]
 
-    if symmetric_around_zero:
-        biggest_abs = max(abs(min_val), abs(max_val))
-        return -biggest_abs, biggest_abs
+        memory.extend(data_series)
 
-    return min_val, max_val
+        mins = []
+        maxs = []
+
+        for dataSeries in memory:
+            max_val = np.nanpercentile(dataSeries, percentile)
+            min_val = np.nanpercentile(dataSeries, 100.0 - percentile)
+
+            if constant_extra is None:
+                data_range = max_val - min_val
+                constant_extra = 0.05 * data_range
+
+            max_val += constant_extra
+            min_val -= constant_extra
+
+            maxs.append(max_val)
+            mins.append(min_val)
+
+        max_val = max(maxs)
+        min_val = min(mins)
+
+        if symmetric_around_zero:
+            biggest_abs = max(abs(min_val), abs(max_val))
+            return -biggest_abs, biggest_abs
+
+        return min_val, max_val
+
+    return calculate_safe_plotting_limits
