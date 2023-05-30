@@ -204,29 +204,6 @@ def _get_python_package_version(name: str, packages: dict[str, str]) -> tuple[st
         except Exception:
             return name, None  # Can't get a version from it, don't care
 
-    # Remove "foo.bar.version" in favor of "foo.bar"
-    # This prevents duplication when the __init__.py includes
-    # "from .version import *"
-    modified = False
-    for ending in (".version", "._version"):
-        if name.endswith(ending):
-            name = name[: -len(ending)]
-            modified = True
-            break
-
-    # Check if this name has already been registered.
-    # This can happen if x._version is encountered before x.
-    if name in packages:
-        if ver != packages[name]:
-            # There is an inconsistency between this version
-            # and that previously calculated. Raising an exception
-            # would go against the ethos of this package. If this
-            # is the stripped package name we should drop it and
-            # trust the primary version. Else if this was not
-            # the modified version we should use it in preference.
-            if modified:
-                return name, None
-
     # Update the package information.
     if ver is not None:
         packages[name] = ver
