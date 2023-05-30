@@ -11,6 +11,7 @@
 #
 
 import os
+import sys
 import unittest
 from collections.abc import Mapping
 
@@ -112,22 +113,34 @@ class PackagesTestCase(unittest.TestCase):
         # Now load an obscure python package and the list of packages should
         # change
         # Shouldn't be used by anything we've previously imported
-        import chunk  # noqa: F401
+        # smtpd can be used on 3.8 since it does have a version string but
+        # it is also a deprecated package so should not be used in tests
+        # for python 3.10 and newer.
+        # chunk does not have a version string but is handled as a stdlib
+        # package on 3.10 and newer.
+        if sys.version_info < (3, 10, 0):
+            import smtpd  # noqa: F401
+
+            new_package = "smtpd"
+        else:
+            import chunk  # noqa: F401
+
+            new_package = "chunk"
 
         new = lsst.utils.packages.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
         missing = packages.missing(new)
         self.assertGreater(len(missing), 0)  # 'packages' should be missing some stuff in 'new'
-        self.assertIn("chunk", missing)
+        self.assertIn(new_package, missing)
 
         # Inverted comparisons
         self.assertDictEqual(new.difference(packages), {})
         self.assertDictEqual(new.missing(packages), {})  # Nothing in 'new' that's not in 'packages'
         extra = new.extra(packages)
         self.assertGreater(len(extra), 0)  # 'new' has extra stuff compared to 'packages'
-        self.assertIn("chunk", extra)
-        self.assertIn("chunk", new)
+        self.assertIn(new_package, extra)
+        self.assertIn(new_package, new)
 
         # Run with both a Packages and a dict
         for new_pkg in (new, dict(new)):
