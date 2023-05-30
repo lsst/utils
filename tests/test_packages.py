@@ -112,22 +112,22 @@ class PackagesTestCase(unittest.TestCase):
         # Now load an obscure python package and the list of packages should
         # change
         # Shouldn't be used by anything we've previously imported
-        import smtpd  # noqa: F401
+        import chunk  # noqa: F401
 
         new = lsst.utils.packages.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
         missing = packages.missing(new)
         self.assertGreater(len(missing), 0)  # 'packages' should be missing some stuff in 'new'
-        self.assertIn("smtpd", missing)
+        self.assertIn("chunk", missing)
 
         # Inverted comparisons
         self.assertDictEqual(new.difference(packages), {})
         self.assertDictEqual(new.missing(packages), {})  # Nothing in 'new' that's not in 'packages'
         extra = new.extra(packages)
         self.assertGreater(len(extra), 0)  # 'new' has extra stuff compared to 'packages'
-        self.assertIn("smtpd", extra)
-        self.assertIn("smtpd", new)
+        self.assertIn("chunk", extra)
+        self.assertIn("chunk", new)
 
         # Run with both a Packages and a dict
         for new_pkg in (new, dict(new)):
