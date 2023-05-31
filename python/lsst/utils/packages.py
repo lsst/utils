@@ -124,37 +124,60 @@ def getPythonPackages() -> Dict[str, str]:
 
     # Not iterating with sys.modules.iteritems() because it's not atomic and
     # subject to race conditions
-    module_names = []
-    for name in list(sys.modules.keys()):
-        if name.startswith("_"):
-            # No reason to think we need to report the version number of
-            # private packages.
-            continue
-        if name in _STDLIB:
-            # Assign all standard library packages the python version.
-            packages[name] = sys.version
-        else:
-            module_names.append(name)
+    module_names = list(sys.modules.keys())
 
     # Use knowledge of package hierarchy to find the versions rather than
     # using each name independently. Group all the module names into the
     # hierarchy, splitting on dot, and skipping any component that starts
     # with an underscore.
-    hierarchy: dict[str, dict] = {}
-    for name in module_names:
-        components = name.split(".")
 
-        current = hierarchy
-        for comp in components:
-            if comp.startswith("_"):
-                # Private hierarchy. Stop expanding.
-                break
-            current = current.setdefault(comp, {})
+    # Sorting the module names gives us:
+    # lsst
+    # lsst.afw
+    # lsst.afw.cameraGeom
+    # ...
+    # lsst.daf
+    # lsst.daf.butler
+    #
+    # and so we can use knowledge of the previous version to inform whether
+    # we need to look at the subsequent line.
+    n_versions = 0
+    n_checked = 0
+    previous = ""
+    for name in sorted(module_names):
+        if name.startswith("_") or "._" in name:
+            # Refers to a private module so we can ignore it and assume
+            # version has been lifted into parent or, if top level, not
+            # relevant for versioning. This applies also to standard library
+            # packages such as _abc and __future__.
+            continue
 
-    log.debug("Given %d modules but checking %d in the top level", len(module_names), len(hierarchy))
+        if name in _STDLIB:
+            # Assign all standard library packages the python version
+            # since they almost all lack explicit versions.
+            packages[name] = sys.version
+            previous = name
+            continue
 
-    # Walk through the hierarchy looking for versions.
-    _get_python_versions_of_hierarchy("", hierarchy, packages)
+        if name.startswith(previous + ".") and previous in packages:
+            # Already have this version. Use the same previous name
+            # for the line after this.
+            continue
+
+        # Look for a version.
+        ver = _get_python_package_version(name, packages)
+
+        n_checked += 1
+        if ver is not None:
+            n_versions += 1
+        previous = name
+
+    log.debug(
+        "Given %d modules but checked %d in hierarchy and found versions for %d",
+        len(module_names),
+        n_checked,
+        n_versions,
+    )
 
     for name in list(packages.keys()):
         # Use LSST package names instead of python module names
@@ -169,7 +192,7 @@ def getPythonPackages() -> Dict[str, str]:
     return packages
 
 
-def _get_python_package_version(name: str, packages: dict[str, str]) -> tuple[str, str | None]:
+def _get_python_package_version(name: str, packages: dict[str, str]) -> str | None:
     """Given a package or module name, try to determine the version.
 
     Parameters
@@ -182,11 +205,9 @@ def _get_python_package_version(name: str, packages: dict[str, str]) -> tuple[st
 
     Returns
     -------
-    name : `str`
-        The key used to update the ``packages`` dictionary.
     ver : `str` or `None`
         The version string stored in ``packages``. Nothing is stored if the
-        value her is `None`.
+        value here is `None`.
     """
     try:
         # This is the Python standard way to find a package version.
@@ -197,55 +218,18 @@ def _get_python_package_version(name: str, packages: dict[str, str]) -> tuple[st
         # that "a" exists for module "a.b" so if hierarchy has been expanded
         # this might fail. Check first.
         if name not in sys.modules:
-            return name, None
+            return None
         module = sys.modules[name]
         try:
             ver = getVersionFromPythonModule(module)
         except Exception:
-            return name, None  # Can't get a version from it, don't care
+            return None  # Can't get a version from it, don't care
 
     # Update the package information.
     if ver is not None:
         packages[name] = ver
 
-    return name, ver
-
-
-def _get_python_versions_of_hierarchy(
-    root: str,
-    hierarchy: dict[str, dict],
-    packages: dict[str, str],
-) -> None:
-    """Determine versions hierarchically.
-
-    Parameters
-    ----------
-    root : `str`
-        The root of the name to use for this package or module lookup. Uses
-        dot separators. Should be empty string when called from top level.
-    hierarchy : `dict`[`str`, `dict`]
-        Hierarchy of module or package names that have been split on a dot.
-        Values are themselves dicts pointing to deeper into the hierarchy.
-    packages : `dict`[`str`, `str`]
-        A mapping of module or package names to version strings.
-
-    Notes
-    -----
-    This is a recursive function that goes as deep into the hierarchy as it
-    needs to go to find a version. Stops recursing once a version has been
-    found or the bottom of the hierarchy is hit.
-    """
-    roots = [root] if root else []
-    for component in hierarchy:
-        name = ".".join(roots + [component])
-        if name in packages:
-            continue
-        _, ver = _get_python_package_version(name, packages)
-        if ver is None and hierarchy[component]:
-            # Try deeper in hierarchy.
-            _get_python_versions_of_hierarchy(name, hierarchy[component], packages)
-
-    return
+    return ver
 
 
 _eups: Optional[Any] = None  # Singleton Eups object
