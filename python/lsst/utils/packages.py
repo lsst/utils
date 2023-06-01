@@ -54,6 +54,13 @@ PYTHON = set(["galsim"])
 # version.  We need to guess the version from the environment
 ENVIRONMENT = set(["astrometry_net", "astrometry_net_data", "minuit2", "xpa"])
 
+try:
+    # Python 3.10 includes a list of standard library modules.
+    # These will all have the same version number as Python itself.
+    _STDLIB = sys.stdlib_module_names
+except AttributeError:
+    _STDLIB = frozenset()
+
 
 def getVersionFromPythonModule(module: types.ModuleType) -> str:
     """Determine the version of a python module.
@@ -114,55 +121,115 @@ def getPythonPackages() -> Dict[str, str]:
             pass  # It's not available, so don't care
 
     packages = {"python": sys.version}
+
     # Not iterating with sys.modules.iteritems() because it's not atomic and
     # subject to race conditions
-    moduleNames = list(sys.modules.keys())
-    for name in moduleNames:
-        try:
-            # This is the Python standard way to find a package version.
-            # It can be slow.
-            ver = importlib.metadata.version(name)
-        except Exception:
-            # Fall back to using the module itself.
-            module = sys.modules[name]
-            try:
-                ver = getVersionFromPythonModule(module)
-            except Exception:
-                continue  # Can't get a version from it, don't care
+    module_names = list(sys.modules.keys())
 
-        # Remove "foo.bar.version" in favor of "foo.bar"
-        # This prevents duplication when the __init__.py includes
-        # "from .version import *"
-        modified = False
-        for ending in (".version", "._version"):
-            if name.endswith(ending):
-                name = name[: -len(ending)]
-                modified = True
-                break
+    # Use knowledge of package hierarchy to find the versions rather than
+    # using each name independently. Group all the module names into the
+    # hierarchy, splitting on dot, and skipping any component that starts
+    # with an underscore.
 
-        # Check if this name has already been registered.
-        # This can happen if x._version is encountered before x.
-        if name in packages:
-            if ver != packages[name]:
-                # There is an inconsistency between this version
-                # and that previously calculated. Raising an exception
-                # would go against the ethos of this package. If this
-                # is the stripped package name we should drop it and
-                # trust the primary version. Else if this was not
-                # the modified version we should use it in preference.
-                if modified:
-                    continue
+    # Sorting the module names gives us:
+    # lsst
+    # lsst.afw
+    # lsst.afw.cameraGeom
+    # ...
+    # lsst.daf
+    # lsst.daf.butler
+    #
+    # and so we can use knowledge of the previous version to inform whether
+    # we need to look at the subsequent line.
+    n_versions = 0
+    n_checked = 0
+    previous = ""
+    for name in sorted(module_names):
+        if name.startswith("_") or "._" in name:
+            # Refers to a private module so we can ignore it and assume
+            # version has been lifted into parent or, if top level, not
+            # relevant for versioning. This applies also to standard library
+            # packages such as _abc and __future__.
+            continue
 
+        if name in _STDLIB:
+            # Assign all standard library packages the python version
+            # since they almost all lack explicit versions.
+            packages[name] = sys.version
+            previous = name
+            continue
+
+        if name.startswith(previous + ".") and previous in packages:
+            # Already have this version. Use the same previous name
+            # for the line after this.
+            continue
+
+        # Look for a version.
+        ver = _get_python_package_version(name, packages)
+
+        n_checked += 1
+        if ver is not None:
+            n_versions += 1
+        previous = name
+
+    log.debug(
+        "Given %d modules but checked %d in hierarchy and found versions for %d",
+        len(module_names),
+        n_checked,
+        n_versions,
+    )
+
+    for name in list(packages.keys()):
         # Use LSST package names instead of python module names
         # This matches the names we get from the environment (i.e., EUPS)
         # so we can clobber these build-time versions if the environment
         # reveals that we're not using the packages as-built.
         if name.startswith("lsst."):
-            name = name.replace("lsst.", "").replace(".", "_")
-
-        packages[name] = ver
+            new_name = name.replace("lsst.", "").replace(".", "_")
+            packages[new_name] = packages[name]
+            del packages[name]
 
     return packages
+
+
+def _get_python_package_version(name: str, packages: dict[str, str]) -> str | None:
+    """Given a package or module name, try to determine the version.
+
+    Parameters
+    ----------
+    name : `str`
+        The name of the package or module to try.
+    packages : `dict`[`str`, `str`]
+        A dictionary mapping a name to a version. Modified in place.
+        The key used might not match exactly the given key.
+
+    Returns
+    -------
+    ver : `str` or `None`
+        The version string stored in ``packages``. Nothing is stored if the
+        value here is `None`.
+    """
+    try:
+        # This is the Python standard way to find a package version.
+        # It can be slow.
+        ver = importlib.metadata.version(name)
+    except Exception:
+        # Fall back to using the module itself. There is no guarantee
+        # that "a" exists for module "a.b" so if hierarchy has been expanded
+        # this might fail. Check first.
+        if name not in sys.modules:
+            return None
+        module = sys.modules[name]
+        try:
+            ver = getVersionFromPythonModule(module)
+        except Exception:
+            return None  # Can't get a version from it, don't care
+
+    # Update the package information.
+    if ver is not None:
+        packages[name] = ver
+
+    return ver
 
 
 _eups: Optional[Any] = None  # Singleton Eups object
