@@ -10,7 +10,8 @@
 # license that can be found in the LICENSE file.
 
 """
-A type-annotation workaround for ``...`` not having an exposed type in Python.
+A type-annotation workaround for ``...`` not having an exposed type in Python
+prior to version 3.10.
 
 This module provides ``Ellipsis`` and ``EllipsisType`` symbols that are
 conditionally defined to point to the built-in "``...``" singleton and its type
@@ -35,6 +36,7 @@ from __future__ import annotations
 
 __all__ = ("Ellipsis", "EllipsisType")
 
+import warnings
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -49,6 +51,14 @@ else:
     try:
         # Present in Python >= 3.10
         from types import EllipsisType
+
+        # If EllipsisType is defined then produce a deprecation warning.
+        warnings.warn(
+            f"Module {__name__} is deprecated for Python 3.10 or later, native type `types.EllipsisType` "
+            "should be used instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
     except ImportError:
         EllipsisType = type(Ellipsis)
     Ellipsis = Ellipsis
