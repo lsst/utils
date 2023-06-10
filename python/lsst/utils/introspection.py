@@ -14,7 +14,13 @@ from __future__ import annotations
 
 """Utilities relating to introspection in python."""
 
-__all__ = ["get_class_of", "get_full_type_name", "get_instance_of", "get_caller_name"]
+__all__ = [
+    "get_class_of",
+    "get_full_type_name",
+    "get_instance_of",
+    "get_caller_name",
+    "find_outside_stacklevel",
+]
 
 import builtins
 import inspect
@@ -184,3 +190,45 @@ def get_caller_name(stacklevel: int = 2) -> str:
     if codename != "<module>":  # top level usually
         name.append(codename)  # function or a method
     return ".".join(name)
+
+
+def find_outside_stacklevel(module_name: str) -> int:
+    """Find the stacklevel for outside of the given module.
+
+    This can be used to determine the stacklevel parameter that should be
+    passed to log messages or warnings in order to make them appear to
+    come from external code and not this package.
+
+    Parameters
+    ----------
+    module_name : `str`
+        The name of the module to base the stack level calculation upon.
+
+    Returns
+    -------
+    stacklevel : `int`
+        The stacklevel to use matching the first stack frame outside of the
+        given module.
+    """
+    this_module = "lsst.utils"
+    stacklevel = -1
+    for i, s in enumerate(inspect.stack()):
+        module = inspect.getmodule(s.frame)
+        # Stack frames sometimes hang around so explicitly delete.
+        del s
+        if module is None:
+            continue
+        if module_name != this_module and module.__name__.startswith(this_module):
+            # Should not include this function unless explicitly requested.
+            continue
+        if not module.__name__.startswith(module_name):
+            # 0 will be this function.
+            # 1 will be the caller
+            # and so does not need adjustment.
+            stacklevel = i
+            break
+    else:
+        # The top can't be inside the module.
+        stacklevel = i
+
+    return stacklevel
