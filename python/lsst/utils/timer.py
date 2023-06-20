@@ -19,7 +19,6 @@ __all__ = ["profile", "logInfo", "timeMethod", "time_this"]
 
 import datetime
 import functools
-import inspect
 import logging
 import time
 from contextlib import contextmanager
@@ -37,6 +36,7 @@ from typing import (
 
 from astropy import units as u
 
+from .introspection import find_outside_stacklevel
 from .usage import _get_current_rusage, get_current_mem_usage, get_peak_mem_usage
 
 if TYPE_CHECKING:
@@ -78,45 +78,6 @@ def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
     if name not in metadata:
         metadata[name] = []
     metadata[name].append(value)
-
-
-def _find_outside_stacklevel() -> int:
-    """Find the stack level corresponding to caller code outside of this
-    module.
-
-    This can be passed directly to `logging.Logger.log()` to ensure
-    that log messages are issued as if they are coming from caller code.
-
-    Returns
-    -------
-    stacklevel : `int`
-        The stack level to use to refer to a caller outside of this module.
-        A ``stacklevel`` of ``1`` corresponds to the caller of this internal
-        function and that is the default expected by `logging.Logger.log()`.
-
-    Notes
-    -----
-    Intended to be called from the function that is going to issue a log
-    message. The result should be passed into `~logging.Logger.log` via the
-    keyword parameter ``stacklevel``.
-    """
-    stacklevel = 1  # the default for `Logger.log`
-    for i, s in enumerate(inspect.stack()):
-        module = inspect.getmodule(s.frame)
-        if module is None:
-            # Stack frames sometimes hang around so explicilty delete.
-            del s
-            continue
-        if not module.__name__.startswith("lsst.utils"):
-            # 0 will be this function.
-            # 1 will be the caller which will be the default for `Logger.log`
-            # and so does not need adjustment.
-            stacklevel = i
-            break
-        # Stack frames sometimes hang around so explicilty delete.
-        del s
-
-    return stacklevel
 
 
 def logPairs(
@@ -179,7 +140,7 @@ def logPairs(
         timer_logger = logging.getLogger("timer." + logger.name)
         if timer_logger.isEnabledFor(logLevel):
             if stacklevel is None:
-                stacklevel = _find_outside_stacklevel()
+                stacklevel = find_outside_stacklevel("lsst.utils")
             else:
                 # Account for the caller stack.
                 stacklevel += 1

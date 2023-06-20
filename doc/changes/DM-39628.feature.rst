@@ -1,0 +1,2 @@
+Added ``lsst.utils.introspection.find_outside_stacklevel``.
+This function can be used to calculate the stack level that should be passed to warnings and log messages in order to make them look like they came from the line outside the specified package in user code.

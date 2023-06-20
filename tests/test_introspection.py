@@ -16,7 +16,13 @@ from collections import Counter
 import lsst.utils
 from lsst.utils import doImport
 from lsst.utils._packaging import getPackageDir
-from lsst.utils.introspection import get_caller_name, get_class_of, get_full_type_name, get_instance_of
+from lsst.utils.introspection import (
+    find_outside_stacklevel,
+    get_caller_name,
+    get_class_of,
+    get_full_type_name,
+    get_instance_of,
+)
 
 
 class GetCallerNameTestCase(unittest.TestCase):
@@ -111,6 +117,20 @@ class TestInstropection(unittest.TestCase):
         with self.assertRaises(TypeError) as cm:
             get_instance_of(lsst.utils)
         self.assertIn("lsst.utils", str(cm.exception))
+
+    def test_stacklevel(self):
+        level = find_outside_stacklevel("lsst.utils")
+        self.assertEqual(level, 1)
+
+        c = doImport("import_test.two.three.success.Container")
+        with self.assertWarns(Warning) as cm:
+            level = c.level()
+        self.assertTrue(cm.filename.endswith("test_introspection.py"))
+        self.assertEqual(level, 2)
+        with self.assertWarns(Warning) as cm:
+            level = c.indirect_level()
+        self.assertTrue(cm.filename.endswith("test_introspection.py"))
+        self.assertEqual(level, 3)
 
 
 if __name__ == "__main__":

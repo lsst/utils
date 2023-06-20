@@ -43,6 +43,8 @@ if TYPE_CHECKING:
     from enum import Enum
 
     class EllipsisType(Enum):
+        """The type associated with an `...`"""
+
         Ellipsis = "..."
 
     Ellipsis = EllipsisType.Ellipsis
