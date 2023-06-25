@@ -40,7 +40,7 @@ class Singleton(type):
     # constructor arguments.
     def __call__(cls) -> Any:
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__()
+            cls._instances[cls] = super().__call__()
         return cls._instances[cls]
 
 
