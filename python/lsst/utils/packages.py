@@ -92,7 +92,7 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
         deps = module.__dependency_versions__
         buildtime = BUILDTIME & set(deps.keys())
         if buildtime:
-            version += " with " + " ".join("%s=%s" % (pkg, deps[pkg]) for pkg in sorted(buildtime))
+            version += " with " + " ".join(f"{pkg}={deps[pkg]}" for pkg in sorted(buildtime))
     return str(version)
 
 

@@ -135,7 +135,7 @@ def inClass(cls, name=None):
                     # property has fget but no __name__
                     name1 = func.fget.__name__
                 else:
-                    raise ValueError("Could not guess attribute name for '{}'.".format(func))
+                    raise ValueError(f"Could not guess attribute name for '{func}'.")
         setattr(cls, name1, func)
         return func
 
@@ -297,7 +297,7 @@ class TemplateMeta(type):
         clz = cls._registry.get(key[0] if len(key) == 1 else key, None)
         if clz is None:
             d = {k: v for k, v in zip(cls.TEMPLATE_PARAMS, key)}
-            raise TypeError("No registered subclass for {}.".format(d))
+            raise TypeError(f"No registered subclass for {d}.")
         return clz(*args, **kwds)
 
     def __subclasscheck__(cls, subclass):
@@ -342,7 +342,7 @@ class TemplateMeta(type):
                 d = {cls.TEMPLATE_PARAMS[0]: key}
             else:
                 d = {k: v for k, v in zip(cls.TEMPLATE_PARAMS, key)}
-            raise KeyError("Another subclass is already registered with {}".format(d))
+            raise KeyError(f"Another subclass is already registered with {d}")
         # If the key used to register a class matches the default key,
         # make the static methods available through the ABC
         if cls.TEMPLATE_DEFAULTS:
@@ -409,7 +409,7 @@ class TemplateMeta(type):
         if key is None:
             raise ValueError("None may not be used as a key.")
         if key in cls._registry:
-            raise KeyError("Cannot multiply-register key {}".format(key))
+            raise KeyError(f"Cannot multiply-register key {key}")
         primaryKey = tuple(getattr(subclass, p, None) for p in cls.TEMPLATE_PARAMS)
         if len(primaryKey) == 1:
             # indices are only tuples if there are multiple elements

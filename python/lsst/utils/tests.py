@@ -227,15 +227,15 @@ class ExecutablesTestCase(unittest.TestCase):
             sp_args.extend(args)
             argstr = 'arguments "' + " ".join(args) + '"'
 
-        print("Running executable '{}' with {}...".format(executable, argstr))
+        print(f"Running executable '{executable}' with {argstr}...")
         if not os.path.exists(executable):
-            self.skipTest("Executable {} is unexpectedly missing".format(executable))
+            self.skipTest(f"Executable {executable} is unexpectedly missing")
         failmsg = None
         try:
             output = subprocess.check_output(sp_args)
         except subprocess.CalledProcessError as e:
             output = e.output
-            failmsg = "Bad exit status from '{}': {}".format(executable, e.returncode)
+            failmsg = f"Bad exit status from '{executable}': {e.returncode}"
         print(output.decode("utf-8"))
         if failmsg:
             if msg is None:
@@ -399,14 +399,14 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
     outDir = os.path.join(callerDir, ".tests")
     if not os.path.isdir(outDir):
         outDir = ""
-    prefix = "%s_%s-" % (callerFileName, callerFuncName)
+    prefix = f"{callerFileName}_{callerFuncName}-"
     outPath = tempfile.mktemp(dir=outDir, suffix=ext, prefix=prefix)
     if os.path.exists(outPath):
         # There should not be a file there given the randomizer. Warn and
         # remove.
         # Use stacklevel 3 so that the warning is reported from the end of the
         # with block
-        warnings.warn("Unexpectedly found pre-existing tempfile named %r" % (outPath,), stacklevel=3)
+        warnings.warn(f"Unexpectedly found pre-existing tempfile named {outPath!r}", stacklevel=3)
         try:
             os.remove(outPath)
         except OSError:
@@ -417,10 +417,10 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
     fileExists = os.path.exists(outPath)
     if expectOutput:
         if not fileExists:
-            raise RuntimeError("Temp file expected named {} but none found".format(outPath))
+            raise RuntimeError(f"Temp file expected named {outPath} but none found")
     else:
         if fileExists:
-            raise RuntimeError("Unexpectedly discovered temp file named {}".format(outPath))
+            raise RuntimeError(f"Unexpectedly discovered temp file named {outPath}")
     # Try to clean up the file regardless
     if fileExists:
         try:
@@ -428,7 +428,7 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
         except OSError as e:
             # Use stacklevel 3 so that the warning is reported from the end of
             # the with block.
-            warnings.warn("Warning: could not remove file %r: %s" % (outPath, e), stacklevel=3)
+            warnings.warn(f"Warning: could not remove file {outPath!r}: {e}", stacklevel=3)
 
 
 class TestCase(unittest.TestCase):
@@ -684,7 +684,7 @@ def assertFloatsAlmostEqual(
     if failed:
         if numpy.isscalar(bad):
             if rtol is None:
-                errMsg = ["%s %s %s; diff=%s with atol=%s" % (lhs, cmpStr, rhs, absDiff, atol)]
+                errMsg = [f"{lhs} {cmpStr} {rhs}; diff={absDiff} with atol={atol}"]
             elif atol is None:
                 errMsg = [
                     "%s %s %s; diff=%s/%s=%s with rtol=%s"
@@ -716,10 +716,10 @@ def assertFloatsAlmostEqual(
                     rhs = numpy.ones(bad.shape, dtype=float) * rhs
                 if rtol is None:
                     for a, b, diff in zip(lhs[bad], rhs[bad], absDiff[bad]):
-                        errMsg.append("%s %s %s (diff=%s)" % (a, cmpStr, b, diff))
+                        errMsg.append(f"{a} {cmpStr} {b} (diff={diff})")
                 else:
                     for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
-                        errMsg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff / rel))
+                        errMsg.append(f"{a} {cmpStr} {b} (diff={diff}/{rel}={diff / rel})")
 
     if msg is not None:
         errMsg.append(msg)
