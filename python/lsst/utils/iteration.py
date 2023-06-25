@@ -17,11 +17,11 @@ from __future__ import annotations
 __all__ = ["chunk_iterable", "ensure_iterable", "isplit"]
 
 import itertools
-from collections.abc import Mapping
-from typing import Any, Iterable, Iterator, Tuple, TypeVar
+from collections.abc import Iterable, Iterator, Mapping
+from typing import Any, TypeVar
 
 
-def chunk_iterable(data: Iterable[Any], chunk_size: int = 1_000) -> Iterator[Tuple[Any, ...]]:
+def chunk_iterable(data: Iterable[Any], chunk_size: int = 1_000) -> Iterator[tuple[Any, ...]]:
     """Return smaller chunks of an iterable.
 
     Parameters

@@ -13,10 +13,9 @@ __all__ = ("doImport", "doImportType")
 
 import importlib
 import types
-from typing import List, Optional, Type, Union
 
 
-def doImport(importable: str) -> Union[types.ModuleType, Type]:
+def doImport(importable: str) -> types.ModuleType | type:
     """Import a python object given an importable string and return it.
 
     Parameters
@@ -43,9 +42,7 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
     if not isinstance(importable, str):
         raise TypeError(f"Unhandled type of importable, val: {importable}")
 
-    def tryImport(
-        module: str, fromlist: List[str], previousError: Optional[str]
-    ) -> Union[types.ModuleType, Type]:
+    def tryImport(module: str, fromlist: list[str], previousError: str | None) -> types.ModuleType | type:
         pytype = importlib.import_module(module)
         # Can have functions inside classes inside modules
         for f in fromlist:
@@ -62,7 +59,7 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
     # and retrieve the class or function as an attribute. Shift components
     # from the module list to the attribute list until something works.
     moduleComponents = importable.split(".")
-    infileComponents: List[str] = []
+    infileComponents: list[str] = []
     previousError = None
 
     while moduleComponents:
@@ -88,7 +85,7 @@ def doImport(importable: str) -> Union[types.ModuleType, Type]:
     raise ModuleNotFoundError(f"Unable to import {importable!r} {extra}")
 
 
-def doImportType(importable: str) -> Type:
+def doImportType(importable: str) -> type:
     """Import a python type given an importable string and return it.
 
     Parameters

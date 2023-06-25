@@ -11,8 +11,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Callable, Iterable, Optional
+from collections.abc import Callable, Iterable, Sequence
 
 import numpy as np
 
@@ -20,7 +19,7 @@ import numpy as np
 def calculate_safe_plotting_limits(
     data_series: Sequence,
     percentile: float = 99.9,
-    constant_extra: Optional[float] = None,
+    constant_extra: float | None = None,
     symmetric_around_zero: bool = False,
 ) -> tuple[float, float]:
     """Calculate the right limits for plotting for one or more data series.
@@ -49,7 +48,7 @@ def calculate_safe_plotting_limits(
 
 def make_calculate_safe_plotting_limits(
     percentile: float = 99.9,
-    constant_extra: Optional[float] = None,
+    constant_extra: float | None = None,
     symmetric_around_zero: bool = False,
 ) -> Callable[[Sequence], tuple[float, float]]:
     """Make a ``calculate_safe_plotting_limits`` closure to get the common

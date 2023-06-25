@@ -39,7 +39,8 @@ import sys
 import tempfile
 import unittest
 import warnings
-from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional, Sequence, Set, Type, Union
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from typing import Any
 
 import numpy
 import psutil
@@ -48,7 +49,7 @@ import psutil
 open_files = set()
 
 
-def _get_open_files() -> Set[str]:
+def _get_open_files() -> set[str]:
     """Return a set containing the list of files currently open in this
     process.
 
@@ -122,7 +123,7 @@ unittest.defaultTestLoader.suiteClass = suiteClassWrapper
 class MemoryTestCase(unittest.TestCase):
     """Check for resource leaks."""
 
-    ignore_regexps: List[str] = []
+    ignore_regexps: list[str] = []
     """List of regexps to ignore when checking for open files."""
 
     @classmethod
@@ -189,9 +190,9 @@ class ExecutablesTestCase(unittest.TestCase):
     def assertExecutable(
         self,
         executable: str,
-        root_dir: Optional[str] = None,
-        args: Optional[Sequence[str]] = None,
-        msg: Optional[str] = None,
+        root_dir: str | None = None,
+        args: Sequence[str] | None = None,
+        msg: str | None = None,
     ) -> None:
         """Check an executable runs and returns good status.
 
@@ -274,7 +275,7 @@ class ExecutablesTestCase(unittest.TestCase):
         setattr(cls, test_name, test_executable_runs)
 
     @classmethod
-    def create_executable_tests(cls, ref_file: str, executables: Optional[Sequence[str]] = None) -> None:
+    def create_executable_tests(cls, ref_file: str, executables: Sequence[str] | None = None) -> None:
         """Discover executables to test and create corresponding test methods.
 
         Scans the directory containing the supplied reference file
@@ -484,9 +485,9 @@ def debugger(*exceptions):
 def plotImageDiff(
     lhs: numpy.ndarray,
     rhs: numpy.ndarray,
-    bad: Optional[numpy.ndarray] = None,
-    diff: Optional[numpy.ndarray] = None,
-    plotFileName: Optional[str] = None,
+    bad: numpy.ndarray | None = None,
+    diff: numpy.ndarray | None = None,
+    plotFileName: str | None = None,
 ) -> None:
     """Plot the comparison of two 2-d NumPy arrays.
 
@@ -557,16 +558,16 @@ def plotImageDiff(
 @inTestCase
 def assertFloatsAlmostEqual(
     testCase: unittest.TestCase,
-    lhs: Union[float, numpy.ndarray],
-    rhs: Union[float, numpy.ndarray],
-    rtol: Optional[float] = sys.float_info.epsilon,
-    atol: Optional[float] = sys.float_info.epsilon,
-    relTo: Optional[float] = None,
+    lhs: float | numpy.ndarray,
+    rhs: float | numpy.ndarray,
+    rtol: float | None = sys.float_info.epsilon,
+    atol: float | None = sys.float_info.epsilon,
+    relTo: float | None = None,
     printFailures: bool = True,
     plotOnFailure: bool = False,
-    plotFileName: Optional[str] = None,
+    plotFileName: str | None = None,
     invert: bool = False,
-    msg: Optional[str] = None,
+    msg: str | None = None,
     ignoreNaNs: bool = False,
 ) -> None:
     """Highly-configurable floating point comparisons for scalars and arrays.
@@ -728,8 +729,8 @@ def assertFloatsAlmostEqual(
 @inTestCase
 def assertFloatsNotEqual(
     testCase: unittest.TestCase,
-    lhs: Union[float, numpy.ndarray],
-    rhs: Union[float, numpy.ndarray],
+    lhs: float | numpy.ndarray,
+    rhs: float | numpy.ndarray,
     **kwds: Any,
 ) -> None:
     """Fail a test if the given floating point values are equal to within the
@@ -760,8 +761,8 @@ def assertFloatsNotEqual(
 @inTestCase
 def assertFloatsEqual(
     testCase: unittest.TestCase,
-    lhs: Union[float, numpy.ndarray],
-    rhs: Union[float, numpy.ndarray],
+    lhs: float | numpy.ndarray,
+    rhs: float | numpy.ndarray,
     **kwargs: Any,
 ) -> None:
     """
@@ -789,7 +790,7 @@ def assertFloatsEqual(
     return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
 
 
-def _settingsIterator(settings: Dict[str, Sequence[Any]]) -> Iterator[Dict[str, Any]]:
+def _settingsIterator(settings: dict[str, Sequence[Any]]) -> Iterator[dict[str, Any]]:
     """Return an iterator for the provided test settings
 
     Parameters
@@ -857,7 +858,7 @@ def classParameters(**settings: Sequence[Any]) -> Callable:
     Note that the values are embedded in the class name.
     """
 
-    def decorator(cls: Type) -> None:
+    def decorator(cls: type) -> None:
         module = sys.modules[cls.__module__].__dict__
         for params in _settingsIterator(settings):
             name = f"{cls.__name__}_{'_'.join(str(vv) for vv in params.values())}"
@@ -935,7 +936,7 @@ def _cartesianProduct(settings: Mapping[str, Sequence[Any]]) -> Mapping[str, Seq
 
         {"foo": [1, 1, 2, 2], "bar": ["black", "white", "black", "white"]}
     """
-    product: Dict[str, List[Any]] = {kk: [] for kk in settings}
+    product: dict[str, list[Any]] = {kk: [] for kk in settings}
     for values in itertools.product(*settings.values()):
         for kk, vv in zip(settings.keys(), values):
             product[kk].append(vv)

@@ -25,7 +25,7 @@ __all__ = [
 import builtins
 import inspect
 import types
-from typing import Any, Type, Union
+from typing import Any
 
 from .doImport import doImport, doImportType
 
@@ -84,7 +84,7 @@ def get_full_type_name(cls: Any) -> str:
     return cleaned_name
 
 
-def get_class_of(typeOrName: Union[Type, str]) -> Type:
+def get_class_of(typeOrName: type | str | types.ModuleType) -> type:
     """Given the type name or a type, return the python type.
 
     If a type name is given, an attempt will be made to import the type.
@@ -112,13 +112,13 @@ def get_class_of(typeOrName: Union[Type, str]) -> Type:
     if isinstance(typeOrName, str):
         cls = doImportType(typeOrName)
     else:
-        cls = typeOrName
-        if isinstance(cls, types.ModuleType):
+        if isinstance(typeOrName, types.ModuleType):
             raise TypeError(f"Can not get class of module {get_full_type_name(typeOrName)}")
+        cls = typeOrName
     return cls
 
 
-def get_instance_of(typeOrName: Union[Type, str], *args: Any, **kwargs: Any) -> Any:
+def get_instance_of(typeOrName: type | str, *args: Any, **kwargs: Any) -> Any:
     """Given the type name or a type, instantiate an object of that type.
 
     If a type name is given, an attempt will be made to import the type.
