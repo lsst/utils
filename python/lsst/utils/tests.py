@@ -58,7 +58,7 @@ def _get_open_files() -> set[str]:
     open_files : `set`
         Set containing the list of open files.
     """
-    return set(p.path for p in psutil.Process().open_files())
+    return {p.path for p in psutil.Process().open_files()}
 
 
 def init() -> None:
@@ -142,7 +142,7 @@ class MemoryTestCase(unittest.TestCase):
         now_open = _get_open_files()
 
         # Some files are opened out of the control of the stack.
-        now_open = set(
+        now_open = {
             f
             for f in now_open
             if not f.endswith(".car")
@@ -153,7 +153,7 @@ class MemoryTestCase(unittest.TestCase):
             and not f.endswith("mime/mime.cache")
             and not f.endswith(".sqlite3")
             and not any([re.search(r, f) for r in self.ignore_regexps])
-        )
+        }
 
         diff = now_open.difference(open_files)
         if diff:

@@ -43,16 +43,16 @@ __all__ = [
 
 
 # Packages used at build-time (e.g., header-only)
-BUILDTIME = set(["boost", "eigen", "tmv"])
+BUILDTIME = {"boost", "eigen", "tmv"}
 
 # Python modules to attempt to load so we can try to get the version
 # We do this because the version only appears to be available from python,
 # but we use the library
-PYTHON = set(["galsim"])
+PYTHON = {"galsim"}
 
 # Packages that don't seem to have a mechanism for reporting the runtime
 # version.  We need to guess the version from the environment
-ENVIRONMENT = set(["astrometry_net", "astrometry_net_data", "minuit2", "xpa"])
+ENVIRONMENT = {"astrometry_net", "astrometry_net_data", "minuit2", "xpa"}
 
 try:
     # Python 3.10 includes a list of standard library modules.
