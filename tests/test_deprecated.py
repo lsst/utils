@@ -16,6 +16,8 @@ import lsst.utils.tests
 
 
 class DeprecatedTestCase(lsst.utils.tests.TestCase):
+    """Test depreaction."""
+
     def test_deprecate_pybind11(self):
         def old(x):
             """Docstring"""

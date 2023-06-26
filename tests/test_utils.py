@@ -20,6 +20,8 @@ display = False
 
 
 class UtilsTestCase(lsst.utils.tests.TestCase):
+    """Test the utils test case."""
+
     def setUp(self):
         self.large = 100.0
         self.epsilon = 1e-8
@@ -236,11 +238,16 @@ class UtilsTestCase(lsst.utils.tests.TestCase):
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
-    # Verify that setting ignore_regexps doesn't cause anything to fail.
+    """Test for file descriptor leaks.
+
+    Verify that setting ignore_regexps doesn't cause anything to fail.
+    """
+
     ignore_regexps = [r"\.extension$"]
 
 
 def setup_module(module):
+    """Initialize the pytest environment."""
     lsst.utils.tests.init()
 
 

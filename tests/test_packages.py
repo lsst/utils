@@ -176,7 +176,6 @@ class PackagesTestCase(unittest.TestCase):
 
     def testBackwardsCompatibility(self):
         """Test if we can read old data files."""
-
         # Pickle contents changed when moving to dict base class.
         packages_p = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v1.pickle"))
         self.assertIsInstance(packages_p, lsst.utils.packages.Packages)

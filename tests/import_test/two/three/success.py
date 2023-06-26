@@ -1,16 +1,21 @@
 # A module that always works
 
 
-def okay():
+def okay() -> bool:
+    """Return `True`."""
     return True
 
 
 class Container:
-    def inside():
+    """Class for testing stacklevel."""
+
+    def inside() -> int:
+        """Return 1."""
         return "1"
 
     @classmethod
-    def level(cls):
+    def level(cls) -> int:
+        """Return the stacklevel of the caller relative to this method."""
         import warnings
 
         from lsst.utils.introspection import find_outside_stacklevel
@@ -21,4 +26,8 @@ class Container:
 
     @classmethod
     def indirect_level(cls):
+        """Return the stacklevel of the caller relative to this method.
+
+        Deliberately includes an additional level.
+        """
         return cls.level()

@@ -32,6 +32,8 @@ test_metadata = {}
 
 @dataclass
 class Example1:
+    """Test class with log and metadata properties, similar to ``Task``."""
+
     log: logging.Logger
     metadata: dict
 
@@ -43,25 +45,31 @@ class Example1:
 
 @timeMethod
 def decorated_sleeper_nothing(self, duration: float) -> None:
+    """Test function that sleeps."""
     time.sleep(duration)
 
 
 @timeMethod(logger=log)
 def decorated_sleeper_logger(self, duration: float) -> None:
+    """Test function that sleeps and logs."""
     time.sleep(duration)
 
 
 @timeMethod(logger=log, logLevel=logging.INFO)
 def decorated_sleeper_logger_level(self, duration: float) -> None:
+    """Test function that logs at INFO."""
     time.sleep(duration)
 
 
 @timeMethod(metadata=test_metadata)
 def decorated_sleeper_metadata(self, duration: float) -> None:
+    """Test function that uses external metadata."""
     time.sleep(duration)
 
 
 class TestTimeMethod(unittest.TestCase):
+    """Test the time method decorator."""
+
     def testLogPairs(self):
         # Test the non-obj case.
         logger = logging.getLogger("test")
@@ -133,7 +141,6 @@ class TestTimeMethod(unittest.TestCase):
 
     def testTaskLike(self):
         """Test timer on something that looks like a Task."""
-
         # Call with different parameters.
         parameters = (
             (logging.getLogger("task"), {}),
@@ -177,6 +184,8 @@ class TestTimeMethod(unittest.TestCase):
 
 
 class TimerTestCase(unittest.TestCase):
+    """Test the timer functionality."""
+
     def testTimer(self):
         with self.assertLogs(level="DEBUG") as cm:
             with time_this():
@@ -303,6 +312,8 @@ class TimerTestCase(unittest.TestCase):
 
 
 class ProfileTestCase(unittest.TestCase):
+    """Test profiling decorator."""
+
     def test_profile(self):
         logger = logging.getLogger("profile")
 

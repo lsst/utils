@@ -71,6 +71,8 @@ class GetCallerNameTestCase(unittest.TestCase):
 
 
 class TestInstropection(unittest.TestCase):
+    """Tests for lsst.utils.introspection."""
+
     def testTypeNames(self):
         # Check types and also an object
         tests = [

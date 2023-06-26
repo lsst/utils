@@ -17,6 +17,8 @@ from lsst.utils.ellipsis import Ellipsis, EllipsisType
 
 
 class EllipsisTestCase(lsst.utils.tests.TestCase):
+    """Test ellipsis handling."""
+
     def test_ellipsis(self):
         # These are true at runtime because of typing.TYPE_CHECKING guards in
         # the module.  When MyPy or other type-checkers run, these assertions

@@ -17,6 +17,8 @@ import numpy as np
 
 
 class MockClass:  # continued class needs to be at module scope
+    """A test class that can be continued."""
+
     def method1(self):
         return self
 
@@ -34,6 +36,8 @@ class MockClass:  # continued class needs to be at module scope
 
 
 class DecoratorsTestCase(lsst.utils.tests.TestCase):
+    """Test the decorators."""
+
     def setUp(self):
         @lsst.utils.continueClass
         class MockClass:

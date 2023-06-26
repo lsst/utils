@@ -16,19 +16,21 @@ import unittest
 
 import lsst.utils.tests
 
-"""
-This file contains tests for lsst.utils.tests.getTempFilePath.
+"""This file contains tests for lsst.utils.tests.getTempFilePath.
 
-The TestNameClashN classes are used to check that getTempFilePath
+The ``TestNameClashN`` classes are used to check that getTempFilePath
 does not use the same name across different test classes in the same
 file even if they have the same test methods. They are distinct classes
 with the same test method in an attempt to trigger a race condition
 whereby context managers use the same name and race to delete the file.
 The sleeps are there to ensure the race condition occurs in older versions
-of this package. This should not happen as of DM-13046."""
+of this package. This should not happen as of DM-13046.
+"""
 
 
 class GetTempFilePathTestCase(unittest.TestCase):
+    """Tests for temporary file path creation."""
+
     def testBasics(self):
         with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
             # Path will have unique component so do not test full equality
@@ -83,7 +85,8 @@ class TestNested(unittest.TestCase):
 
 class TestExpected(unittest.TestCase):
     """Tests that we get files when we expect to get them and we get upset
-    when we don't get them."""
+    when we don't get them.
+    """
 
     def testOutputExpected(self):
         with lsst.utils.tests.getTempFilePath(".txt") as tmpFile:
@@ -111,6 +114,8 @@ class TestExpected(unittest.TestCase):
 
 
 class TestNameClash1(unittest.TestCase):
+    """Test involving a potential class of test method name."""
+
     def testClash(self):
         """Create the temp file and pause before trying to delete it."""
         with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
@@ -121,9 +126,12 @@ class TestNameClash1(unittest.TestCase):
 
 
 class TestNameClash2(unittest.TestCase):
+    """Test involving a potential class of test method name."""
+
     def testClash(self):
         """Pause a little before trying to create the temp file. The pause
-        time is less than the time that TestNameClash1 is pausing."""
+        time is less than the time that TestNameClash1 is pausing.
+        """
         with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
             time.sleep(0.1)
             with open(tmpFile, "w") as f:
@@ -132,6 +140,8 @@ class TestNameClash2(unittest.TestCase):
 
 
 class TestNameClash3(unittest.TestCase):
+    """Test involving a potential class of test method name."""
+
     def testClash(self):
         """Create temp file and remove it without pauses."""
         with lsst.utils.tests.getTempFilePath(".fits") as tmpFile:
@@ -141,10 +151,13 @@ class TestNameClash3(unittest.TestCase):
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
+    """Test for file descriptor leaks."""
+
     pass
 
 
 def setup_module(module):
+    """Initialize the pytest environment."""
     lsst.utils.tests.init()
 
 

@@ -1,3 +1,6 @@
 class Simple:
-    def true():
+    """Simple test class."""
+
+    def true() -> bool:
+        """Return `True`."""
         return True

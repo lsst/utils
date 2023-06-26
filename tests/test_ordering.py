@@ -15,6 +15,8 @@ import lsst.utils.tests
 
 
 class TestCaseOrdering(lsst.utils.tests.TestCase):
+    """Test that tests are ordered as expected."""
+
     def testTestOrdering(self):
         class DummyTest(lsst.utils.tests.TestCase):
             def noOp(self):
