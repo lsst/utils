@@ -114,7 +114,7 @@ class TestExpected(unittest.TestCase):
 
 
 class TestNameClash1(unittest.TestCase):
-    """Test involving a potential class of test method name."""
+    """Test involving a potential clash of test method name."""
 
     def testClash(self):
         """Create the temp file and pause before trying to delete it."""
@@ -126,7 +126,7 @@ class TestNameClash1(unittest.TestCase):
 
 
 class TestNameClash2(unittest.TestCase):
-    """Test involving a potential class of test method name."""
+    """Test involving a potential clash of test method name."""
 
     def testClash(self):
         """Pause a little before trying to create the temp file. The pause
@@ -140,7 +140,7 @@ class TestNameClash2(unittest.TestCase):
 
 
 class TestNameClash3(unittest.TestCase):
-    """Test involving a potential class of test method name."""
+    """Test involving a potential clash of test method name."""
 
     def testClash(self):
         """Create temp file and remove it without pauses."""

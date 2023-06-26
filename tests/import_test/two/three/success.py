@@ -9,7 +9,7 @@ def okay() -> bool:
 class Container:
     """Class for testing stacklevel."""
 
-    def inside() -> int:
+    def inside() -> str:
         """Return 1."""
         return "1"
 
