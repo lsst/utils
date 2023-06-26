@@ -50,11 +50,11 @@ def doImport(importable: str) -> types.ModuleType | type:
         for f in fromlist:
             try:
                 pytype = getattr(pytype, f)
-            except AttributeError:
+            except AttributeError as e:
                 extra = f"({previousError})" if previousError is not None else ""
                 raise ImportError(
                     f"Could not get attribute '{f}' from '{module}' when importing '{importable}' {extra}"
-                )
+                ) from e
         return pytype
 
     # Go through the import path attempting to load the module
