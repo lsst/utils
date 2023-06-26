@@ -451,8 +451,8 @@ class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
                 return cls
 
         # Add in a built in function to ExampleF to mimic how pybind11 treats
-        # static methods from c++
-        setattr(ExampleF, "pow", pow)
+        # static methods from c++.
+        ExampleF.pow = pow
 
         Example.register(np.float32, ExampleF)
         Example.register(np.int32, ExampleI)
