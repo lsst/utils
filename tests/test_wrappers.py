@@ -244,14 +244,14 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
         with self.assertRaises(TypeError):
             f["F"]
         with self.assertRaises(TypeError):
-            for x in f:
+            for _ in f:
                 pass
         with self.assertRaises(TypeError):
             len(self.ExampleF)
         with self.assertRaises(TypeError):
             self.ExampleF["F"]
         with self.assertRaises(TypeError):
-            for x in self.ExampleF:
+            for _ in self.ExampleF:
                 pass
 
     def testAliasUnregistered(self):
