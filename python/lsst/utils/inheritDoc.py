@@ -9,12 +9,14 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
+from __future__ import annotations
+
 __all__ = ("inheritDoc",)
 
-from typing import Callable, Type
+from collections.abc import Callable
 
 
-def inheritDoc(klass: Type) -> Callable:
+def inheritDoc(klass: type) -> Callable:
     """Extend existing documentation for a method that exists in another
     class and extend it with any additional documentation defined.
 
@@ -34,7 +36,7 @@ def inheritDoc(klass: Type) -> Callable:
         Intermediate decorator used in the documentation process.
     """
 
-    def tmpDecorator(method: Type) -> Callable:
+    def tmpDecorator(method: type) -> Callable:
         """Update the documentation from a class with the same method."""
         methodName = method.__name__
         if not hasattr(klass, methodName):

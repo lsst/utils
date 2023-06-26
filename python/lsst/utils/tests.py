@@ -11,6 +11,8 @@
 
 """Support code for running unit tests"""
 
+from __future__ import annotations
+
 __all__ = [
     "init",
     "MemoryTestCase",
@@ -39,7 +41,8 @@ import sys
 import tempfile
 import unittest
 import warnings
-from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional, Sequence, Set, Type, Union
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from typing import Any
 
 import numpy
 import psutil
@@ -48,7 +51,7 @@ import psutil
 open_files = set()
 
 
-def _get_open_files() -> Set[str]:
+def _get_open_files() -> set[str]:
     """Return a set containing the list of files currently open in this
     process.
 
@@ -57,7 +60,7 @@ def _get_open_files() -> Set[str]:
     open_files : `set`
         Set containing the list of open files.
     """
-    return set(p.path for p in psutil.Process().open_files())
+    return {p.path for p in psutil.Process().open_files()}
 
 
 def init() -> None:
@@ -109,20 +112,20 @@ def sort_tests(tests) -> unittest.TestSuite:
     return suite
 
 
-def suiteClassWrapper(tests):
+def _suiteClassWrapper(tests):
     return unittest.TestSuite(sort_tests(tests))
 
 
 # Replace the suiteClass callable in the defaultTestLoader
 # so that we can reorder the test ordering. This will have
 # no effect if no memory test cases are found.
-unittest.defaultTestLoader.suiteClass = suiteClassWrapper
+unittest.defaultTestLoader.suiteClass = _suiteClassWrapper
 
 
 class MemoryTestCase(unittest.TestCase):
     """Check for resource leaks."""
 
-    ignore_regexps: List[str] = []
+    ignore_regexps: list[str] = []
     """List of regexps to ignore when checking for open files."""
 
     @classmethod
@@ -141,7 +144,7 @@ class MemoryTestCase(unittest.TestCase):
         now_open = _get_open_files()
 
         # Some files are opened out of the control of the stack.
-        now_open = set(
+        now_open = {
             f
             for f in now_open
             if not f.endswith(".car")
@@ -151,8 +154,8 @@ class MemoryTestCase(unittest.TestCase):
             and not f.endswith("astropy.log")
             and not f.endswith("mime/mime.cache")
             and not f.endswith(".sqlite3")
-            and not any([re.search(r, f) for r in self.ignore_regexps])
-        )
+            and not any(re.search(r, f) for r in self.ignore_regexps)
+        }
 
         diff = now_open.difference(open_files)
         if diff:
@@ -184,14 +187,13 @@ class ExecutablesTestCase(unittest.TestCase):
         executed. This allows the test runner to trigger the class set up
         machinery to test whether there are some executables to test.
         """
-        pass
 
     def assertExecutable(
         self,
         executable: str,
-        root_dir: Optional[str] = None,
-        args: Optional[Sequence[str]] = None,
-        msg: Optional[str] = None,
+        root_dir: str | None = None,
+        args: Sequence[str] | None = None,
+        msg: str | None = None,
     ) -> None:
         """Check an executable runs and returns good status.
 
@@ -226,15 +228,15 @@ class ExecutablesTestCase(unittest.TestCase):
             sp_args.extend(args)
             argstr = 'arguments "' + " ".join(args) + '"'
 
-        print("Running executable '{}' with {}...".format(executable, argstr))
+        print(f"Running executable '{executable}' with {argstr}...")
         if not os.path.exists(executable):
-            self.skipTest("Executable {} is unexpectedly missing".format(executable))
+            self.skipTest(f"Executable {executable} is unexpectedly missing")
         failmsg = None
         try:
             output = subprocess.check_output(sp_args)
         except subprocess.CalledProcessError as e:
             output = e.output
-            failmsg = "Bad exit status from '{}': {}".format(executable, e.returncode)
+            failmsg = f"Bad exit status from '{executable}': {e.returncode}"
         print(output.decode("utf-8"))
         if failmsg:
             if msg is None:
@@ -274,7 +276,7 @@ class ExecutablesTestCase(unittest.TestCase):
         setattr(cls, test_name, test_executable_runs)
 
     @classmethod
-    def create_executable_tests(cls, ref_file: str, executables: Optional[Sequence[str]] = None) -> None:
+    def create_executable_tests(cls, ref_file: str, executables: Sequence[str] | None = None) -> None:
         """Discover executables to test and create corresponding test methods.
 
         Scans the directory containing the supplied reference file
@@ -310,7 +312,7 @@ class ExecutablesTestCase(unittest.TestCase):
         if executables is None:
             # Look for executables to test by walking the tree
             executables = []
-            for root, dirs, files in os.walk(ref_dir):
+            for root, _, files in os.walk(ref_dir):
                 for f in files:
                     # Skip Python files. Shared libraries are executable.
                     if not f.endswith(".py") and not f.endswith(".so"):
@@ -398,14 +400,14 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
     outDir = os.path.join(callerDir, ".tests")
     if not os.path.isdir(outDir):
         outDir = ""
-    prefix = "%s_%s-" % (callerFileName, callerFuncName)
+    prefix = f"{callerFileName}_{callerFuncName}-"
     outPath = tempfile.mktemp(dir=outDir, suffix=ext, prefix=prefix)
     if os.path.exists(outPath):
         # There should not be a file there given the randomizer. Warn and
         # remove.
         # Use stacklevel 3 so that the warning is reported from the end of the
         # with block
-        warnings.warn("Unexpectedly found pre-existing tempfile named %r" % (outPath,), stacklevel=3)
+        warnings.warn(f"Unexpectedly found pre-existing tempfile named {outPath!r}", stacklevel=3)
         try:
             os.remove(outPath)
         except OSError:
@@ -416,10 +418,10 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
     fileExists = os.path.exists(outPath)
     if expectOutput:
         if not fileExists:
-            raise RuntimeError("Temp file expected named {} but none found".format(outPath))
+            raise RuntimeError(f"Temp file expected named {outPath} but none found")
     else:
         if fileExists:
-            raise RuntimeError("Unexpectedly discovered temp file named {}".format(outPath))
+            raise RuntimeError(f"Unexpectedly discovered temp file named {outPath}")
     # Try to clean up the file regardless
     if fileExists:
         try:
@@ -427,7 +429,7 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
         except OSError as e:
             # Use stacklevel 3 so that the warning is reported from the end of
             # the with block.
-            warnings.warn("Warning: could not remove file %r: %s" % (outPath, e), stacklevel=3)
+            warnings.warn(f"Warning: could not remove file {outPath!r}: {e}", stacklevel=3)
 
 
 class TestCase(unittest.TestCase):
@@ -484,9 +486,9 @@ def debugger(*exceptions):
 def plotImageDiff(
     lhs: numpy.ndarray,
     rhs: numpy.ndarray,
-    bad: Optional[numpy.ndarray] = None,
-    diff: Optional[numpy.ndarray] = None,
-    plotFileName: Optional[str] = None,
+    bad: numpy.ndarray | None = None,
+    diff: numpy.ndarray | None = None,
+    plotFileName: str | None = None,
 ) -> None:
     """Plot the comparison of two 2-d NumPy arrays.
 
@@ -557,16 +559,16 @@ def plotImageDiff(
 @inTestCase
 def assertFloatsAlmostEqual(
     testCase: unittest.TestCase,
-    lhs: Union[float, numpy.ndarray],
-    rhs: Union[float, numpy.ndarray],
-    rtol: Optional[float] = sys.float_info.epsilon,
-    atol: Optional[float] = sys.float_info.epsilon,
-    relTo: Optional[float] = None,
+    lhs: float | numpy.ndarray,
+    rhs: float | numpy.ndarray,
+    rtol: float | None = sys.float_info.epsilon,
+    atol: float | None = sys.float_info.epsilon,
+    relTo: float | None = None,
     printFailures: bool = True,
     plotOnFailure: bool = False,
-    plotFileName: Optional[str] = None,
+    plotFileName: str | None = None,
     invert: bool = False,
-    msg: Optional[str] = None,
+    msg: str | None = None,
     ignoreNaNs: bool = False,
 ) -> None:
     """Highly-configurable floating point comparisons for scalars and arrays.
@@ -683,7 +685,7 @@ def assertFloatsAlmostEqual(
     if failed:
         if numpy.isscalar(bad):
             if rtol is None:
-                errMsg = ["%s %s %s; diff=%s with atol=%s" % (lhs, cmpStr, rhs, absDiff, atol)]
+                errMsg = [f"{lhs} {cmpStr} {rhs}; diff={absDiff} with atol={atol}"]
             elif atol is None:
                 errMsg = [
                     "%s %s %s; diff=%s/%s=%s with rtol=%s"
@@ -715,10 +717,10 @@ def assertFloatsAlmostEqual(
                     rhs = numpy.ones(bad.shape, dtype=float) * rhs
                 if rtol is None:
                     for a, b, diff in zip(lhs[bad], rhs[bad], absDiff[bad]):
-                        errMsg.append("%s %s %s (diff=%s)" % (a, cmpStr, b, diff))
+                        errMsg.append(f"{a} {cmpStr} {b} (diff={diff})")
                 else:
                     for a, b, diff, rel in zip(lhs[bad], rhs[bad], absDiff[bad], relTo[bad]):
-                        errMsg.append("%s %s %s (diff=%s/%s=%s)" % (a, cmpStr, b, diff, rel, diff / rel))
+                        errMsg.append(f"{a} {cmpStr} {b} (diff={diff}/{rel}={diff / rel})")
 
     if msg is not None:
         errMsg.append(msg)
@@ -728,8 +730,8 @@ def assertFloatsAlmostEqual(
 @inTestCase
 def assertFloatsNotEqual(
     testCase: unittest.TestCase,
-    lhs: Union[float, numpy.ndarray],
-    rhs: Union[float, numpy.ndarray],
+    lhs: float | numpy.ndarray,
+    rhs: float | numpy.ndarray,
     **kwds: Any,
 ) -> None:
     """Fail a test if the given floating point values are equal to within the
@@ -760,8 +762,8 @@ def assertFloatsNotEqual(
 @inTestCase
 def assertFloatsEqual(
     testCase: unittest.TestCase,
-    lhs: Union[float, numpy.ndarray],
-    rhs: Union[float, numpy.ndarray],
+    lhs: float | numpy.ndarray,
+    rhs: float | numpy.ndarray,
     **kwargs: Any,
 ) -> None:
     """
@@ -789,7 +791,7 @@ def assertFloatsEqual(
     return assertFloatsAlmostEqual(testCase, lhs, rhs, rtol=0, atol=0, **kwargs)
 
 
-def _settingsIterator(settings: Dict[str, Sequence[Any]]) -> Iterator[Dict[str, Any]]:
+def _settingsIterator(settings: dict[str, Sequence[Any]]) -> Iterator[dict[str, Any]]:
     """Return an iterator for the provided test settings
 
     Parameters
@@ -857,7 +859,7 @@ def classParameters(**settings: Sequence[Any]) -> Callable:
     Note that the values are embedded in the class name.
     """
 
-    def decorator(cls: Type) -> None:
+    def decorator(cls: type) -> None:
         module = sys.modules[cls.__module__].__dict__
         for params in _settingsIterator(settings):
             name = f"{cls.__name__}_{'_'.join(str(vv) for vv in params.values())}"
@@ -935,7 +937,7 @@ def _cartesianProduct(settings: Mapping[str, Sequence[Any]]) -> Mapping[str, Seq
 
         {"foo": [1, 1, 2, 2], "bar": ["black", "white", "black", "white"]}
     """
-    product: Dict[str, List[Any]] = {kk: [] for kk in settings}
+    product: dict[str, list[Any]] = {kk: [] for kk in settings}
     for values in itertools.product(*settings.values()):
         for kk, vv in zip(settings.keys(), values):
             product[kk].append(vv)

@@ -11,6 +11,7 @@
 
 """Utilities for measuring resource consumption.
 """
+from __future__ import annotations
 
 __all__ = ["get_current_mem_usage", "get_peak_mem_usage"]
 
@@ -18,7 +19,6 @@ import dataclasses
 import platform
 import resource
 import time
-from typing import Dict, Tuple, Union
 
 import astropy.units as u
 import psutil
@@ -48,7 +48,7 @@ def _get_rusage_multiplier() -> int:
 _RUSAGE_MEMORY_MULTIPLIER = _get_rusage_multiplier()
 
 
-def get_current_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
+def get_current_mem_usage() -> tuple[u.Quantity, u.Quantity]:
     """Report current memory usage.
 
     Returns
@@ -72,7 +72,7 @@ def get_current_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
     return usage_main, usage_child
 
 
-def get_peak_mem_usage() -> Tuple[u.Quantity, u.Quantity]:
+def get_peak_mem_usage() -> tuple[u.Quantity, u.Quantity]:
     """Report peak memory usage.
 
     Returns
@@ -112,7 +112,7 @@ class _UsageInfo:
     voluntaryContextSwitches: int
     involuntaryContextSwitches: int
 
-    def dict(self) -> Dict[str, Union[float, int]]:
+    def dict(self) -> dict[str, float | int]:
         return dataclasses.asdict(self)
 
 

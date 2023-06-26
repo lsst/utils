@@ -18,7 +18,8 @@ from __future__ import annotations
 __all__ = ["Singleton", "cached_getter", "immutable"]
 
 import functools
-from typing import Any, Callable, Dict, Type, TypeVar
+from collections.abc import Callable
+from typing import Any, Type, TypeVar
 
 
 class Singleton(type):
@@ -32,14 +33,14 @@ class Singleton(type):
     adjust state of the singleton.
     """
 
-    _instances: Dict[Type, Any] = {}
+    _instances: dict[type, Any] = {}
 
     # Signature is intentionally not substitutable for type.__call__ (no *args,
     # **kwargs) to require classes that use this metaclass to have no
     # constructor arguments.
     def __call__(cls) -> Any:
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__()
+            cls._instances[cls] = super().__call__()
         return cls._instances[cls]
 
 

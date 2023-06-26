@@ -9,9 +9,9 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 #
-from __future__ import annotations
-
 """Support for threading and multi-processing."""
+
+from __future__ import annotations
 
 __all__ = ["set_thread_envvars", "disable_implicit_threading"]
 

@@ -24,16 +24,21 @@ class SingletonTestCase(unittest.TestCase):
     """Tests of the Singleton metaclass"""
 
     class IsSingleton(metaclass=Singleton):
+        """A singleton."""
+
         def __init__(self):
             self.data = {}
             self.id = 0
 
     class IsBadSingleton(IsSingleton):
+        """A single that can not accept any arguments."""
+
         def __init__(self, arg):
-            """A singleton can not accept any arguments."""
             self.arg = arg
 
     class IsSingletonSubclass(IsSingleton):
+        """A subclass of a singleton."""
+
         def __init__(self):
             super().__init__()
 
@@ -55,8 +60,12 @@ class SingletonTestCase(unittest.TestCase):
 
 
 class ImmutabilityTestCase(unittest.TestCase):
+    """Test immutable classes."""
+
     @immutable
     class Immutable:
+        """An immutable test class."""
+
         def __init__(self, name: str, number: int):
             self.name = name
             self.number = number
@@ -84,6 +93,8 @@ class ImmutabilityTestCase(unittest.TestCase):
 
 
 class CacheTestCase(unittest.TestCase):
+    """Test the caching code."""
+
     class Cached1:
         """Cached getter using cached_getter. This can use slots."""
 

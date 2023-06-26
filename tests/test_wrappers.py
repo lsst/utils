@@ -17,6 +17,8 @@ import numpy as np
 
 
 class MockClass:  # continued class needs to be at module scope
+    """A test class that can be continued."""
+
     def method1(self):
         return self
 
@@ -34,6 +36,8 @@ class MockClass:  # continued class needs to be at module scope
 
 
 class DecoratorsTestCase(lsst.utils.tests.TestCase):
+    """Test the decorators."""
+
     def setUp(self):
         @lsst.utils.continueClass
         class MockClass:
@@ -162,7 +166,7 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
         d = self.ExampleD()
         self.assertIsInstance(f, self.Example)
         self.assertIsInstance(d, self.Example)
-        self.assertEqual(set(self.Example.__subclasses__()), set([self.ExampleF, self.ExampleD]))
+        self.assertEqual(set(self.Example.__subclasses__()), {self.ExampleF, self.ExampleD})
 
         # To test fallback code path, ensure that there are multiple
         # examples to check.
@@ -222,32 +226,32 @@ class TemplateMetaSimpleTestCase(lsst.utils.tests.TestCase):
         self.register()
         self.assertIn(np.float32, self.Example)
         self.assertEqual(self.Example[np.float32], self.ExampleF)
-        self.assertEqual(set(self.Example.keys()), set([np.float32, np.float64]))
-        self.assertEqual(set(self.Example.values()), set([self.ExampleF, self.ExampleD]))
+        self.assertEqual(set(self.Example.keys()), {np.float32, np.float64})
+        self.assertEqual(set(self.Example.values()), {self.ExampleF, self.ExampleD})
         self.assertEqual(
-            set(self.Example.items()), set([(np.float32, self.ExampleF), (np.float64, self.ExampleD)])
+            set(self.Example.items()), {(np.float32, self.ExampleF), (np.float64, self.ExampleD)}
         )
         self.assertEqual(len(self.Example), 2)
-        self.assertEqual(set(iter(self.Example)), set([np.float32, np.float64]))
+        self.assertEqual(set(iter(self.Example)), {np.float32, np.float64})
         self.assertEqual(self.Example.get(np.float64), self.ExampleD)
         self.assertEqual(self.Example.get(np.int32, False), False)
 
     def testNoInheritedDictBehavior(self):
         self.register()
         f = self.ExampleF()
-        with self.assertRaises(Exception):  # Py2:AttributeError, Py3:TypeError
+        with self.assertRaises(TypeError):
             len(f)
-        with self.assertRaises(Exception):  # Py2:AttributeError, Py3:TypeError
+        with self.assertRaises(TypeError):
             f["F"]
         with self.assertRaises(TypeError):
-            for x in f:
+            for _ in f:
                 pass
         with self.assertRaises(TypeError):
             len(self.ExampleF)
         with self.assertRaises(TypeError):
             self.ExampleF["F"]
         with self.assertRaises(TypeError):
-            for x in self.ExampleF:
+            for _ in self.ExampleF:
                 pass
 
     def testAliasUnregistered(self):
@@ -358,7 +362,7 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
         self.assertIsInstance(d, self.Example)
         self.assertEqual(
             set(self.Example.__subclasses__()),
-            set([self.Example2F, self.Example2D, self.Example3F, self.Example3D]),
+            {self.Example2F, self.Example2D, self.Example3F, self.Example3D},
         )
 
     def testConstruction(self):
@@ -377,25 +381,23 @@ class TemplateMetaHardTestCase(lsst.utils.tests.TestCase):
         self.assertEqual(self.Example[2, np.float32], self.Example2F)
         self.assertEqual(
             set(self.Example.keys()),
-            set([(2, np.float32), (2, np.float64), (3, np.float32), (3, np.float64)]),
+            {(2, np.float32), (2, np.float64), (3, np.float32), (3, np.float64)},
         )
         self.assertEqual(
-            set(self.Example.values()), set([self.Example2F, self.Example2D, self.Example3F, self.Example3D])
+            set(self.Example.values()), {self.Example2F, self.Example2D, self.Example3F, self.Example3D}
         )
         self.assertEqual(
             set(self.Example.items()),
-            set(
-                [
-                    ((2, np.float32), self.Example2F),
-                    ((2, np.float64), self.Example2D),
-                    ((3, np.float32), self.Example3F),
-                    ((3, np.float64), self.Example3D),
-                ]
-            ),
+            {
+                ((2, np.float32), self.Example2F),
+                ((2, np.float64), self.Example2D),
+                ((3, np.float32), self.Example3F),
+                ((3, np.float64), self.Example3D),
+            },
         )
         self.assertEqual(len(self.Example), 4)
         self.assertEqual(
-            set(iter(self.Example)), set([(2, np.float32), (2, np.float64), (3, np.float32), (3, np.float64)])
+            set(iter(self.Example)), {(2, np.float32), (2, np.float64), (3, np.float32), (3, np.float64)}
         )
         self.assertEqual(self.Example.get((3, np.float64)), self.Example3D)
         self.assertEqual(self.Example.get((2, np.int32), False), False)
@@ -449,8 +451,8 @@ class TestDefaultMethodCopying(lsst.utils.tests.TestCase):
                 return cls
 
         # Add in a built in function to ExampleF to mimic how pybind11 treats
-        # static methods from c++
-        setattr(ExampleF, "pow", pow)
+        # static methods from c++.
+        ExampleF.pow = pow
 
         Example.register(np.float32, ExampleF)
         Example.register(np.int32, ExampleI)

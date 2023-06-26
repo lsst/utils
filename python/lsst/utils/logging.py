@@ -24,9 +24,10 @@ __all__ = (
 import logging
 import sys
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
 from logging import LoggerAdapter
-from typing import Any, Generator, List, Optional, Union
+from typing import Any, Union
 
 try:
     import lsst.log.utils as logUtils
@@ -172,7 +173,7 @@ class LsstLogAdapter(LoggerAdapter):
     _stacklevel = _calculate_base_stacklevel(2, 1)
 
     @contextmanager
-    def temporary_log_level(self, level: Union[int, str]) -> Generator:
+    def temporary_log_level(self, level: int | str) -> Generator:
         """Temporarily set the level of this logger.
 
         Parameters
@@ -253,7 +254,7 @@ class LsstLogAdapter(LoggerAdapter):
         stacklevel = self._process_stacklevel(kwargs)
         self.log(TRACE, fmt, *args, **kwargs, stacklevel=stacklevel)
 
-    def setLevel(self, level: Union[int, str]) -> None:
+    def setLevel(self, level: int | str) -> None:
         """Set the level for the logger, trapping lsst.log values.
 
         Parameters
@@ -272,7 +273,7 @@ class LsstLogAdapter(LoggerAdapter):
         self.logger.setLevel(level)
 
     @property
-    def handlers(self) -> List[logging.Handler]:
+    def handlers(self) -> list[logging.Handler]:
         """Log handlers associated with this logger."""
         return self.logger.handlers
 
@@ -288,7 +289,7 @@ class LsstLogAdapter(LoggerAdapter):
         self.logger.removeHandler(handler)
 
 
-def getLogger(name: Optional[str] = None, logger: Optional[logging.Logger] = None) -> LsstLogAdapter:
+def getLogger(name: str | None = None, logger: logging.Logger | None = None) -> LsstLogAdapter:
     """Get a logger compatible with LSST usage.
 
     Parameters
@@ -323,7 +324,7 @@ def getLogger(name: Optional[str] = None, logger: Optional[logging.Logger] = Non
 LsstLoggers = Union[logging.Logger, LsstLogAdapter]
 
 
-def getTraceLogger(logger: Union[str, LsstLoggers], trace_level: int) -> LsstLogAdapter:
+def getTraceLogger(logger: str | LsstLoggers, trace_level: int) -> LsstLogAdapter:
     """Get a logger with the appropriate TRACE name.
 
     Parameters
@@ -367,7 +368,7 @@ class PeriodicLogger:
     LOGGING_INTERVAL = 600.0
     """Default interval between log messages."""
 
-    def __init__(self, logger: LsstLoggers, interval: Optional[float] = None, level: int = VERBOSE):
+    def __init__(self, logger: LsstLoggers, interval: float | None = None, level: int = VERBOSE):
         self.logger = logger
         self.interval = interval if interval is not None else self.LOGGING_INTERVAL
         self.level = level

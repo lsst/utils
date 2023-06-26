@@ -9,9 +9,6 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-"""Simple unit test for Task logging.
-"""
-
 import logging
 import time
 import unittest
@@ -20,9 +17,10 @@ from lsst.utils.logging import PeriodicLogger, getLogger, trace_set_at
 
 
 class TestLogging(unittest.TestCase):
+    """Simple unit tests for Task logging."""
+
     def testLogLevels(self):
         """Check that the new log levels look reasonable."""
-
         root = getLogger()
 
         self.assertEqual(root.DEBUG, logging.DEBUG)
@@ -32,7 +30,6 @@ class TestLogging(unittest.TestCase):
 
     def testLogCommands(self):
         """Check that all the log commands work."""
-
         root = getLogger()
 
         with self.assertLogs(level=root.TRACE) as cm:

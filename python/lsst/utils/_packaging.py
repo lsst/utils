@@ -11,6 +11,8 @@
 
 """Functions to help find packages."""
 
+from __future__ import annotations
+
 __all__ = ("getPackageDir",)
 
 import os

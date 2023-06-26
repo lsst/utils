@@ -9,11 +9,11 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 #
+"""Determine which packages are being used in the system and their versions.
+"""
+
 from __future__ import annotations
 
-"""
-Determine which packages are being used in the system and their versions
-"""
 import hashlib
 import importlib
 import io
@@ -27,7 +27,7 @@ import sys
 import types
 from collections.abc import Mapping
 from functools import lru_cache
-from typing import Any, Dict, Optional, Tuple, Type
+from typing import Any
 
 import yaml
 
@@ -43,16 +43,16 @@ __all__ = [
 
 
 # Packages used at build-time (e.g., header-only)
-BUILDTIME = set(["boost", "eigen", "tmv"])
+BUILDTIME = {"boost", "eigen", "tmv"}
 
 # Python modules to attempt to load so we can try to get the version
 # We do this because the version only appears to be available from python,
 # but we use the library
-PYTHON = set(["galsim"])
+PYTHON = {"galsim"}
 
 # Packages that don't seem to have a mechanism for reporting the runtime
 # version.  We need to guess the version from the environment
-ENVIRONMENT = set(["astrometry_net", "astrometry_net_data", "minuit2", "xpa"])
+ENVIRONMENT = {"astrometry_net", "astrometry_net_data", "minuit2", "xpa"}
 
 try:
     # Python 3.10 includes a list of standard library modules.
@@ -92,11 +92,11 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
         deps = module.__dependency_versions__
         buildtime = BUILDTIME & set(deps.keys())
         if buildtime:
-            version += " with " + " ".join("%s=%s" % (pkg, deps[pkg]) for pkg in sorted(buildtime))
+            version += " with " + " ".join(f"{pkg}={deps[pkg]}" for pkg in sorted(buildtime))
     return str(version)
 
 
-def getPythonPackages() -> Dict[str, str]:
+def getPythonPackages() -> dict[str, str]:
     """Get imported python packages and their versions.
 
     Returns
@@ -232,11 +232,11 @@ def _get_python_package_version(name: str, packages: dict[str, str]) -> str | No
     return ver
 
 
-_eups: Optional[Any] = None  # Singleton Eups object
+_eups: Any | None = None  # Singleton Eups object
 
 
 @lru_cache(maxsize=1)
-def getEnvironmentPackages(include_all: bool = False) -> Dict[str, str]:
+def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
     """Get products and their versions from the environment.
 
     Parameters
@@ -322,7 +322,7 @@ def getEnvironmentPackages(include_all: bool = False) -> Dict[str, str]:
 
 
 @lru_cache(maxsize=1)
-def getCondaPackages() -> Dict[str, str]:
+def getCondaPackages() -> dict[str, str]:
     """Get products and their versions from the conda environment.
 
     Returns
@@ -412,7 +412,7 @@ class Packages(dict):
 
     formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml", ".json": "json"}
 
-    def __setstate__(self, state: Dict[str, Any]) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         # This only seems to be called for old pickle files where
         # the data was stored in _packages.
         self.update(state["_packages"])
@@ -544,7 +544,7 @@ class Packages(dict):
         # Default repr() does not report the class name.
         return f"{self.__class__.__name__}({super().__repr__()})"
 
-    def extra(self, other: Mapping) -> Dict[str, str]:
+    def extra(self, other: Mapping) -> dict[str, str]:
         """Get packages in self but not in another `Packages` object.
 
         Parameters
@@ -560,7 +560,7 @@ class Packages(dict):
         """
         return {pkg: self[pkg] for pkg in self.keys() - other.keys()}
 
-    def missing(self, other: Mapping) -> Dict[str, str]:
+    def missing(self, other: Mapping) -> dict[str, str]:
         """Get packages in another `Packages` object but missing from self.
 
         Parameters
@@ -576,7 +576,7 @@ class Packages(dict):
         """
         return {pkg: other[pkg] for pkg in other.keys() - self.keys()}
 
-    def difference(self, other: Mapping) -> Dict[str, Tuple[str, str]]:
+    def difference(self, other: Mapping) -> dict[str, tuple[str, str]]:
         """Get packages in symmetric difference of self and another `Packages`
         object.
 
@@ -604,7 +604,7 @@ class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
     `~lsst.utils.packages.Packages` instance.
     """
 
-    def find_class(self, module: str, name: str) -> Type:
+    def find_class(self, module: str, name: str) -> type:
         """Return the class that should be used for unpickling.
 
         This is always known to be the class in this package.
@@ -615,20 +615,21 @@ class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
 # Register YAML representers
 
 
-def pkg_representer(dumper: yaml.Dumper, data: Any) -> yaml.MappingNode:
+def _pkg_representer(dumper: yaml.Dumper, data: Any) -> yaml.MappingNode:
     """Represent Packages as a simple dict"""
     return dumper.represent_mapping("lsst.utils.packages.Packages", data, flow_style=None)
 
 
-yaml.add_representer(Packages, pkg_representer)
+yaml.add_representer(Packages, _pkg_representer)
 
 
-def pkg_constructor(loader: yaml.constructor.SafeConstructor, node: yaml.Node) -> Any:
+def _pkg_constructor(loader: yaml.constructor.SafeConstructor, node: yaml.Node) -> Any:
+    """Convert YAML representation back to Python class."""
     yield Packages(loader.construct_mapping(node, deep=True))  # type: ignore
 
 
 for loader in (yaml.Loader, yaml.CLoader, yaml.UnsafeLoader, yaml.SafeLoader, yaml.FullLoader):
-    yaml.add_constructor("lsst.utils.packages.Packages", pkg_constructor, Loader=loader)
+    yaml.add_constructor("lsst.utils.packages.Packages", _pkg_constructor, Loader=loader)
 
     # Register the old name with YAML.
-    yaml.add_constructor("lsst.base.Packages", pkg_constructor, Loader=loader)
+    yaml.add_constructor("lsst.base.Packages", _pkg_constructor, Loader=loader)

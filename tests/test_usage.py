@@ -16,6 +16,8 @@ from lsst.utils.usage import get_current_mem_usage, get_peak_mem_usage
 
 
 class UsageTestCase(unittest.TestCase):
+    """Test resource usage functions."""
+
     def testGetCurrentMemUsage(self):
         main, children = get_current_mem_usage()
         self.assertGreater(main, 0 * u.byte)

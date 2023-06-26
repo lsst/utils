@@ -151,11 +151,11 @@ class PackagesTestCase(unittest.TestCase):
             self.assertEqual(len(packages), len(new_pkg))
 
         # Loop over keys to check iterator.
-        keys = {k for k in new}
+        keys = set(new)
         self.assertEqual(keys, set(dict(new).keys()))
 
         # Loop over values to check that we do get them all.
-        values = {v for v in new.values()}
+        values = set(new.values())
         self.assertEqual(values, set(dict(new).values()))
 
         # Serialize via bytes
@@ -176,7 +176,6 @@ class PackagesTestCase(unittest.TestCase):
 
     def testBackwardsCompatibility(self):
         """Test if we can read old data files."""
-
         # Pickle contents changed when moving to dict base class.
         packages_p = lsst.utils.packages.Packages.read(os.path.join(TESTDIR, "data", "v1.pickle"))
         self.assertIsInstance(packages_p, lsst.utils.packages.Packages)

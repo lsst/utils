@@ -19,6 +19,8 @@ from lsst.utils import getPackageDir
 
 @unittest.skipIf("UTILS_DIR" not in os.environ, "EUPS has not set up this package.")
 class GetPackageDirTestCase(unittest.TestCase):
+    """Test that EUPS environment variables can be read."""
+
     def testBasics(self):
         utilsPath = getPackageDir("utils")
         self.assertTrue(os.path.isfile(os.path.join(utilsPath, "tests", "test_getPackageDir.py")))
@@ -33,10 +35,11 @@ class GetPackageDirTestCase(unittest.TestCase):
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
-    pass
+    """Test for file descriptor leaks."""
 
 
 def setup_module(module):
+    """Initialize the pytest environment."""
     lsst.utils.tests.init()
 
 

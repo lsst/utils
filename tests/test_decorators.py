@@ -71,6 +71,7 @@ class DecoratorProductTestCase(lsst.utils.tests.TestCase):
 
 
 def testDecorators():
+    """Test that the decorators have been applied."""
     world = globals()
     assert "DecoratorTestCase_one_3" in world
     assert "DecoratorTestCase_two_3" in world
@@ -84,10 +85,11 @@ def testDecorators():
 
 
 class TestMemory(lsst.utils.tests.MemoryTestCase):
-    pass
+    """Test for file descriptor leaks."""
 
 
 def setup_module(module):
+    """Initialize the pytest environment."""
     lsst.utils.tests.init()
 
 

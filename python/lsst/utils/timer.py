@@ -21,18 +21,9 @@ import datetime
 import functools
 import logging
 import time
+from collections.abc import Callable, Collection, Iterable, Iterator, MutableMapping
 from contextlib import contextmanager
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Collection,
-    Iterable,
-    Iterator,
-    MutableMapping,
-    Optional,
-    Tuple,
-)
+from typing import TYPE_CHECKING, Any
 
 from astropy import units as u
 
@@ -82,11 +73,11 @@ def _add_to_metadata(metadata: MutableMapping, name: str, value: Any) -> None:
 
 def logPairs(
     obj: Any,
-    pairs: Collection[Tuple[str, Any]],
+    pairs: Collection[tuple[str, Any]],
     logLevel: int = logging.DEBUG,
-    metadata: Optional[MutableMapping] = None,
-    logger: Optional[logging.Logger] = None,
-    stacklevel: Optional[int] = None,
+    metadata: MutableMapping | None = None,
+    logger: logging.Logger | None = None,
+    stacklevel: int | None = None,
 ) -> None:
     """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``
 
@@ -151,9 +142,9 @@ def logInfo(
     obj: Any,
     prefix: str,
     logLevel: int = logging.DEBUG,
-    metadata: Optional[MutableMapping] = None,
-    logger: Optional[logging.Logger] = None,
-    stacklevel: Optional[int] = None,
+    metadata: MutableMapping | None = None,
+    logger: logging.Logger | None = None,
+    stacklevel: int | None = None,
 ) -> None:
     """Log timer information to ``obj.metadata`` and ``obj.log``.
 
@@ -236,10 +227,10 @@ def logInfo(
 
 
 def timeMethod(
-    _func: Optional[Any] = None,
+    _func: Any | None = None,
     *,
-    metadata: Optional[MutableMapping] = None,
-    logger: Optional[logging.Logger] = None,
+    metadata: MutableMapping | None = None,
+    logger: logging.Logger | None = None,
     logLevel: int = logging.DEBUG,
 ) -> Callable:
     """Measure duration of a method.
@@ -327,10 +318,10 @@ def timeMethod(
 
 @contextmanager
 def time_this(
-    log: Optional[LsstLoggers] = None,
-    msg: Optional[str] = None,
+    log: LsstLoggers | None = None,
+    msg: str | None = None,
     level: int = logging.DEBUG,
-    prefix: Optional[str] = "timer",
+    prefix: str | None = "timer",
     args: Iterable[Any] = (),
     mem_usage: bool = False,
     mem_child: bool = False,
@@ -437,9 +428,7 @@ def time_this(
 
 
 @contextmanager
-def profile(
-    filename: Optional[str], log: Optional[logging.Logger] = None
-) -> Iterator[Optional[cProfile.Profile]]:
+def profile(filename: str | None, log: logging.Logger | None = None) -> Iterator[cProfile.Profile | None]:
     """Profile the enclosed code block and save the result to a file.
 
     Parameters

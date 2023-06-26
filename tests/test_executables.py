@@ -16,6 +16,8 @@ import lsst.utils.tests
 
 
 class ExplicitBinaryTester(lsst.utils.tests.ExecutablesTestCase):
+    """Test that a named executable can be run."""
+
     def testSimpleExe(self):
         """Test explicit shell script"""
         self.assertExecutable(
@@ -38,7 +40,7 @@ class ExplicitBinaryTester(lsst.utils.tests.ExecutablesTestCase):
 
 
 class UtilsBinaryTester(lsst.utils.tests.ExecutablesTestCase):
-    pass
+    """Run test binaries in this package."""
 
 
 EXECUTABLES = None
