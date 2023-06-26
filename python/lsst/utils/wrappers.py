@@ -270,7 +270,7 @@ class TemplateMeta(type):
         attrs["TEMPLATE_DEFAULTS"] = attrs["_inherited"].pop(
             "TEMPLATE_DEFAULTS", (None,) * len(attrs["TEMPLATE_PARAMS"])
         )
-        attrs["_registry"] = dict()
+        attrs["_registry"] = {}
         self = type.__new__(cls, name, bases, attrs)
 
         if len(self.TEMPLATE_PARAMS) == 0:
@@ -298,7 +298,7 @@ class TemplateMeta(type):
         # indices are only tuples if there are multiple elements
         clz = cls._registry.get(key[0] if len(key) == 1 else key, None)
         if clz is None:
-            d = {k: v for k, v in zip(cls.TEMPLATE_PARAMS, key)}
+            d = dict(zip(cls.TEMPLATE_PARAMS, key))
             raise TypeError(f"No registered subclass for {d}.")
         return clz(*args, **kwds)
 
@@ -343,7 +343,7 @@ class TemplateMeta(type):
             if len(cls.TEMPLATE_PARAMS) == 1:
                 d = {cls.TEMPLATE_PARAMS[0]: key}
             else:
-                d = {k: v for k, v in zip(cls.TEMPLATE_PARAMS, key)}
+                d = dict(zip(cls.TEMPLATE_PARAMS, key))
             raise KeyError(f"Another subclass is already registered with {d}")
         # If the key used to register a class matches the default key,
         # make the static methods available through the ABC
