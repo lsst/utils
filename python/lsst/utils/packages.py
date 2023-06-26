@@ -615,20 +615,21 @@ class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
 # Register YAML representers
 
 
-def pkg_representer(dumper: yaml.Dumper, data: Any) -> yaml.MappingNode:
+def _pkg_representer(dumper: yaml.Dumper, data: Any) -> yaml.MappingNode:
     """Represent Packages as a simple dict"""
     return dumper.represent_mapping("lsst.utils.packages.Packages", data, flow_style=None)
 
 
-yaml.add_representer(Packages, pkg_representer)
+yaml.add_representer(Packages, _pkg_representer)
 
 
-def pkg_constructor(loader: yaml.constructor.SafeConstructor, node: yaml.Node) -> Any:
+def _pkg_constructor(loader: yaml.constructor.SafeConstructor, node: yaml.Node) -> Any:
+    """Convert YAML representation back to Python class."""
     yield Packages(loader.construct_mapping(node, deep=True))  # type: ignore
 
 
 for loader in (yaml.Loader, yaml.CLoader, yaml.UnsafeLoader, yaml.SafeLoader, yaml.FullLoader):
-    yaml.add_constructor("lsst.utils.packages.Packages", pkg_constructor, Loader=loader)
+    yaml.add_constructor("lsst.utils.packages.Packages", _pkg_constructor, Loader=loader)
 
     # Register the old name with YAML.
-    yaml.add_constructor("lsst.base.Packages", pkg_constructor, Loader=loader)
+    yaml.add_constructor("lsst.base.Packages", _pkg_constructor, Loader=loader)
