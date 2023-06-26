@@ -10,9 +10,9 @@
 # license that can be found in the LICENSE file.
 #
 
-from __future__ import annotations
-
 """Utilities relating to iterators."""
+
+from __future__ import annotations
 
 __all__ = ["chunk_iterable", "ensure_iterable", "isplit"]
 

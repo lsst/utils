@@ -9,10 +9,9 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 #
+"""Utilities relating to introspection in python."""
 
 from __future__ import annotations
-
-"""Utilities relating to introspection in python."""
 
 __all__ = [
     "get_class_of",
