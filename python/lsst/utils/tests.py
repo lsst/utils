@@ -313,7 +313,7 @@ class ExecutablesTestCase(unittest.TestCase):
         if executables is None:
             # Look for executables to test by walking the tree
             executables = []
-            for root, dirs, files in os.walk(ref_dir):
+            for root, _, files in os.walk(ref_dir):
                 for f in files:
                     # Skip Python files. Shared libraries are executable.
                     if not f.endswith(".py") and not f.endswith(".so"):
