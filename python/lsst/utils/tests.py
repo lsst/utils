@@ -11,6 +11,8 @@
 
 """Support code for running unit tests"""
 
+from __future__ import annotations
+
 __all__ = [
     "init",
     "MemoryTestCase",

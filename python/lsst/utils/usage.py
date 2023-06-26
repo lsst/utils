@@ -11,6 +11,7 @@
 
 """Utilities for measuring resource consumption.
 """
+from __future__ import annotations
 
 __all__ = ["get_current_mem_usage", "get_peak_mem_usage"]
 
