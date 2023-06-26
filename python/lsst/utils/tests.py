@@ -112,14 +112,14 @@ def sort_tests(tests) -> unittest.TestSuite:
     return suite
 
 
-def suiteClassWrapper(tests):
+def _suiteClassWrapper(tests):
     return unittest.TestSuite(sort_tests(tests))
 
 
 # Replace the suiteClass callable in the defaultTestLoader
 # so that we can reorder the test ordering. This will have
 # no effect if no memory test cases are found.
-unittest.defaultTestLoader.suiteClass = suiteClassWrapper
+unittest.defaultTestLoader.suiteClass = _suiteClassWrapper
 
 
 class MemoryTestCase(unittest.TestCase):
