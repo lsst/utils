@@ -187,7 +187,6 @@ class ExecutablesTestCase(unittest.TestCase):
         executed. This allows the test runner to trigger the class set up
         machinery to test whether there are some executables to test.
         """
-        pass
 
     def assertExecutable(
         self,

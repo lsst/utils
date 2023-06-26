@@ -37,8 +37,6 @@ class GetPackageDirTestCase(unittest.TestCase):
 class TestMemory(lsst.utils.tests.MemoryTestCase):
     """Test for file descriptor leaks."""
 
-    pass
-
 
 def setup_module(module):
     """Initialize the pytest environment."""

@@ -42,8 +42,6 @@ class ExplicitBinaryTester(lsst.utils.tests.ExecutablesTestCase):
 class UtilsBinaryTester(lsst.utils.tests.ExecutablesTestCase):
     """Run test binaries in this package."""
 
-    pass
-
 
 EXECUTABLES = None
 UtilsBinaryTester.create_executable_tests(__file__, EXECUTABLES)
