@@ -31,15 +31,15 @@ New Features
     * ``lsst.utils.logging``
   * Added ``lsst.utils.doImportType`` to import a python type from a string and guarantee it is not a module.
   * ``lsst.utils.get_caller_name`` is now deprecated in its current location and has been relocated to ``lsst.utils.introspection``. (`DM-31722 <https://jira.lsstcorp.org/browse/DM-31722>`_)
-- Add `lsst.logging.set_trace_at` to control ``TRACE``-level loggers. (`DM-32142 <https://jira.lsstcorp.org/browse/DM-32142>`_)
+- Add `lsst.utils.logging.trace_set_at` to control ``TRACE``-level loggers. (`DM-32142 <https://jira.lsstcorp.org/browse/DM-32142>`_)
 - Builds using ``setuptools`` now calculate versions from the Git repository, including the use of alpha releases for those associated with weekly tags. (`DM-32408 <https://jira.lsstcorp.org/browse/DM-32408>`_)
 - Context manager ``lsst.utils.timer.time_this`` can now include memory usage in its report. (`DM-33331 <https://jira.lsstcorp.org/browse/DM-33331>`_)
-- A new package `lsst.utils.packages` has been added to allow system package versions to be obtained.
+- A new package ``lsst.utils.packages`` has been added to allow system package versions to be obtained.
   This code has been relocated from ``lsst.base``. (`DM-33403 <https://jira.lsstcorp.org/browse/DM-33403>`_)
 - Add ``lsst.utils.threads`` for control of threads.
   Use `lsst.utils.threads.disable_implicit_threading()` to disable implicit threading.
   This function should be used in place of ``lsst.base.disableImplicitThreading()`` in all new code.
-  This package now depends on the `threadpoolctl` package. (`DM-33622 <https://jira.lsstcorp.org/browse/DM-33622>`_)
+  This package now depends on the ``threadpoolctl`` package. (`DM-33622 <https://jira.lsstcorp.org/browse/DM-33622>`_)
 - Added a new class `lsst.utils.logging.PeriodicLogger` to allow a user to issue log messages after some time interval has elapsed. (`DM-33919 <https://jira.lsstcorp.org/browse/DM-33919>`_)
 - Added ``lsst.utils.logging.getTraceLogger`` to simplify the creation of a trace logger that uses a ``TRACEn`` prefix for the logger name. (`DM-34208 <https://jira.lsstcorp.org/browse/DM-34208>`_)
 

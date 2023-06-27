@@ -63,7 +63,7 @@ def ensure_iterable(a: Any) -> Iterable[Any]:
 
     Returns
     -------
-    i : `generator`
+    i : `~collections.abc.Iterable`
         Iterable version of the input value.
     """
     if isinstance(a, str):
