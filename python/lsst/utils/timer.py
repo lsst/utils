@@ -28,12 +28,11 @@ from typing import TYPE_CHECKING, Any
 from astropy import units as u
 
 from .introspection import find_outside_stacklevel
+from .logging import LsstLoggers
 from .usage import _get_current_rusage, get_current_mem_usage, get_peak_mem_usage
 
 if TYPE_CHECKING:
     import cProfile
-
-    from .logging import LsstLoggers
 
 
 _LOG = logging.getLogger(__name__)
