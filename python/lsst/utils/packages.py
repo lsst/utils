@@ -67,7 +67,7 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
 
     Parameters
     ----------
-    module : `module`
+    module : `~types.ModuleType`
         Module for which to get version.
 
     Returns
@@ -77,7 +77,7 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
     Raises
     ------
     AttributeError
-        Raised if __version__ attribute is not set.
+        Raised if ``__version__`` attribute is not set.
 
     Notes
     -----
@@ -199,7 +199,7 @@ def _get_python_package_version(name: str, packages: dict[str, str]) -> str | No
     ----------
     name : `str`
         The name of the package or module to try.
-    packages : `dict`[`str`, `str`]
+    packages : `dict` [ `str`, `str` ]
         A dictionary mapping a name to a version. Modified in place.
         The key used might not match exactly the given key.
 
@@ -587,9 +587,9 @@ class Packages(dict):
 
         Returns
         -------
-        difference : `dict` [`str`, `tuple` [`str`, `str`]]
+        difference : `dict` [`str`, `tuple` [ `str`, `str` ]]
             Packages in symmetric difference.  Keys (type `str`) are package
-            names; values (type `tuple`[`str`, `str`]) are their versions.
+            names; values (type `tuple` [ `str`, `str` ]) are their versions.
         """
         return {pkg: (self[pkg], other[pkg]) for pkg in self.keys() & other.keys() if self[pkg] != other[pkg]}
 

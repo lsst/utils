@@ -312,7 +312,7 @@ def getLogger(name: str | None = None, logger: logging.Logger | None = None) -> 
     uniform interface than when using `logging.setLoggerClass`. An adapter
     can be wrapped around the root logger and the `~logging.setLoggerClass`
     will return the logger first given that name even if the name was
-    used before the `Task` was created.
+    used before the `~lsst.pipe.base.Task` was created.
     """
     if not logger:
         logger = logging.getLogger(name)
