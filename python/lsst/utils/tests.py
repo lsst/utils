@@ -17,6 +17,7 @@ __all__ = [
     "init",
     "MemoryTestCase",
     "ExecutablesTestCase",
+    "ImportTestCase",
     "getTempFilePath",
     "TestCase",
     "assertFloatsAlmostEqual",
@@ -31,6 +32,7 @@ __all__ = [
 import contextlib
 import functools
 import gc
+import importlib
 import inspect
 import itertools
 import os
@@ -41,11 +43,13 @@ import sys
 import tempfile
 import unittest
 import warnings
-from collections.abc import Callable, Iterator, Mapping, Sequence
-from typing import Any
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from typing import Any, ClassVar
 
 import numpy
 import psutil
+
+from .doImport import doImport
 
 # Initialize the list of open files to an empty set
 open_files = set()
@@ -329,6 +333,66 @@ class ExecutablesTestCase(unittest.TestCase):
         # Create the test functions and attach them to the class
         for e in executables:
             cls._build_test_method(e, ref_dir)
+
+
+class ImportTestCase(unittest.TestCase):
+    """Test that the named packages can be imported and all files within
+    that package.
+
+    The test methods are created dynamically. Callers must subclass this
+    method and define the ``PACKAGES`` property.
+    """
+
+    PACKAGES: ClassVar[Iterable[str]] = ()
+    """Packages to be imported."""
+
+    _n_registered = 0
+    """Number of packages registered for testing by this class."""
+
+    def _test_no_packages_registered_for_import_testing(self) -> None:
+        """Test when no packages have been registered.
+
+        Without this, if no packages have been listed no tests will be
+        registered and the test system will not report on anything. This
+        test fails and reports why.
+        """
+        raise AssertionError("No packages registered with import test. Was the PACKAGES property set?")
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Create the test methods based on the content of the ``PACKAGES``
+        class property.
+        """
+        super().__init_subclass__(**kwargs)
+
+        for mod in cls.PACKAGES:
+            test_name = "test_import_" + mod.replace(".", "_")
+
+            def test_import(*args: Any) -> None:
+                self = args[0]
+                self.assertImport(mod)
+
+            test_import.__name__ = test_name
+            setattr(cls, test_name, test_import)
+            cls._n_registered += 1
+
+        # If there are no packages listed that is likely a mistake and
+        # so register a failing test.
+        if cls._n_registered == 0:
+            setattr(cls, "test_no_packages_registered", cls._test_no_packages_registered_for_import_testing)
+
+    def assertImport(self, root_pkg):
+        for file in importlib.resources.contents(root_pkg):
+            if not file.endswith(".py"):
+                continue
+            if file.startswith("__"):
+                continue
+            root, _ = os.path.splitext(file)
+            module_name = f"{root_pkg}.{root}"
+            with self.subTest(module=module_name):
+                try:
+                    doImport(module_name)
+                except ImportError as e:
+                    raise AssertionError(f"Error importing module {module_name}: {e}") from e
 
 
 @contextlib.contextmanager
