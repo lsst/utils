@@ -32,7 +32,7 @@ __all__ = [
 import contextlib
 import functools
 import gc
-import importlib
+import importlib.resources as resources
 import inspect
 import itertools
 import os
@@ -381,7 +381,8 @@ class ImportTestCase(unittest.TestCase):
             setattr(cls, "test_no_packages_registered", cls._test_no_packages_registered_for_import_testing)
 
     def assertImport(self, root_pkg):
-        for file in importlib.resources.contents(root_pkg):
+        for file in resources.files(root_pkg).iterdir():
+            file = file.name
             if not file.endswith(".py"):
                 continue
             if file.startswith("__"):
