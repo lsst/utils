@@ -160,7 +160,7 @@ class MemoryTestCase(unittest.TestCase):
         diff = now_open.difference(open_files)
         if diff:
             for f in diff:
-                print("File open: %s" % f)
+                print(f"File open: {f}")
             self.fail("Failed to close %d file%s" % (len(diff), "s" if len(diff) != 1 else ""))
 
 
@@ -687,17 +687,14 @@ def assertFloatsAlmostEqual(
             if rtol is None:
                 errMsg = [f"{lhs} {cmpStr} {rhs}; diff={absDiff} with atol={atol}"]
             elif atol is None:
-                errMsg = [
-                    "%s %s %s; diff=%s/%s=%s with rtol=%s"
-                    % (lhs, cmpStr, rhs, absDiff, relTo, absDiff / relTo, rtol)
-                ]
+                errMsg = [f"{lhs} {cmpStr} {rhs}; diff={absDiff}/{relTo}={absDiff / relTo} with rtol={rtol}"]
             else:
                 errMsg = [
-                    "%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
-                    % (lhs, cmpStr, rhs, absDiff, relTo, absDiff / relTo, rtol, atol)
+                    f"{lhs} {cmpStr} {rhs}; diff={absDiff}/{relTo}={absDiff / relTo} "
+                    f"with rtol={rtol}, atol={atol}"
                 ]
         else:
-            errMsg = ["%d/%d elements %s with rtol=%s, atol=%s" % (bad.sum(), bad.size, failStr, rtol, atol)]
+            errMsg = [f"{bad.sum()}/{bad.size} elements {failStr} with rtol={rtol}, atol={atol}"]
             if plotOnFailure:
                 if len(lhs.shape) != 2 or len(rhs.shape) != 2:
                     raise ValueError("plotOnFailure is only valid for 2-d arrays")

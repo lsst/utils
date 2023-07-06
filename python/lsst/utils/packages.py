@@ -534,7 +534,7 @@ class Packages(dict):
             ff.write(self.toBytes(self.formats[ext]))
 
     def __str__(self) -> str:
-        ss = "%s({\n" % self.__class__.__name__
+        ss = self.__class__.__name__ + "({\n"
         # Sort alphabetically by module name, for convenience in reading
         ss += ",\n".join(f"{prod!r}:{self[prod]!r}" for prod in sorted(self))
         ss += ",\n})"
