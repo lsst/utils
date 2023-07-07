@@ -17,6 +17,7 @@ __all__ = [
     "init",
     "MemoryTestCase",
     "ExecutablesTestCase",
+    "ImportTestCase",
     "getTempFilePath",
     "TestCase",
     "assertFloatsAlmostEqual",
@@ -31,6 +32,7 @@ __all__ = [
 import contextlib
 import functools
 import gc
+import importlib.resources as resources
 import inspect
 import itertools
 import os
@@ -41,11 +43,13 @@ import sys
 import tempfile
 import unittest
 import warnings
-from collections.abc import Callable, Iterator, Mapping, Sequence
-from typing import Any
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from typing import Any, ClassVar
 
 import numpy
 import psutil
+
+from .doImport import doImport
 
 # Initialize the list of open files to an empty set
 open_files = set()
@@ -160,7 +164,7 @@ class MemoryTestCase(unittest.TestCase):
         diff = now_open.difference(open_files)
         if diff:
             for f in diff:
-                print("File open: %s" % f)
+                print(f"File open: {f}")
             self.fail("Failed to close %d file%s" % (len(diff), "s" if len(diff) != 1 else ""))
 
 
@@ -329,6 +333,67 @@ class ExecutablesTestCase(unittest.TestCase):
         # Create the test functions and attach them to the class
         for e in executables:
             cls._build_test_method(e, ref_dir)
+
+
+class ImportTestCase(unittest.TestCase):
+    """Test that the named packages can be imported and all files within
+    that package.
+
+    The test methods are created dynamically. Callers must subclass this
+    method and define the ``PACKAGES`` property.
+    """
+
+    PACKAGES: ClassVar[Iterable[str]] = ()
+    """Packages to be imported."""
+
+    _n_registered = 0
+    """Number of packages registered for testing by this class."""
+
+    def _test_no_packages_registered_for_import_testing(self) -> None:
+        """Test when no packages have been registered.
+
+        Without this, if no packages have been listed no tests will be
+        registered and the test system will not report on anything. This
+        test fails and reports why.
+        """
+        raise AssertionError("No packages registered with import test. Was the PACKAGES property set?")
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Create the test methods based on the content of the ``PACKAGES``
+        class property.
+        """
+        super().__init_subclass__(**kwargs)
+
+        for mod in cls.PACKAGES:
+            test_name = "test_import_" + mod.replace(".", "_")
+
+            def test_import(*args: Any) -> None:
+                self = args[0]
+                self.assertImport(mod)
+
+            test_import.__name__ = test_name
+            setattr(cls, test_name, test_import)
+            cls._n_registered += 1
+
+        # If there are no packages listed that is likely a mistake and
+        # so register a failing test.
+        if cls._n_registered == 0:
+            setattr(cls, "test_no_packages_registered", cls._test_no_packages_registered_for_import_testing)
+
+    def assertImport(self, root_pkg):
+        for file in resources.files(root_pkg).iterdir():
+            file = file.name
+            if not file.endswith(".py"):
+                continue
+            if file.startswith("__"):
+                continue
+            root, _ = os.path.splitext(file)
+            module_name = f"{root_pkg}.{root}"
+            with self.subTest(module=module_name):
+                try:
+                    doImport(module_name)
+                except ImportError as e:
+                    raise AssertionError(f"Error importing module {module_name}: {e}") from e
 
 
 @contextlib.contextmanager
@@ -687,17 +752,14 @@ def assertFloatsAlmostEqual(
             if rtol is None:
                 errMsg = [f"{lhs} {cmpStr} {rhs}; diff={absDiff} with atol={atol}"]
             elif atol is None:
-                errMsg = [
-                    "%s %s %s; diff=%s/%s=%s with rtol=%s"
-                    % (lhs, cmpStr, rhs, absDiff, relTo, absDiff / relTo, rtol)
-                ]
+                errMsg = [f"{lhs} {cmpStr} {rhs}; diff={absDiff}/{relTo}={absDiff / relTo} with rtol={rtol}"]
             else:
                 errMsg = [
-                    "%s %s %s; diff=%s/%s=%s with rtol=%s, atol=%s"
-                    % (lhs, cmpStr, rhs, absDiff, relTo, absDiff / relTo, rtol, atol)
+                    f"{lhs} {cmpStr} {rhs}; diff={absDiff}/{relTo}={absDiff / relTo} "
+                    f"with rtol={rtol}, atol={atol}"
                 ]
         else:
-            errMsg = ["%d/%d elements %s with rtol=%s, atol=%s" % (bad.sum(), bad.size, failStr, rtol, atol)]
+            errMsg = [f"{bad.sum()}/{bad.size} elements {failStr} with rtol={rtol}, atol={atol}"]
             if plotOnFailure:
                 if len(lhs.shape) != 2 or len(rhs.shape) != 2:
                     raise ValueError("plotOnFailure is only valid for 2-d arrays")
