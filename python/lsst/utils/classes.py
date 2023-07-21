@@ -87,7 +87,7 @@ def immutable(cls: _T) -> _T:
         # Disable default state-setting when unpickled.
         return {}
 
-    cls.__getstate__ = __getstate__
+    cls.__getstate__ = __getstate__  # type: ignore[assignment]
 
     def __setstate__(self: _T, state: Any) -> None:  # noqa: N807
         # Disable default state-setting when copied.
