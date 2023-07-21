@@ -367,7 +367,7 @@ class ImportTestCase(unittest.TestCase):
         for mod in cls.PACKAGES:
             test_name = "test_import_" + mod.replace(".", "_")
 
-            def test_import(*args: Any) -> None:
+            def test_import(*args: Any, mod=mod) -> None:
                 self = args[0]
                 self.assertImport(mod)
 
