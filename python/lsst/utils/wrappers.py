@@ -396,9 +396,7 @@ class TemplateMeta(type):
                 setattrSafe(p, k)
         else:
             raise ValueError(
-                "key must have {} elements (one for each of {})".format(
-                    len(cls.TEMPLATE_PARAMS), cls.TEMPLATE_PARAMS
-                )
+                f"key must have {len(cls.TEMPLATE_PARAMS)} elements (one for each of {cls.TEMPLATE_PARAMS})"
             )
 
         for name, attr in cls._inherited.items():
