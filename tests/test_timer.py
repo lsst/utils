@@ -328,7 +328,7 @@ class ProfileTestCase(unittest.TestCase):
             self.assertEqual(len(cm.output), 2)
             self.assertIsNotNone(prof)
             self.assertTrue(os.path.exists(tmp.name))
-            self.assertIsInstance(pstats.Stats(tmp.name), pstats.Stats),
+            self.assertIsInstance(pstats.Stats(tmp.name), pstats.Stats)
 
 
 if __name__ == "__main__":
