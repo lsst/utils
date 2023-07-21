@@ -378,7 +378,7 @@ class ImportTestCase(unittest.TestCase):
         # If there are no packages listed that is likely a mistake and
         # so register a failing test.
         if cls._n_registered == 0:
-            setattr(cls, "test_no_packages_registered", cls._test_no_packages_registered_for_import_testing)
+            cls.test_no_packages_registered = cls._test_no_packages_registered_for_import_testing
 
     def assertImport(self, root_pkg):
         for file in resources.files(root_pkg).iterdir():
