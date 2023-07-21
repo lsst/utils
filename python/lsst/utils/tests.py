@@ -32,7 +32,6 @@ __all__ = [
 import contextlib
 import functools
 import gc
-import importlib.resources as resources
 import inspect
 import itertools
 import os
@@ -44,6 +43,7 @@ import tempfile
 import unittest
 import warnings
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from importlib import resources
 from typing import Any, ClassVar
 
 import numpy
