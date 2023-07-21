@@ -473,10 +473,8 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
         # Use stacklevel 3 so that the warning is reported from the end of the
         # with block
         warnings.warn(f"Unexpectedly found pre-existing tempfile named {outPath!r}", stacklevel=3)
-        try:
+        with contextlib.suppress(OSError):
             os.remove(outPath)
-        except OSError:
-            pass
 
     yield outPath
 

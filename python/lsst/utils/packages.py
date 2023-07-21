@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import importlib
 import io
@@ -115,10 +116,9 @@ def getPythonPackages() -> dict[str, str]:
     """
     # Attempt to import libraries that only report their version in python
     for module_name in PYTHON:
-        try:
+        # If it's not available we continue.
+        with contextlib.suppress(Exception):
             importlib.import_module(module_name)
-        except Exception:
-            pass  # It's not available, so don't care
 
     packages = {"python": sys.version}
 
