@@ -28,7 +28,7 @@ import sys
 import types
 from collections.abc import Mapping
 from functools import lru_cache
-from typing import Any
+from typing import Any, ClassVar
 
 import yaml
 
@@ -410,7 +410,12 @@ class Packages(dict):
     This is a wrapper around a dict with some convenience methods.
     """
 
-    formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml", ".json": "json"}
+    formats: ClassVar[dict[str, str]] = {
+        ".pkl": "pickle",
+        ".pickle": "pickle",
+        ".yaml": "yaml",
+        ".json": "json",
+    }
 
     def __setstate__(self, state: dict[str, Any]) -> None:
         # This only seems to be called for old pickle files where

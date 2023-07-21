@@ -129,7 +129,7 @@ unittest.defaultTestLoader.suiteClass = _suiteClassWrapper
 class MemoryTestCase(unittest.TestCase):
     """Check for resource leaks."""
 
-    ignore_regexps: list[str] = []
+    ignore_regexps: ClassVar[list[str]] = []
     """List of regexps to ignore when checking for open files."""
 
     @classmethod
