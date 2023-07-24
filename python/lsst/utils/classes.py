@@ -19,7 +19,7 @@ __all__ = ["Singleton", "cached_getter", "immutable"]
 
 import functools
 from collections.abc import Callable
-from typing import Any, Type, TypeVar
+from typing import Any, ClassVar, Type, TypeVar
 
 
 class Singleton(type):
@@ -33,7 +33,7 @@ class Singleton(type):
     adjust state of the singleton.
     """
 
-    _instances: dict[type, Any] = {}
+    _instances: ClassVar[dict[type, Any]] = {}
 
     # Signature is intentionally not substitutable for type.__call__ (no *args,
     # **kwargs) to require classes that use this metaclass to have no
@@ -87,7 +87,7 @@ def immutable(cls: _T) -> _T:
         # Disable default state-setting when unpickled.
         return {}
 
-    cls.__getstate__ = __getstate__
+    cls.__getstate__ = __getstate__  # type: ignore[assignment]
 
     def __setstate__(self: _T, state: Any) -> None:  # noqa: N807
         # Disable default state-setting when copied.

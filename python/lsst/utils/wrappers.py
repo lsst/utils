@@ -307,20 +307,14 @@ class TemplateMeta(type):
         # any registered type or true subclass thereof.
         if subclass in cls._registry.values():
             return True
-        for v in cls._registry.values():
-            if issubclass(subclass, v):
-                return True
-        return False
+        return any(issubclass(subclass, v) for v in cls._registry.values())
 
     def __instancecheck__(cls, instance):
         # Special method hook for the isinstance built-in: we return true for
         # an instance of any registered type or true subclass thereof.
         if type(instance) in cls._registry.values():
             return True
-        for v in cls._registry.values():
-            if isinstance(instance, v):
-                return True
-        return False
+        return any(isinstance(instance, v) for v in cls._registry.values())
 
     def __subclasses__(cls):
         """Return a tuple of all classes that inherit from this class."""
@@ -396,9 +390,7 @@ class TemplateMeta(type):
                 setattrSafe(p, k)
         else:
             raise ValueError(
-                "key must have {} elements (one for each of {})".format(
-                    len(cls.TEMPLATE_PARAMS), cls.TEMPLATE_PARAMS
-                )
+                f"key must have {len(cls.TEMPLATE_PARAMS)} elements (one for each of {cls.TEMPLATE_PARAMS})"
             )
 
         for name, attr in cls._inherited.items():

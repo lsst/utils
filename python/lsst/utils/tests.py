@@ -32,7 +32,6 @@ __all__ = [
 import contextlib
 import functools
 import gc
-import importlib.resources as resources
 import inspect
 import itertools
 import os
@@ -44,6 +43,7 @@ import tempfile
 import unittest
 import warnings
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from importlib import resources
 from typing import Any, ClassVar
 
 import numpy
@@ -129,7 +129,7 @@ unittest.defaultTestLoader.suiteClass = _suiteClassWrapper
 class MemoryTestCase(unittest.TestCase):
     """Check for resource leaks."""
 
-    ignore_regexps: list[str] = []
+    ignore_regexps: ClassVar[list[str]] = []
     """List of regexps to ignore when checking for open files."""
 
     @classmethod
@@ -367,7 +367,7 @@ class ImportTestCase(unittest.TestCase):
         for mod in cls.PACKAGES:
             test_name = "test_import_" + mod.replace(".", "_")
 
-            def test_import(*args: Any) -> None:
+            def test_import(*args: Any, mod=mod) -> None:
                 self = args[0]
                 self.assertImport(mod)
 
@@ -378,7 +378,7 @@ class ImportTestCase(unittest.TestCase):
         # If there are no packages listed that is likely a mistake and
         # so register a failing test.
         if cls._n_registered == 0:
-            setattr(cls, "test_no_packages_registered", cls._test_no_packages_registered_for_import_testing)
+            cls.test_no_packages_registered = cls._test_no_packages_registered_for_import_testing
 
     def assertImport(self, root_pkg):
         for file in resources.files(root_pkg).iterdir():
@@ -473,10 +473,8 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
         # Use stacklevel 3 so that the warning is reported from the end of the
         # with block
         warnings.warn(f"Unexpectedly found pre-existing tempfile named {outPath!r}", stacklevel=3)
-        try:
+        with contextlib.suppress(OSError):
             os.remove(outPath)
-        except OSError:
-            pass
 
     yield outPath
 

@@ -22,7 +22,7 @@ import functools
 import logging
 import time
 from collections.abc import Callable, Collection, Iterable, Iterator, MutableMapping
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from typing import TYPE_CHECKING, Any
 
 from astropy import units as u
@@ -109,15 +109,13 @@ def logPairs(
     """
     if obj is not None:
         if metadata is None:
-            try:
+            with suppress(AttributeError):
                 metadata = obj.metadata
-            except AttributeError:
-                pass
+
         if logger is None:
-            try:
+            with suppress(AttributeError):
                 logger = obj.log
-            except AttributeError:
-                pass
+
     strList = []
     for name, value in pairs:
         if metadata is not None:
@@ -197,10 +195,9 @@ def logInfo(
     * Version 1: ``MaxResidentSetSize`` will be stored in bytes.
     """
     if metadata is None and obj is not None:
-        try:
+        with suppress(AttributeError):
             metadata = obj.metadata
-        except AttributeError:
-            pass
+
     if metadata is not None:
         # Log messages already have timestamps.
         utcStr = datetime.datetime.utcnow().isoformat()

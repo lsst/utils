@@ -36,9 +36,8 @@ class GetTempFilePathTestCase(unittest.TestCase):
             # Path will have unique component so do not test full equality
             self.assertIn("test_getTempFilePath_testBasics", tmpFile)
             self.assertTrue(tmpFile.endswith(".txt"))
-            f = open(tmpFile, "w")
-            f.write("foo\n")
-            f.close()
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
         self.assertFalse(os.path.exists(tmpFile))
 
     def testMultipleCallDepth(self):
@@ -53,9 +52,8 @@ class GetTempFilePathTestCase(unittest.TestCase):
             # Path will have unique component so do not test full equality
             self.assertIn(f"test_getTempFilePath_{funcName}", tmpFile)
             self.assertTrue(tmpFile.endswith(".fits"))
-            f = open(tmpFile, "w")
-            f.write("foo\n")
-            f.close()
+            with open(tmpFile, "w") as f:
+                f.write("foo\n")
         self.assertFalse(os.path.exists(tmpFile))
 
     def runLevel2(self, funcName):

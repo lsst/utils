@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import importlib
 import io
@@ -27,7 +28,7 @@ import sys
 import types
 from collections.abc import Mapping
 from functools import lru_cache
-from typing import Any
+from typing import Any, ClassVar
 
 import yaml
 
@@ -115,10 +116,9 @@ def getPythonPackages() -> dict[str, str]:
     """
     # Attempt to import libraries that only report their version in python
     for module_name in PYTHON:
-        try:
+        # If it's not available we continue.
+        with contextlib.suppress(Exception):
             importlib.import_module(module_name)
-        except Exception:
-            pass  # It's not available, so don't care
 
     packages = {"python": sys.version}
 
@@ -410,7 +410,12 @@ class Packages(dict):
     This is a wrapper around a dict with some convenience methods.
     """
 
-    formats = {".pkl": "pickle", ".pickle": "pickle", ".yaml": "yaml", ".json": "json"}
+    formats: ClassVar[dict[str, str]] = {
+        ".pkl": "pickle",
+        ".pickle": "pickle",
+        ".yaml": "yaml",
+        ".json": "json",
+    }
 
     def __setstate__(self, state: dict[str, Any]) -> None:
         # This only seems to be called for old pickle files where
