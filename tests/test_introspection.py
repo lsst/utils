@@ -134,6 +134,17 @@ class TestInstropection(unittest.TestCase):
         self.assertTrue(cm.filename.endswith("test_introspection.py"))
         self.assertEqual(level, 3)
 
+        # Test with additional options.
+        with self.assertWarns(Warning) as cm:
+            level = c.indirect_level(allow_methods={"indirect_level"})
+        self.assertEqual(level, 2)
+        self.assertTrue(cm.filename.endswith("success.py"))
+
+        with self.assertWarns(Warning) as cm:
+            level = c.indirect_level(allow_methods={"import_test.two.three.success.Container.level"})
+        self.assertEqual(level, 1)
+        self.assertTrue(cm.filename.endswith("success.py"))
+
 
 if __name__ == "__main__":
     unittest.main()

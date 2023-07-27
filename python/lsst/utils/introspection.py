@@ -192,7 +192,11 @@ def get_caller_name(stacklevel: int = 2) -> str:
     return ".".join(name)
 
 
-def find_outside_stacklevel(*module_names: str, allow_modules: Set[str] = frozenset()) -> int:
+def find_outside_stacklevel(
+    *module_names: str,
+    allow_modules: Set[str] = frozenset(),
+    allow_methods: Set[str] = frozenset(),
+) -> int:
     """Find the stacklevel for outside of the given module.
 
     This can be used to determine the stacklevel parameter that should be
@@ -208,6 +212,10 @@ def find_outside_stacklevel(*module_names: str, allow_modules: Set[str] = frozen
         Names that should not be skipped when calculating the stacklevel.
         If the module name starts with any of the names in this set the
         corresponding stacklevel is used.
+    allow_methods : `set` [`str`]
+        Method names that are allowed to be treated as "outside". Fully
+        qualified method names must match exactly. Method names without
+        path components will match solely the method name itself.
 
     Returns
     -------
@@ -230,10 +238,22 @@ def find_outside_stacklevel(*module_names: str, allow_modules: Set[str] = frozen
         if i == 0:
             continue
         module = inspect.getmodule(s.frame)
-        # Stack frames sometimes hang around so explicitly delete.
-        del s
         if module is None:
             continue
+
+        if allow_methods:
+            code = s.frame.f_code
+            short_name = code.co_name
+            full_name = f"{module.__name__}.{code.co_qualname}"
+            if {short_name, full_name} & allow_methods:
+                # Method name is allowed so we stop here.
+                del s
+                stacklevel = i
+                break
+
+        # Stack frames sometimes hang around so explicitly delete.
+        del s
+
         if (
             # The module does not match any of the skipped names.
             not any(module.__name__.startswith(name) for name in module_names)
