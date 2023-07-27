@@ -23,7 +23,9 @@ __all__ = [
 
 import builtins
 import inspect
+import sys
 import types
+import warnings
 from collections.abc import Set
 from typing import Any
 
@@ -215,7 +217,8 @@ def find_outside_stacklevel(
     allow_methods : `set` [`str`]
         Method names that are allowed to be treated as "outside". Fully
         qualified method names must match exactly. Method names without
-        path components will match solely the method name itself.
+        path components will match solely the method name itself. On Python
+        3.10 fully qualified names are not supported.
 
     Returns
     -------
@@ -232,6 +235,17 @@ def find_outside_stacklevel(
             stacklevel=find_outside_stacklevel("lsst.daf")
         )
     """
+    if sys.version_info < (3, 11, 0):
+        short_names = {m for m in allow_methods if "." not in m}
+        if len(short_names) != len(allow_methods):
+            warnings.warn(
+                "Python 3.10 does not support fully qualified names in allow_methods. Dropping them.",
+                stacklevel=2,
+            )
+            allow_methods = short_names
+
+    need_full_names = any("." in m for m in allow_methods)
+
     stacklevel = -1
     for i, s in enumerate(inspect.stack()):
         # This function is never going to be the right answer.
@@ -243,9 +257,11 @@ def find_outside_stacklevel(
 
         if allow_methods:
             code = s.frame.f_code
-            short_name = code.co_name
-            full_name = f"{module.__name__}.{code.co_qualname}"
-            if {short_name, full_name} & allow_methods:
+            names = {code.co_name}  # The name of the function itself.
+            if need_full_names:
+                full_name = f"{module.__name__}.{code.co_qualname}"
+                names.add(full_name)
+            if names & allow_methods:
                 # Method name is allowed so we stop here.
                 del s
                 stacklevel = i
