@@ -23,7 +23,9 @@ class Container:
         stacklevel = find_outside_stacklevel(
             "import_test", allow_methods=allow_methods, allow_modules=allow_modules
         )
-        warnings.warn(f"Using stacklevel={stacklevel} in Container class", stacklevel=stacklevel)
+        warnings.warn(
+            f"Using stacklevel={stacklevel} in Container class", category=FutureWarning, stacklevel=stacklevel
+        )
         return stacklevel
 
     @classmethod
