@@ -1,0 +1,1 @@
+Removed deprecated ``lsst.utils.get_caller_name``. Use ``lsst.utils.introspection``.

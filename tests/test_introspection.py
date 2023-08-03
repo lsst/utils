@@ -9,6 +9,7 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
+import sys
 import unittest
 from collections import Counter
 
@@ -133,6 +134,24 @@ class TestInstropection(unittest.TestCase):
             level = c.indirect_level()
         self.assertTrue(cm.filename.endswith("test_introspection.py"))
         self.assertEqual(level, 3)
+
+        # Test with additional options.
+        with self.assertWarns(Warning) as cm:
+            level = c.indirect_level(allow_methods={"indirect_level"})
+        self.assertEqual(level, 2)
+        self.assertTrue(cm.filename.endswith("success.py"))
+
+        # Adjust test on python 3.10.
+        allow_methods = {"import_test.two.three.success.Container.level"}
+        stacklevel = 1
+        if sys.version_info < (3, 11, 0):
+            # python 3.10 does not support "." syntax and will filter it out.
+            allow_methods.add("indirect_level")
+            stacklevel = 2
+        with self.assertWarns(FutureWarning) as cm:
+            level = c.indirect_level(allow_methods=allow_methods)
+        self.assertEqual(level, stacklevel)
+        self.assertTrue(cm.filename.endswith("success.py"))
 
 
 if __name__ == "__main__":

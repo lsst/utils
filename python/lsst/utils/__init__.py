@@ -13,7 +13,6 @@
 from ._packaging import *
 from .deprecated import *
 from .doImport import *
-from .get_caller_name import *
 from .inheritDoc import *
 from .version import *
 from .wrappers import *
