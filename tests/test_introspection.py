@@ -125,6 +125,10 @@ class TestInstropection(unittest.TestCase):
         level = find_outside_stacklevel("lsst.utils")
         self.assertEqual(level, 1)
 
+        info = {}
+        level = find_outside_stacklevel("lsst.utils", stack_info=info)
+        self.assertIn("test_introspection.py", info["filename"])
+
         c = doImport("import_test.two.three.success.Container")
         with self.assertWarns(Warning) as cm:
             level = c.level()
