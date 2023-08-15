@@ -1,0 +1,2 @@
+Added the ability for ``find_outside_stacklevel`` to return additional information about the matching stack to the caller.
+This allows, for example, the filename and lineno to be reported without the caller making another call to ``inspect.stack()`` or calling ``get_caller_name``.
