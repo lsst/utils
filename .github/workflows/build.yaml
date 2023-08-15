@@ -27,11 +27,12 @@ jobs:
           channels: conda-forge,defaults
           channel-priority: strict
           show-channel-urls: true
+          miniforge-variant: Mambaforge
+          use-mamba: true
 
       - name: Install eups and any other conda packages
         shell: bash -l {0}
         run: |
-          conda install mamba
           mamba install -y -q eups conda pip
 
       # We have two cores so we can speed up the testing with xdist
@@ -57,7 +58,7 @@ jobs:
 
       - name: Build and install
         shell: bash -l {0}
-        run: pip install -v -e .
+        run: pip install --no-deps -v -e .
 
       - name: Setup EUPS test package
         shell: bash -l {0}
