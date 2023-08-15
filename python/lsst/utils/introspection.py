@@ -198,6 +198,7 @@ def find_outside_stacklevel(
     *module_names: str,
     allow_modules: Set[str] = frozenset(),
     allow_methods: Set[str] = frozenset(),
+    stack_info: dict[str, Any] | None = None,
 ) -> int:
     """Find the stacklevel for outside of the given module.
 
@@ -219,6 +220,11 @@ def find_outside_stacklevel(
         qualified method names must match exactly. Method names without
         path components will match solely the method name itself. On Python
         3.10 fully qualified names are not supported.
+    stack_info : `dict` or `None`, optional
+        If given, the dictionary is filled with information from
+        the relevant stack frame. This can be used to form your own warning
+        message without having to call :func:`inspect.stack` yourself with
+        the stack level.
 
     Returns
     -------
@@ -246,6 +252,10 @@ def find_outside_stacklevel(
 
     need_full_names = any("." in m for m in allow_methods)
 
+    if stack_info is not None:
+        # Ensure it is empty when we start.
+        stack_info.clear()
+
     stacklevel = -1
     for i, s in enumerate(inspect.stack()):
         # This function is never going to be the right answer.
@@ -254,6 +264,11 @@ def find_outside_stacklevel(
         module = inspect.getmodule(s.frame)
         if module is None:
             continue
+
+        if stack_info is not None:
+            stack_info["filename"] = s.filename
+            stack_info["lineno"] = s.lineno
+            stack_info["name"] = s.frame.f_code.co_name
 
         if allow_methods:
             code = s.frame.f_code
