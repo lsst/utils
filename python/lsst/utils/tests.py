@@ -464,7 +464,11 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
     callerFileName = os.path.splitext(callerFileNameWithExt)[0]
     outDir = os.path.join(callerDir, ".tests")
     if not os.path.isdir(outDir):
-        outDir = ""
+        # No .tests directory implies we are not running with sconsUtils.
+        # Need to use the current working directory, the callerDir, or
+        # /tmp equivalent. If cwd is used if must be as an absolute path
+        # in case the test code changes cwd.
+        outDir = os.path.abspath(os.path.curdir)
     prefix = f"{callerFileName}_{callerFuncName}-"
     outPath = tempfile.mktemp(dir=outDir, suffix=ext, prefix=prefix)
     if os.path.exists(outPath):
