@@ -13,6 +13,7 @@ from __future__ import annotations
 
 __all__ = ("inheritDoc",)
 
+import inspect
 from collections.abc import Callable
 
 
@@ -34,6 +35,18 @@ def inheritDoc(klass: type) -> Callable:
     -------
     decorator : callable
         Intermediate decorator used in the documentation process.
+
+    Notes
+    -----
+    This method naively appends the doc string from the decorated method to the
+    doc string of the equivalent method from the given class. No attempt
+    is made to ensure that duplicated sections are merged together or
+    overwritten.
+
+    This decorator is not necessary to ensure that a parent doc string appears
+    in a subclass. Tools like ``pydoc`` and Sphinx handle that automatically.
+    This can, though, be used to ensure that a specific docstring from a
+    parent class appears if there is ambiguity from multiple inheritance.
     """
 
     def tmpDecorator(method: type) -> Callable:
@@ -41,8 +54,21 @@ def inheritDoc(klass: type) -> Callable:
         methodName = method.__name__
         if not hasattr(klass, methodName):
             raise AttributeError(f"{klass} has no method named {methodName} to inherit from")
-        appendText = method.__doc__ or ""
-        method.__doc__ = getattr(klass, methodName).__doc__ + appendText
+
+        # To append reliably, the doc strings need to be cleaned to
+        # remove indents.
+        appendText = inspect.cleandoc(method.__doc__ or "")
+        parentText = inspect.cleandoc(getattr(klass, methodName).__doc__ or "")
+
+        if parentText:
+            if appendText:
+                # cleandoc() strips leading and trailing space so it is safe
+                # to add new lines.
+                parentText += "\n\n" + appendText
+            method.__doc__ = parentText
+        else:
+            # Do not update the doc string if there was no parent doc string.
+            pass
         return method
 
     return tmpDecorator
