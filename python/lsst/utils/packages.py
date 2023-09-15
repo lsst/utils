@@ -336,11 +336,17 @@ def getCondaPackages() -> dict[str, str]:
     Returns empty result if a conda environment is not in use or can not
     be queried.
     """
-    # Get the installed package list
+    # Require the conda API to list conda packages.
     try:
-        versions_json = subprocess.check_output(["conda", "list", "--json"])
-    except subprocess.CalledProcessError:
+        from conda.cli.main import main_subshell
+    except ImportError:
+        # Assume no conda packages.
         return {}
+
+    stdout = io.StringIO()
+    with contextlib.redirect_stdout(stdout):
+        main_subshell("list", "--json")
+    versions_json = stdout.getvalue()
 
     packages = {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json)}
 
