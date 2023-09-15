@@ -336,21 +336,18 @@ def getCondaPackages() -> dict[str, str]:
     Returns empty result if a conda environment is not in use or can not
     be queried.
     """
+    # Get the installed package list
     try:
-        from conda.cli.python_api import Commands, run_command
-    except ImportError:
+        versions_json = subprocess.check_output(["conda", "list", "--json"])
+    except subprocess.CalledProcessError:
         return {}
 
-    # Get the installed package list
-    versions_json = run_command(Commands.LIST, "--json")
-    packages = {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json[0])}
+    packages = {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json)}
 
     # Try to work out the conda environment name and include it as a fake
     # package. The "obvious" way of running "conda info --json" does give
     # access to the active_prefix but takes about 2 seconds to run.
-    # The equivalent to the code above would be:
-    #    info_json = run_command(Commands.INFO, "--json")
-    # As a comporomise look for the env name in the path to the python
+    # As a compromise look for the env name in the path to the python
     # executable
     match = re.search(r"/envs/(.*?)/bin/", sys.executable)
     if match:
