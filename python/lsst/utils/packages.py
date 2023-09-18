@@ -336,21 +336,40 @@ def getCondaPackages() -> dict[str, str]:
     Returns empty result if a conda environment is not in use or can not
     be queried.
     """
-    try:
-        from conda.cli.python_api import Commands, run_command
-    except ImportError:
+    if "CONDA_PREFIX" not in os.environ:
         return {}
 
-    # Get the installed package list
-    versions_json = run_command(Commands.LIST, "--json")
-    packages = {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json[0])}
+    # conda list is very slow. Ten times faster to scan the directory
+    # directly. This will only find conda packages and not pip installed
+    # packages.
+    meta_path = os.path.join(os.environ["CONDA_PREFIX"], "conda-meta")
+
+    try:
+        filenames = os.scandir(path=meta_path)
+    except FileNotFoundError:
+        return {}
+
+    packages = {}
+
+    for filename in filenames:
+        if not filename.name.endswith(".json"):
+            continue
+        with open(filename) as f:
+            try:
+                data = json.load(f)
+            except ValueError:
+                continue
+            try:
+                packages[data["name"]] = data["version"]
+            except KeyError:
+                continue
+
+    packages = {n: v for n, v in sorted(packages.items())}
 
     # Try to work out the conda environment name and include it as a fake
     # package. The "obvious" way of running "conda info --json" does give
     # access to the active_prefix but takes about 2 seconds to run.
-    # The equivalent to the code above would be:
-    #    info_json = run_command(Commands.INFO, "--json")
-    # As a comporomise look for the env name in the path to the python
+    # As a compromise look for the env name in the path to the python
     # executable
     match = re.search(r"/envs/(.*?)/bin/", sys.executable)
     if match:
