@@ -38,5 +38,16 @@ class TestImports(ImportTestCase):
         self.assertEqual(self._n_registered, 1)
 
 
+class TestSkipImports(ImportTestCase):
+    """Test that we can run the import tests with some modules skipped."""
+
+    PACKAGES = ("import_test.two.three",)
+    SKIP_FILES = {"import_test.two.three": {"runtime.py", "fail.py"}}
+
+    def test_import(self):
+        """Test that we can import utils."""
+        import import_test  # noqa: F401
+
+
 if __name__ == "__main__":
     unittest.main()
