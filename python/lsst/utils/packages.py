@@ -336,19 +336,32 @@ def getCondaPackages() -> dict[str, str]:
     Returns empty result if a conda environment is not in use or can not
     be queried.
     """
-    # Require the conda API to list conda packages.
-    try:
-        from conda.cli.main import main_subshell
-    except ImportError:
-        # Assume no conda packages.
+    if "CONDA_PREFIX" not in os.environ:
         return {}
 
-    stdout = io.StringIO()
-    with contextlib.redirect_stdout(stdout):
-        main_subshell("list", "--json")
-    versions_json = stdout.getvalue()
+    # conda list is very slow. Ten times faster to scan the directory
+    # directly. This will only find conda packages and not pip installed
+    # packages.
+    meta_path = os.path.join(os.environ["CONDA_PREFIX"], "conda-meta")
 
-    packages = {pkg["name"]: pkg["version"] for pkg in json.loads(versions_json)}
+    filenames = os.scandir(path=meta_path)
+
+    packages = {}
+
+    for filename in filenames:
+        if not filename.name.endswith(".json"):
+            continue
+        with open(filename) as f:
+            try:
+                data = json.load(f)
+            except ValueError:
+                continue
+            try:
+                packages[data["name"]] = data["version"]
+            except KeyError:
+                continue
+
+    packages = {n: v for n, v in sorted(packages.items())}
 
     # Try to work out the conda environment name and include it as a fake
     # package. The "obvious" way of running "conda info --json" does give
