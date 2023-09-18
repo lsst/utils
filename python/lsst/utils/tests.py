@@ -43,7 +43,12 @@ import tempfile
 import unittest
 import warnings
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
-from importlib import resources
+
+if sys.version_info < (3, 10, 0):
+    import importlib_resources as resources
+else:
+    from importlib import resources
+
 from typing import Any, ClassVar
 
 import numpy
