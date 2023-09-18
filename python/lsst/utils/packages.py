@@ -344,7 +344,10 @@ def getCondaPackages() -> dict[str, str]:
     # packages.
     meta_path = os.path.join(os.environ["CONDA_PREFIX"], "conda-meta")
 
-    filenames = os.scandir(path=meta_path)
+    try:
+        filenames = os.scandir(path=meta_path)
+    except FileNotFoundError:
+        return {}
 
     packages = {}
 
