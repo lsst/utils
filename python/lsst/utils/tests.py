@@ -42,8 +42,13 @@ import sys
 import tempfile
 import unittest
 import warnings
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
-from importlib import resources
+from collections.abc import Callable, Container, Iterable, Iterator, Mapping, Sequence
+
+if sys.version_info < (3, 10, 0):
+    import importlib_resources as resources
+else:
+    from importlib import resources
+
 from typing import Any, ClassVar
 
 import numpy
@@ -346,6 +351,16 @@ class ImportTestCase(unittest.TestCase):
     PACKAGES: ClassVar[Iterable[str]] = ()
     """Packages to be imported."""
 
+    SKIP_FILES: ClassVar[Mapping[str, Container[str]]] = {}
+    """Files to be skipped importing; specified as key-value pairs.
+
+    The key is the package name and the value is a set of files names in that
+    package to skip.
+
+    Note: Files with names not ending in .py or beginning with leading double
+    underscores are always skipped.
+    """
+
     _n_registered = 0
     """Number of packages registered for testing by this class."""
 
@@ -383,9 +398,13 @@ class ImportTestCase(unittest.TestCase):
     def assertImport(self, root_pkg):
         for file in resources.files(root_pkg).iterdir():
             file = file.name
+            # When support for python 3.9 is dropped, this could be updated to
+            # use match case construct.
             if not file.endswith(".py"):
                 continue
             if file.startswith("__"):
+                continue
+            if file in self.SKIP_FILES.get(root_pkg, ()):
                 continue
             root, _ = os.path.splitext(file)
             module_name = f"{root_pkg}.{root}"

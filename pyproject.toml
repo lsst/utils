@@ -27,7 +27,8 @@ dependencies = [
     "deprecated >= 1.2",
     "pyyaml >= 5.1",
     "astropy >= 5.0",
-    "threadpoolctl"
+    "threadpoolctl",
+    "importlib_resources",
 ]
 dynamic = ["version"]
 [project.urls]
