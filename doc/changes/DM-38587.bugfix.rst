@@ -1,2 +1,0 @@
-Fixed ``time_this`` when ``mem_usage=True`` to prevent memory statistics being gathered when the log message would not be issued.
-We had been trapping this on the exit to the context manager but not entry for the initial memory statistics gathering.
