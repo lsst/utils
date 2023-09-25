@@ -38,7 +38,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build and install
-        run: pip install -v .
+        run: pip install --no-deps -v .
 
       - name: Build documentation
         working-directory: ./doc
