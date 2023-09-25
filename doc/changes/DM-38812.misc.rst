@@ -1,2 +1,0 @@
-Modified the code that determines the versions of Python packages so that it now uses `importlib.metadata`.
-This is slightly slower than accessing ``__version__`` but does give more consistent results.

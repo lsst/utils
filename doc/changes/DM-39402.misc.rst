@@ -1,2 +1,0 @@
-Improved the performance of ``lsst.utils.packages.getPythonPackages()`` to use the namespace hierarchy so it now only needs to check as deep into the hierarchy as is needed to find a version.
-Additionally, the code no longer tries to extract versions from Python standard library packages.
