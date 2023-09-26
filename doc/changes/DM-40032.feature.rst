@@ -1,1 +1,0 @@
-Update the interface to ``lsst.utils.introspection.find_outside_stacklevel`` to allow multiple modules to be skipped in the hierarchy and also specify that some methods and modules should not be skipped.

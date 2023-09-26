@@ -1,3 +1,59 @@
+lsst-utils v26.0.0 (2023-09-22)
+===============================
+
+This release no longer works with Python 3.8.
+
+New Features
+------------
+
+- Now works with Python 3.11.
+  Python 3.11 now ensures that the ``stacklevel`` parameter for logging methods is now consistent independent of how many method calls are involved internally. (`DM-37987 <https://jira.lsstcorp.org/browse/DM-37987>`_)
+- Added ``lsst.utils.tests.ImportTestCase`` class.
+  This test case can be used to force the import of every file in a package.
+  This can be very useful for spotting obvious problems if a package does not export every file by default. (`DM-35901 <https://jira.lsstcorp.org/browse/DM-35901>`_)
+- Added a utility function, ``calculate_safe_plotting_limits``, located in ``lsst.utils.plotting.limits``, for calculating plotting limits for data with large outliers. (`DM-38386 <https://jira.lsstcorp.org/browse/DM-38386>`_)
+- ``MemoryTestCase`` now can accept an "ignore" list of regexps that match acceptable open files. (`DM-38764 <https://jira.lsstcorp.org/browse/DM-38764>`_)
+- Adds an alternative way of interacting with ``calculate_safe_plotting_limits()``.
+
+  This change adds a factory interface, such that one can use the function to accumulate the safe plotting limits over many different data series without having them all in-hand, by using the ``make_calculate_safe_plotting_limits()`` function to return a ``calculate_safe_plotting_limits()`` which will return the common limits after the addition of each new data series. The original behaviour remains unchanged. (`DM-38900 <https://jira.lsstcorp.org/browse/DM-38900>`_)
+- Added ``lsst.utils.introspection.find_outside_stacklevel``.
+  This function can be used to calculate the stack level that should be passed to warnings and log messages in order to make them look like they came from the line outside the specified package in user code. (`DM-39628 <https://jira.lsstcorp.org/browse/DM-39628>`_)
+- Update the interface to ``lsst.utils.introspection.find_outside_stacklevel`` to allow multiple modules to be skipped in the hierarchy and also specify that some methods and modules should not be skipped. (`DM-40032 <https://jira.lsstcorp.org/browse/DM-40032>`_)
+- Added the ability for ``find_outside_stacklevel`` to return additional information about the matching stack to the caller.
+  This allows, for example, the filename and lineno to be reported without the caller making another call to ``inspect.stack()`` or calling ``get_caller_name``. (`DM-40367 <https://jira.lsstcorp.org/browse/DM-40367>`_)
+- Added the ``lsst.utils.db_auth.DbAuth`` class that has been relocated from ``daf_butler``. (`DM-40462 <https://jira.lsstcorp.org/browse/DM-40462>`_)
+
+
+Bug Fixes
+---------
+
+- Fixed ``time_this`` when ``mem_usage=True`` to prevent memory statistics being gathered when the log message would not be issued.
+  We had been trapping this on the exit to the context manager but not entry for the initial memory statistics gathering. (`DM-38587 <https://jira.lsstcorp.org/browse/DM-38587>`_)
+- Updated the python version handling such that it is no longer a failure for the python package version to disagree with the ``.version`` property of that package.
+  The package version is now used in preference if there is a disagreement. (`DM-38665 <https://jira.lsstcorp.org/browse/DM-38665>`_)
+
+
+Miscellaneous Changes of Minor Interest
+---------------------------------------
+
+- Modified the code that determines the versions of Python packages so that it now uses `importlib.metadata`.
+  This is slightly slower than accessing ``__version__`` but does give more consistent results. (`DM-38812 <https://jira.lsstcorp.org/browse/DM-38812>`_)
+- Improved the performance of ``lsst.utils.packages.getPythonPackages()`` to use the namespace hierarchy so it now only needs to check as deep into the hierarchy as is needed to find a version.
+  Additionally, the code no longer tries to extract versions from Python standard library packages. (`DM-39402 <https://jira.lsstcorp.org/browse/DM-39402>`_)
+
+
+An API Removal or Deprecation
+-----------------------------
+
+- Dropped support for Python 3.8. (`DM-35901 <https://jira.lsstcorp.org/browse/DM-35901>`_)
+- * Removed deprecated APIs from `lsst.utils.logging`.
+  * Removed deprecated ``demangleType`` and ``backtrace`` that were forwarded from ``cpputils``.
+  * Removed ``cpputils`` from the EUPS table file. (`DM-37534 <https://jira.lsstcorp.org/browse/DM-37534>`_)
+- A Mypy workaround in the ``ellipsis`` module is not needed for Python 3.10 or newer.
+  Importing ``lsst.utils.ellipsis`` in these Python versions will produce a `DeprecationWarning`. (`DM-39410 <https://jira.lsstcorp.org/browse/DM-39410>`_)
+- Removed deprecated ``lsst.utils.get_caller_name``. Use ``lsst.utils.introspection``. (`DM-40032 <https://jira.lsstcorp.org/browse/DM-40032>`_)
+
+
 lsst-utils v25.0.0 (2023-02-17)
 ===============================
 
