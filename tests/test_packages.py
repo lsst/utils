@@ -120,21 +120,17 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(new.extra(packages), {})
 
         # Now load an obscure python package and the list of packages should
-        # change
-        # Shouldn't be used by anything we've previously imported
-        # smtpd can be used on 3.8 since it does have a version string but
-        # it is also a deprecated package so should not be used in tests
-        # for python 3.10 and newer.
-        # chunk does not have a version string but is handled as a stdlib
-        # package on 3.10 and newer.
+        # change. Shouldn't be used by anything we've previously imported and
+        # preferably should not be a deprecated package.
         if sys.version_info < (3, 10, 0):
             import smtpd  # noqa: F401
 
             new_package = "smtpd"
         else:
-            import chunk  # noqa: F401
+            import wave  # noqa: F401
 
-            new_package = "chunk"
+            new_package = "wave"
+        self.assertNotIn(new_package, packages)
 
         new = lsst.utils.packages.Packages.fromSystem()
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
