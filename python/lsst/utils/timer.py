@@ -20,6 +20,7 @@ __all__ = ["profile", "logInfo", "timeMethod", "time_this"]
 import datetime
 import functools
 import logging
+import sys
 import time
 from collections.abc import Callable, Collection, Iterable, Iterator, MutableMapping
 from contextlib import contextmanager, suppress
@@ -200,7 +201,11 @@ def logInfo(
 
     if metadata is not None:
         # Log messages already have timestamps.
-        utcStr = datetime.datetime.utcnow().isoformat()
+        if sys.version_info < (3, 11, 0):
+            now = datetime.datetime.utcnow()
+        else:
+            now = datetime.datetime.now(datetime.UTC)
+        utcStr = now.isoformat()
         _add_to_metadata(metadata, name=prefix + "Utc", value=utcStr)
 
         # Force a version number into the metadata.
