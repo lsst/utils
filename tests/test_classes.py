@@ -31,7 +31,7 @@ log = logging.getLogger("test_classes")
 
 
 class SingletonTestCase(unittest.TestCase):
-    """Tests of the Singleton metaclass"""
+    """Tests of the Singleton metaclass."""
 
     class IsSingleton(metaclass=Singleton):
         """A singleton."""

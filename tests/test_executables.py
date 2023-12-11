@@ -29,7 +29,7 @@ class ExplicitBinaryTester(lsst.utils.tests.ExecutablesTestCase):
     """Test that a named executable can be run."""
 
     def testSimpleExe(self):
-        """Test explicit shell script"""
+        """Test explicit shell script."""
         self.assertExecutable(
             "testexe.sh", root_dir=os.path.dirname(__file__), args=["-h"], msg="testexe.sh failed"
         )
