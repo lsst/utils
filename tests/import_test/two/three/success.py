@@ -15,7 +15,20 @@ class Container:
 
     @classmethod
     def level(cls, allow_methods=frozenset(), allow_modules=frozenset()) -> int:
-        """Return the stacklevel of the caller relative to this method."""
+        """Return the stacklevel of the caller relative to this method.
+
+        Parameters
+        ----------
+        allow_methods : `frozenset`
+            Allowed methods.
+        allow_modules : `frozenset`
+            Allowed modules.
+
+        Returns
+        -------
+        `int`
+            The stack level relative to this method.
+        """
         import warnings
 
         from lsst.utils.introspection import find_outside_stacklevel
@@ -33,5 +46,17 @@ class Container:
         """Return the stacklevel of the caller relative to this method.
 
         Deliberately includes an additional level.
+
+        Parameters
+        ----------
+        allow_methods : `frozenset`
+            Allowed methods.
+        allow_modules : `frozenset`
+            Allowed modules.
+
+        Returns
+        -------
+        `int`
+            The stack level relative to this method.
         """
         return cls.level(allow_methods=allow_methods, allow_modules=allow_modules)

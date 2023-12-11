@@ -30,7 +30,7 @@ numCalls = 0  # Number of times testMethodDecorator gets called
 
 @lsst.utils.tests.classParameters(word=["one", "two", "three", "four"], length=[3, 3, 5, 4])
 class DecoratorTestCase(lsst.utils.tests.TestCase):
-    """Test methodParameters and classParameters decorators"""
+    """Test methodParameters and classParameters decorators."""
 
     def setUp(self):
         self.numCalls = 0
@@ -56,7 +56,7 @@ class DecoratorTestCase(lsst.utils.tests.TestCase):
 
 @lsst.utils.tests.classParametersProduct(word=["one", "two"], number=[3, 4])
 class DecoratorProductTestCase(lsst.utils.tests.TestCase):
-    """Test methodParametersProduct and classParametersProduct decorators"""
+    """Test methodParametersProduct and classParametersProduct decorators."""
 
     def setUp(self):
         self.combinations = set()

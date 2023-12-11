@@ -80,7 +80,7 @@ class PlottingLimitsClosureTestCase(unittest.TestCase):
         self.assertLess(ymax, max(self.series1_max, self.series2_max) + 1)
 
     def testSymmetric(self):
-        """Test that the symmetric option works"""
+        """Test that the symmetric option works."""
         calc = make_calculate_safe_plotting_limits(symmetric_around_zero=True)
         _, _ = calc(self.series1)
         ymin, ymax = calc(self.outliers)
@@ -90,7 +90,7 @@ class PlottingLimitsClosureTestCase(unittest.TestCase):
         self.assertLess(ymin, self.series1_min)
 
     def testConstantExtra(self):
-        """Test that the constantExtra option works"""
+        """Test that the constantExtra option works."""
         calc = make_calculate_safe_plotting_limits(constant_extra=0)
         _, _ = calc(self.series1)
         strictMin, strictMax = calc(self.outliers)
@@ -171,14 +171,14 @@ class PlottingLimitsTestCase(unittest.TestCase):
         self.assertLess(ymax, max(self.series1_max, self.series2_max) + 1)
 
     def testSymmetric(self):
-        """Test that the symmetric option works"""
+        """Test that the symmetric option works."""
         ymin, ymax = calculate_safe_plotting_limits([self.series1, self.outliers], symmetric_around_zero=True)
         self.assertEqual(ymin, -ymax)
         self.assertGreater(ymax, self.series1_max)
         self.assertLess(ymin, self.series1_min)
 
     def testConstantExtra(self):
-        """Test that the constantExtra option works"""
+        """Test that the constantExtra option works."""
         strictMin, strictMax = calculate_safe_plotting_limits([self.series1, self.outliers], constant_extra=0)
         self.assertAlmostEqual(strictMin, self.series1_min, places=4)
         self.assertAlmostEqual(strictMax, self.series1_max, places=4)

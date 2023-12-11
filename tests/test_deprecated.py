@@ -30,7 +30,7 @@ class DeprecatedTestCase(lsst.utils.tests.TestCase):
 
     def test_deprecate_pybind11(self):
         def old(x):
-            """Docstring"""
+            """Docstring."""
             return x + 1
 
         # Use an unusual category

@@ -113,6 +113,16 @@ def cached_getter(func: Callable[[_S], _R]) -> Callable[[_S], _R]:
     Only works on methods that take only ``self``
     as an argument, and returns the cached result on subsequent calls.
 
+    Parameters
+    ----------
+    func : `~collections.abc.Callable`
+        Method from which the result should be cached.
+
+    Returns
+    -------
+    `~collections.abc.Callable`
+        Decorated method.
+
     Notes
     -----
     This is intended primarily as a stopgap for Python 3.8's more sophisticated

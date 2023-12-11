@@ -74,6 +74,7 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
     Returns
     -------
     version : `str`
+        The version of the python module.
 
     Raises
     ------
@@ -417,12 +418,7 @@ class Packages(dict):
         print("Extra packages compared to before:", pkgs.extra(old))
         print("Different packages: ", pkgs.difference(old))
         old.update(pkgs)  # Include any new packages in the old
-        old.write("/path/to/packages.pickle")
-
-    Parameters
-    ----------
-    packages : `dict`
-        A mapping {package: version} where both keys and values are type `str`.
+        old.write("/path/to/packages.pickle").
 
     Notes
     -----
@@ -547,7 +543,7 @@ class Packages(dict):
         filename : `str`
             Filename to which to write. The format of the data file
             is determined from the file extension. Currently supports
-            ``.pickle``, ``.json``, and ``.yaml``
+            ``.pickle``, ``.json``, and ``.yaml``.
         """
         _, ext = os.path.splitext(filename)
         if ext not in self.formats:
@@ -632,6 +628,18 @@ class _BackwardsCompatibilityUnpickler(pickle.Unpickler):
         """Return the class that should be used for unpickling.
 
         This is always known to be the class in this package.
+
+        Parameters
+        ----------
+        module : `str`
+            Ignored.
+        name : `str`
+            Ignored.
+
+        Returns
+        -------
+        `type` [`Packages`]
+            The Python type to use. Always returns `Packages`.
         """
         return Packages
 

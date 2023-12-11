@@ -79,7 +79,7 @@ def logPairs(
     logger: logging.Logger | None = None,
     stacklevel: int | None = None,
 ) -> None:
-    """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``
+    """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``.
 
     Parameters
     ----------
@@ -238,7 +238,7 @@ def timeMethod(
 
     Parameters
     ----------
-    func
+    _func : `~collections.abc.Callable` or `None`
         The method to wrap.
     metadata : `collections.abc.MutableMapping`, optional
         Metadata to use as override if the instance object attached

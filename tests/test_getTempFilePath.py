@@ -51,7 +51,7 @@ class GetTempFilePathTestCase(unittest.TestCase):
         self.assertFalse(os.path.exists(tmpFile))
 
     def testMultipleCallDepth(self):
-        """Test getTempFile with multiple call depth"""
+        """Test getTempFile with multiple call depth."""
         funcName = "testMultipleCallDepth"
         self.runGetTempFile(funcName)
         self.runLevel2(funcName)
@@ -67,11 +67,11 @@ class GetTempFilePathTestCase(unittest.TestCase):
         self.assertFalse(os.path.exists(tmpFile))
 
     def runLevel2(self, funcName):
-        """Call runGetTempFile"""
+        """Call runGetTempFile."""
         self.runGetTempFile(funcName)
 
     def runLevel3(self, funcName):
-        """Call runLevel2, which calls runGetTempFile"""
+        """Call runLevel2, which calls runGetTempFile."""
         self.runLevel2(funcName)
 
 

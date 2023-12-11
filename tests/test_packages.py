@@ -31,7 +31,7 @@ TESTDIR = os.path.abspath(os.path.dirname(__file__))
 
 
 class PackagesTestCase(unittest.TestCase):
-    """Tests for package version collection
+    """Tests for package version collection.
 
     Unfortunately, we're somewhat limited in what we can test because
     we only get the versions of things being used at runtime, and this
@@ -42,13 +42,13 @@ class PackagesTestCase(unittest.TestCase):
     """
 
     def testPython(self):
-        """Test that we get the right version for this python package"""
+        """Test that we get the right version for this python package."""
         versions = lsst.utils.packages.getPythonPackages()
         expected = lsst.utils.version.__version__
         self.assertEqual(versions["utils"], expected)
 
     def testEnvironment(self):
-        """Test getting versions from the environment
+        """Test getting versions from the environment.
 
         Unfortunately, none of the products that need their versions divined
         from the environment are dependencies of this package, and so all we
@@ -57,7 +57,7 @@ class PackagesTestCase(unittest.TestCase):
         lsst.utils.packages.getEnvironmentPackages()
 
     def testConda(self):
-        """Test getting versions from conda environement
+        """Test getting versions from conda environment.
 
         We do not rely on being run in a conda environment so all we can do is
         test that this doesn't fall over.
@@ -74,7 +74,7 @@ class PackagesTestCase(unittest.TestCase):
         return new
 
     def testPackages(self):
-        """Test the Packages class"""
+        """Test the Packages class."""
         packages = lsst.utils.packages.Packages.fromSystem()
         self.assertIsInstance(packages, Mapping)
 

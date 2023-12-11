@@ -275,7 +275,7 @@ class DbAuth:
 
         See Also
         --------
-        getAuth
+        getAuth : Retrieve authentication credentials.
         """
         components = urllib.parse.urlparse(url)
         username, password = self.getAuth(

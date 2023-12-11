@@ -49,7 +49,7 @@ def inheritDoc(klass: type) -> Callable:
     parent class appears if there is ambiguity from multiple inheritance.
     """
 
-    def tmpDecorator(method: type) -> Callable:
+    def _tmpDecorator(method: type) -> Callable:
         """Update the documentation from a class with the same method."""
         methodName = method.__name__
         if not hasattr(klass, methodName):
@@ -71,4 +71,4 @@ def inheritDoc(klass: type) -> Callable:
             pass
         return method
 
-    return tmpDecorator
+    return _tmpDecorator
