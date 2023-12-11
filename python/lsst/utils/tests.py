@@ -1088,9 +1088,8 @@ def methodParametersProduct(**settings: Sequence[Any]) -> Callable:
     **settings : `dict` (`str`: iterable)
         The parameter combinations to test. Each should be an iterable.
 
-    Example
-    -------
-
+    Examples
+    --------
         @methodParametersProduct(foo=[1, 2], bar=["black", "white"])
         def testSomething(self, foo, bar):
             ...

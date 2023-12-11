@@ -238,7 +238,7 @@ def timeMethod(
 
     Parameters
     ----------
-    func
+    _func : `~collections.abc.Callable` or `None`
         The method to wrap.
     metadata : `collections.abc.MutableMapping`, optional
         Metadata to use as override if the instance object attached

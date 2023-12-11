@@ -129,7 +129,7 @@ def get_instance_of(typeOrName: type | str, *args: Any, **kwargs: Any) -> Any:
     ----------
     typeOrName : `str` or Python class
         A string describing the Python class to load or a Python type.
-    args : `tuple`
+    *args : `tuple`
         Positional arguments to use pass to the object constructor.
     **kwargs
         Keyword arguments to pass to object constructor.
