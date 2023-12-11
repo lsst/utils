@@ -34,6 +34,15 @@ def calculate_safe_plotting_limits(
     data_series : `iterable` or `iterable` of `iterable`
         One or more data series which will be going on the same axis, and
         therefore want to have their common plotting limits calculated.
+    percentile : `float`, optional
+        The percentile used to clip the outliers from the data.
+    constant_extra : `float` or `None`, optional
+        The amount that's added on each side of the range so that data does not
+        quite touch the axes. If the default ``None`` is left then 5% of the
+        data range is added for cosmetics, but if zero is set this will
+        overrides this behaviour and zero you will get.
+    symmetric_around_zero : `bool`, optional
+        Whether to make the limits symmetric around zero.
 
     Returns
     -------
@@ -64,7 +73,7 @@ def make_calculate_safe_plotting_limits(
         data range is added for cosmetics, but if zero is set this will
         overrides this behaviour and zero you will get.
     symmetric_around_zero : `bool`, optional
-        Make the limits symmetric around zero?
+        Whether to make the limits symmetric around zero.
 
     Returns
     -------

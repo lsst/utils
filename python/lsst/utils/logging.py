@@ -236,6 +236,15 @@ class LsstLogAdapter(LoggerAdapter):
 
         Arguments are as for `logging.info`.
         ``VERBOSE`` is between ``DEBUG`` and ``INFO``.
+
+        Parameters
+        ----------
+        fmt : `str`
+            Log message.
+        *args : `~typing.Any`
+            Parameters references by log message.
+        **kwargs : `~typing.Any`
+            Parameters forwarded to `log`.
         """
         # There is no other way to achieve this other than a special logger
         # method.
@@ -248,6 +257,15 @@ class LsstLogAdapter(LoggerAdapter):
 
         Arguments are as for `logging.info`.
         ``TRACE`` is lower than ``DEBUG``.
+
+        Parameters
+        ----------
+        fmt : `str`
+            Log message.
+        *args : `~typing.Any`
+            Parameters references by log message.
+        **kwargs : `~typing.Any`
+            Parameters forwarded to `log`.
         """
         # There is no other way to achieve this other than a special logger
         # method.
@@ -280,12 +298,21 @@ class LsstLogAdapter(LoggerAdapter):
     def addHandler(self, handler: logging.Handler) -> None:
         """Add a handler to this logger.
 
-        The handler is forwarded to the underlying logger.
+        Parameters
+        ----------
+        handler : `logging.Handler`
+           Handler to add. The handler is forwarded to the underlying logger.
         """
         self.logger.addHandler(handler)
 
     def removeHandler(self, handler: logging.Handler) -> None:
-        """Remove the given handler from the underlying logger."""
+        """Remove the given handler from the underlying logger.
+
+        Parameters
+        ----------
+        handler : `logging.Handler`
+            Handler to remove.
+        """
         self.logger.removeHandler(handler)
 
 

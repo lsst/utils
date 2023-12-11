@@ -32,12 +32,12 @@ from typing import Any
 from .doImport import doImport, doImportType
 
 
-def get_full_type_name(cls: Any) -> str:
+def get_full_type_name(cls_: Any) -> str:
     """Return full type name of the supplied entity.
 
     Parameters
     ----------
-    cls : `type` or `object`
+    cls_ : `type` or `object`
         Entity from which to obtain the full name. Can be an instance
         or a `type`.
 
@@ -56,16 +56,16 @@ def get_full_type_name(cls: Any) -> str:
     """
     # If we have a module that needs to be converted directly
     # to a name.
-    if isinstance(cls, types.ModuleType):
-        return cls.__name__
+    if isinstance(cls_, types.ModuleType):
+        return cls_.__name__
     # If we have an instance we need to convert to a type
-    if not hasattr(cls, "__qualname__"):
-        cls = type(cls)
-    if hasattr(builtins, cls.__qualname__):
+    if not hasattr(cls_, "__qualname__"):
+        cls_ = type(cls_)
+    if hasattr(builtins, cls_.__qualname__):
         # Special case builtins such as str and dict
-        return cls.__qualname__
+        return cls_.__qualname__
 
-    real_name = cls.__module__ + "." + cls.__qualname__
+    real_name = cls_.__module__ + "." + cls_.__qualname__
 
     # Remove components with leading underscores
     cleaned_name = ".".join(c for c in real_name.split(".") if not c.startswith("_"))
@@ -80,7 +80,7 @@ def get_full_type_name(cls: Any) -> str:
 
         # The thing we imported should match the class we started with
         # despite the clean up. If it does not we return the real name
-        if test is not cls:
+        if test is not cls_:
             return real_name
 
     return cleaned_name

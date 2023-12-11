@@ -38,17 +38,17 @@ def deprecate_pybind11(obj: Any, reason: str, version: str, category: type[Warni
     obj : function, method, or class
         The function, method, or class to deprecate.
     reason : `str`
-        Reason for deprecation, passed to `~deprecated.sphinx.deprecated`
+        Reason for deprecation, passed to `~deprecated.sphinx.deprecated`.
     version : 'str'
         Next major version in which the interface will be deprecated,
-        passed to `~deprecated.sphinx.deprecated`
+        passed to `~deprecated.sphinx.deprecated`.
     category : `Warning`
-        Warning category, passed to `~deprecated.sphinx.deprecated`
+        Warning category, passed to `~deprecated.sphinx.deprecated`.
 
     Returns
     -------
     obj : function, method, or class
-        Wrapped function, method, or class
+        Wrapped function, method, or class.
 
     Examples
     --------

@@ -79,7 +79,7 @@ def logPairs(
     logger: logging.Logger | None = None,
     stacklevel: int | None = None,
 ) -> None:
-    """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``
+    """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``.
 
     Parameters
     ----------

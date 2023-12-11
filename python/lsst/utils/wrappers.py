@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import sys
 import types
+from typing import Any
 
 import numpy as np
 
@@ -34,13 +35,25 @@ INTRINSIC_SPECIAL_ATTRIBUTES = frozenset(
 )
 
 
-def isAttributeSafeToTransfer(name, value):
+def isAttributeSafeToTransfer(name: str, value: Any) -> bool:
     """Return True if an attribute is safe to monkeypatch-transfer to another
     class.
 
     This rejects special methods that are defined automatically for all
     classes, leaving only those explicitly defined in a class decorated by
     `continueClass` or registered with an instance of `TemplateMeta`.
+
+    Parameters
+    ----------
+    name : `str`
+        The name of the attribute to check.
+    value : `~typing.Any`
+        The value of the attribute.
+
+    Returns
+    -------
+    `bool`
+        Whether the attribute is safe to monkeypatch-transfer.
     """
     if name.startswith("__") and (
         value is getattr(object, name, None) or name in INTRINSIC_SPECIAL_ATTRIBUTES
@@ -78,7 +91,6 @@ def continueClass(cls):
         Python's built-in `super` function does not behave properly in classes
         decorated with `continueClass`.  Base class methods must be invoked
         directly using their explicit types instead.
-
     """
     orig = getattr(sys.modules[cls.__module__], cls.__name__)
     for name in dir(cls):
@@ -93,9 +105,17 @@ def continueClass(cls):
     return orig
 
 
-def inClass(cls, name=None):
+def inClass(cls, name: str | None = None):
     """Add the decorated function to the given class as a method.
 
+    Parameters
+    ----------
+    name : `str` or `None`, optional
+        Name to be associated with the decorated function if the default
+        can not be determined.
+
+    Examples
+    --------
     For example:
 
     .. code-block:: python
@@ -115,6 +135,8 @@ def inClass(cls, name=None):
             def run(self):
                 return None
 
+    Notes
+    -----
     Standard decorators like ``classmethod``, ``staticmethod``, and
     ``property`` may be used *after* this decorator.  Custom decorators
     may only be used if they return an object with a ``__name__`` attribute
@@ -250,7 +272,6 @@ class TemplateMeta(type):
         Python's built-in `super` function does not behave properly in classes
         that have `TemplateMeta` as their metaclass (which should be rare, as
         TemplateMeta ABCs will have base classes of their own)..
-
     """
 
     def __new__(cls, name, bases, attrs):
@@ -323,11 +344,18 @@ class TemplateMeta(type):
         # functionality.
         return tuple(set(cls._registry.values()))
 
-    def register(cls, key, subclass):
+    def register(cls, key, subclass) -> None:
         """Register a subclass of this ABC with the given key (a string,
         number, type, or other hashable).
 
         Register may only be called once for a given key or a given subclass.
+
+        Parameters
+        ----------
+        key : `str` or `numbers.Number` or `None` or `collections.abc.Hashable`
+            Key to use for registration.
+        subclass : `type`
+            Subclass to register.
         """
         if key is None:
             raise ValueError("None may not be used as a key.")
@@ -396,9 +424,16 @@ class TemplateMeta(type):
         for name, attr in cls._inherited.items():
             setattr(subclass, name, attr)
 
-    def alias(cls, key, subclass):
+    def alias(cls, key, subclass) -> None:
         """Add an alias that allows an existing subclass to be accessed with a
         different key.
+
+        Parameters
+        ----------
+        key : `str` or `numbers.Number` or `None` or `collections.abc.Hashable`
+            Key to use for aliasing.
+        subclass : `type`
+            Subclass to alias.
         """
         if key is None:
             raise ValueError("None may not be used as a key.")
@@ -441,8 +476,20 @@ class TemplateMeta(type):
         """Return an iterable of (key, subclass) pairs."""
         return cls._registry.items()
 
-    def get(cls, key, default=None):
-        """Return the subclass associated with the given key (including
-        aliases), or ``default`` if the key is not recognized.
+    def get(cls, key, default=None) -> type:
+        """Return the subclass associated with the given key.
+
+        Parameters
+        ----------
+        key : `~collections.abc.Hashable`
+            Key to query.
+        default : `~typing.Any` or `None`, optional
+            Default value to return if ``key`` is not found.
+
+        Returns
+        -------
+        `type`
+            Subclass with the given key. Includes aliases. Returns ``default``
+            if the key is not recognized.
         """
         return cls._registry.get(key, default)

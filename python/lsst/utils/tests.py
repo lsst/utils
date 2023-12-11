@@ -9,7 +9,7 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-"""Support code for running unit tests"""
+"""Support code for running unit tests."""
 
 from __future__ import annotations
 
@@ -139,7 +139,7 @@ class MemoryTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        """Reset the leak counter when the tests have been completed"""
+        """Reset the leak counter when the tests have been completed."""
         init()
 
     def testFileDescriptorLeaks(self) -> None:
@@ -418,7 +418,7 @@ class ImportTestCase(unittest.TestCase):
 @contextlib.contextmanager
 def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
     """Return a path suitable for a temporary file and try to delete the
-    file on success
+    file on success.
 
     If the with block completes successfully then the file is deleted,
     if possible; failure results in a printed warning.
@@ -438,11 +438,11 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
         If `False`, a file should not be present when the context manager
         exits.
 
-    Returns
-    -------
+    Yields
+    ------
     path : `str`
         Path for a temporary file. The path is a combination of the caller's
-        file path and the name of the top-level function
+        file path and the name of the top-level function.
 
     Examples
     --------
@@ -527,13 +527,23 @@ class TestCase(unittest.TestCase):
 def inTestCase(func: Callable) -> Callable:
     """Add a free function to our custom TestCase class, while
     also making it available as a free function.
+
+    Parameters
+    ----------
+    func : `~collections.abc.Callable`
+        Function to be added to `unittest.TestCase` class.
+
+    Returns
+    -------
+    func : `~collections.abc.Callable`
+        The given function.
     """
     setattr(TestCase, func.__name__, func)
     return func
 
 
 def debugger(*exceptions):
-    """Enter the debugger when there's an uncaught exception
+    """Enter the debugger when there's an uncaught exception.
 
     To use, just slap a ``@debugger()`` on your function.
 
@@ -545,6 +555,12 @@ def debugger(*exceptions):
 
     Code provided by "Rosh Oxymoron" on StackOverflow:
     http://stackoverflow.com/questions/4398967/python-unit-testing-automatically-running-the-debugger-when-a-test-fails
+
+    Parameters
+    ----------
+    *exceptions : `Exception`
+        Specific exception classes to catch. Default is to catch
+        `AssertionError`.
 
     Notes
     -----
@@ -581,13 +597,13 @@ def plotImageDiff(
     Parameters
     ----------
     lhs : `numpy.ndarray`
-        LHS values to compare; a 2-d NumPy array
+        LHS values to compare; a 2-d NumPy array.
     rhs : `numpy.ndarray`
-        RHS values to compare; a 2-d NumPy array
+        RHS values to compare; a 2-d NumPy array.
     bad : `numpy.ndarray`
-        A 2-d boolean NumPy array of values to emphasize in the plots
+        A 2-d boolean NumPy array of values to emphasize in the plots.
     diff : `numpy.ndarray`
-        difference array; a 2-d NumPy array, or None to show lhs-rhs
+        Difference array; a 2-d NumPy array, or None to show lhs-rhs.
     plotFileName : `str`
         Filename to save the plot to.  If None, the plot will be displayed in
         a window.
@@ -833,6 +849,8 @@ def assertFloatsNotEqual(
     rhs : scalar or array-like
         RHS value(s) to compare; may be a scalar or array-like of any
         dimension.
+    **kwds : `~typing.Any`
+        Keyword parameters forwarded to `assertFloatsAlmostEqual`.
 
     Raises
     ------
@@ -865,6 +883,8 @@ def assertFloatsEqual(
     rhs : scalar or array-like
         RHS value(s) to compare; may be a scalar or array-like of any
         dimension.
+    **kwargs : `~typing.Any`
+        Keyword parameters forwarded to `assertFloatsAlmostEqual`.
 
     Raises
     ------
@@ -908,7 +928,7 @@ def _settingsIterator(settings: dict[str, Sequence[Any]]) -> Iterator[dict[str, 
 
 
 def classParameters(**settings: Sequence[Any]) -> Callable:
-    """Class decorator for generating unit tests
+    """Class decorator for generating unit tests.
 
     This decorator generates classes with class variables according to the
     supplied ``settings``.
@@ -995,7 +1015,7 @@ def methodParameters(**settings: Sequence[Any]) -> Callable:
 
 
 def _cartesianProduct(settings: Mapping[str, Sequence[Any]]) -> Mapping[str, Sequence[Any]]:
-    """Return the cartesian product of the settings
+    """Return the cartesian product of the settings.
 
     Parameters
     ----------
@@ -1028,7 +1048,7 @@ def _cartesianProduct(settings: Mapping[str, Sequence[Any]]) -> Mapping[str, Seq
 
 
 def classParametersProduct(**settings: Sequence[Any]) -> Callable:
-    """Class decorator for generating unit tests
+    """Class decorator for generating unit tests.
 
     This decorator generates classes with class variables according to the
     cartesian product of the supplied ``settings``.
@@ -1110,6 +1130,11 @@ def temporaryDirectory() -> Iterator[str]:
 
     The difference from `tempfile.TemporaryDirectory` is that this ignores
     errors when deleting a directory, which may happen with some filesystems.
+
+    Yields
+    ------
+    `str`
+        Name of the temporary directory.
     """
     tmpdir = tempfile.mkdtemp()
     yield tmpdir
