@@ -28,6 +28,7 @@ import sys
 import types
 from collections.abc import Mapping
 from functools import lru_cache
+from importlib.metadata import packages_distributions
 from typing import Any, ClassVar
 
 import yaml
@@ -50,6 +51,8 @@ BUILDTIME = {"boost", "eigen", "tmv"}
 # We do this because the version only appears to be available from python,
 # but we use the library
 PYTHON = {"galsim"}
+
+SPECIAL_NAMESPACES = {"lsst"}
 
 # Packages that don't seem to have a mechanism for reporting the runtime
 # version.  We need to guess the version from the environment
@@ -121,11 +124,13 @@ def getPythonPackages() -> dict[str, str]:
         with contextlib.suppress(Exception):
             importlib.import_module(module_name)
 
+    package_dist = packages_distributions()
+
     packages = {"python": sys.version}
 
     # Not iterating with sys.modules.iteritems() because it's not atomic and
     # subject to race conditions
-    module_names = list(sys.modules.keys())
+    module_names = sorted(list(sys.modules.keys()))
 
     # Use knowledge of package hierarchy to find the versions rather than
     # using each name independently. Group all the module names into the
@@ -145,7 +150,7 @@ def getPythonPackages() -> dict[str, str]:
     n_versions = 0
     n_checked = 0
     previous = ""
-    for name in sorted(module_names):
+    for name in module_names:
         if name.startswith("_") or "._" in name:
             # Refers to a private module so we can ignore it and assume
             # version has been lifted into parent or, if top level, not
@@ -165,8 +170,19 @@ def getPythonPackages() -> dict[str, str]:
             # for the line after this.
             continue
 
-        # Look for a version.
-        ver = _get_python_package_version(name, packages)
+        # Find the namespace which we need to use package_dist.
+        namespace = name.split(".")[0]
+
+        # package_dist is a mapping from import namespace to distribution
+        # package names. This may be a one-to-many mapping due to namespace
+        # packages. Note that package_dist does not know about editable
+        # installs or eups installs via path manipulation.
+        if namespace in package_dist:
+            dist_names = package_dist[namespace]
+        else:
+            dist_names = [name]
+
+        ver = _get_python_package_version(name, namespace, dist_names, packages)
 
         n_checked += 1
         if ver is not None:
@@ -193,13 +209,19 @@ def getPythonPackages() -> dict[str, str]:
     return packages
 
 
-def _get_python_package_version(name: str, packages: dict[str, str]) -> str | None:
+def _get_python_package_version(
+    name: str, namespace: str, dist_names: list[str], packages: dict[str, str]
+) -> str | None:
     """Given a package or module name, try to determine the version.
 
     Parameters
     ----------
     name : `str`
-        The name of the package or module to try.
+        The imported name of the package or module to try.
+    namespace : `str`
+        The namespace of the package or module.
+    dist_names : `list` [ `str` ]
+        The distribution names of the package or module.
     packages : `dict` [ `str`, `str` ]
         A dictionary mapping a name to a version. Modified in place.
         The key used might not match exactly the given key.
@@ -210,10 +232,39 @@ def _get_python_package_version(name: str, packages: dict[str, str]) -> str | No
         The version string stored in ``packages``. Nothing is stored if the
         value here is `None`.
     """
+    # We have certain special namespaces that are used via eups that
+    # need to be enumerated here.
+    if len(dist_names) > 1 or namespace in SPECIAL_NAMESPACES:
+        # Split the name into parts.
+        name_parts = re.split("[._-]", name)
+
+        found = False
+        for dist_name in dist_names:
+            dist_name_parts = re.split("[._-]", dist_name)
+            # Check if the components start with the namespace; this is
+            # needed because (at least) lsst.ts packages do not use
+            # ``lsst`` in the package name.
+            if dist_name_parts[0] != namespace:
+                dist_name_parts.insert(0, namespace)
+
+            if dist_name_parts == name_parts:
+                found = True
+                break
+
+        if not found:
+            # This fallback case occurs when (a) we are testing the overall
+            # namespace (e.g. "lsst" or "sphinxcontrib") and the code below
+            # will return None; or (b) for eups-installed and other
+            # "editable installations" that are not registered as part
+            # of importlib.packages_distributions().
+            dist_name = name
+    else:
+        dist_name = dist_names[0]
+
     try:
         # This is the Python standard way to find a package version.
         # It can be slow.
-        ver = importlib.metadata.version(name)
+        ver = importlib.metadata.version(dist_name)
     except Exception:
         # Fall back to using the module itself. There is no guarantee
         # that "a" exists for module "a.b" so if hierarchy has been expanded
