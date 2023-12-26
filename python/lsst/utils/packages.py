@@ -50,7 +50,7 @@ BUILDTIME = {"boost", "eigen", "tmv"}
 # Python modules to attempt to load so we can try to get the version
 # We do this because the version only appears to be available from python,
 # but we use the library
-PYTHON = {"galsim"}
+PYTHON = {}
 
 SPECIAL_NAMESPACES = {"lsst"}
 
