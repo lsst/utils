@@ -234,7 +234,7 @@ def _get_python_package_version(
     """
     # We have certain special namespaces that are used via eups that
     # need to be enumerated here.
-    if len(dist_names) > 1 or name.split(".")[0] in SPECIAL_NAMESPACES:
+    if len(dist_names) > 1 or namespace in SPECIAL_NAMESPACES:
         # Split the name into parts.
         name_parts = re.split("[._-]", name)
 
