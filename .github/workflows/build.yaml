@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v3
@@ -44,6 +44,11 @@ jobs:
         shell: bash -l {0}
         run: |
           mamba install numexpr
+
+      - name: Install lsst-ts-xml for test coverage of installing into lsst namespace
+        shell: bash -l {0}
+        run: |
+          mamba install lsst-ts-xml
 
       - name: Install dependencies
         shell: bash -l {0}
