@@ -19,6 +19,7 @@ __all__ = ["Singleton", "cached_getter", "immutable"]
 
 import functools
 from collections.abc import Callable
+from threading import RLock
 from typing import Any, ClassVar, Type, TypeVar
 
 
@@ -34,14 +35,21 @@ class Singleton(type):
     """
 
     _instances: ClassVar[dict[type, Any]] = {}
+    # This lock isn't ideal because it is shared between all classes using this
+    # metaclass, but current use cases don't do long-running I/O during
+    # initialization so the performance impact should be low.  It must be an
+    # RLock instead of a regular Lock because one singleton class might try to
+    # instantiate another as part of its initialization.
+    __lock: ClassVar[RLock] = RLock()
 
     # Signature is intentionally not substitutable for type.__call__ (no *args,
     # **kwargs) to require classes that use this metaclass to have no
     # constructor arguments.
     def __call__(cls) -> Any:
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__call__()
-        return cls._instances[cls]
+        with cls.__lock:
+            if cls not in cls._instances:
+                cls._instances[cls] = super().__call__()
+            return cls._instances[cls]
 
 
 _T = TypeVar("_T", bound="Type")
