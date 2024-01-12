@@ -1,0 +1,1 @@
+Move code for getting version from git for a single package into its own function.

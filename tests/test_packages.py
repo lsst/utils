@@ -21,6 +21,7 @@
 
 import os
 import sys
+import tempfile
 import unittest
 from collections.abc import Mapping
 
@@ -46,6 +47,19 @@ class PackagesTestCase(unittest.TestCase):
         versions = lsst.utils.packages.getPythonPackages()
         expected = lsst.utils.version.__version__
         self.assertEqual(versions["utils"], expected)
+
+    def testGit(self):
+        """Test getting versions from Git."""
+        with tempfile.TemporaryDirectory(prefix=TESTDIR) as d:
+            version = lsst.utils.packages.getVersionFromGit(d)
+            self.assertEqual(version, "@NO_GIT")
+
+            os.mkdir(d + "/.git")
+            version = lsst.utils.packages.getVersionFromGit(d)
+            self.assertEqual(version, "@GIT_ERROR")
+
+        version = lsst.utils.packages.getVersionFromGit(__file__.rsplit("tests", 1)[:-1][0])
+        self.assertIn("@", version)
 
     def testEnvironment(self):
         """Test getting versions from the environment.
