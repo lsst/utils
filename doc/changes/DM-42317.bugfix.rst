@@ -1,0 +1,1 @@
+Fixed a race condition in ``Singleton`` that could cause more than one instance of a class to be created if two threads concurrently attempted to create the instance.
