@@ -37,6 +37,7 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     "getVersionFromPythonModule",
+    "getVersionFromGit",
     "getPythonPackages",
     "getEnvironmentPackages",
     "getCondaPackages",
@@ -99,6 +100,48 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
         if buildtime:
             version += " with " + " ".join(f"{pkg}={deps[pkg]}" for pkg in sorted(buildtime))
     return str(version)
+
+
+def getVersionFromGit(module_dir: str) -> str:
+    """Determine the version of a python module.
+
+    Parameters
+    ----------
+    module_dir : `str`
+        Directory of module
+
+    Returns
+    -------
+    ver : `str`
+        The version of the python module.
+        - @GIT_ERROR if problems running git command
+        - @NO_GIT if module_dir is not a git directory
+    """
+    gitDir = os.path.join(module_dir, ".git")
+    if os.path.exists(gitDir):
+        # get the git revision and an indication if the working copy is
+        # clean
+        revCmd = ["git", "--git-dir=" + gitDir, "--work-tree=" + module_dir, "rev-parse", "HEAD"]
+        diffCmd = [
+            "git",
+            "--no-pager",
+            "--git-dir=" + gitDir,
+            "--work-tree=" + module_dir,
+            "diff",
+            "--patch",
+        ]
+        try:
+            rev = subprocess.check_output(revCmd).decode().strip()
+            diff = subprocess.check_output(diffCmd)
+        except Exception:
+            ver = "@GIT_ERROR"
+        else:
+            ver = "@" + rev
+            if diff:
+                ver += "+" + hashlib.md5(diff).hexdigest()
+    else:
+        ver = "@NO_GIT"
+    return ver
 
 
 def getPythonPackages() -> dict[str, str]:
@@ -343,32 +386,7 @@ def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
                 packages[prod.name] = prod.version + tag_msg
             continue
         ver = prod.version
-
-        gitDir = os.path.join(prod.dir, ".git")
-        if os.path.exists(gitDir):
-            # get the git revision and an indication if the working copy is
-            # clean
-            revCmd = ["git", "--git-dir=" + gitDir, "--work-tree=" + prod.dir, "rev-parse", "HEAD"]
-            diffCmd = [
-                "git",
-                "--no-pager",
-                "--git-dir=" + gitDir,
-                "--work-tree=" + prod.dir,
-                "diff",
-                "--patch",
-            ]
-            try:
-                rev = subprocess.check_output(revCmd).decode().strip()
-                diff = subprocess.check_output(diffCmd)
-            except Exception:
-                ver += "@GIT_ERROR"
-            else:
-                ver += "@" + rev
-                if diff:
-                    ver += "+" + hashlib.md5(diff).hexdigest()
-        else:
-            ver += "@NO_GIT"
-
+        ver += getVersionFromGit(prod.dir)
         packages[prod.name] = ver
     return packages
 
