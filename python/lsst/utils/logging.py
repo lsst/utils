@@ -28,7 +28,7 @@ import time
 from collections.abc import Generator
 from contextlib import contextmanager
 from logging import LoggerAdapter
-from typing import Any, Union
+from typing import Any, TypeAlias, Union
 
 try:
     import lsst.log.utils as logUtils
@@ -349,7 +349,7 @@ def getLogger(name: str | None = None, logger: logging.Logger | None = None) -> 
     return LsstLogAdapter(logger, {})
 
 
-LsstLoggers = Union[logging.Logger, LsstLogAdapter]
+LsstLoggers: TypeAlias = Union[logging.Logger, LsstLogAdapter]
 
 
 def getTraceLogger(logger: str | LsstLoggers, trace_level: int) -> LsstLogAdapter:
