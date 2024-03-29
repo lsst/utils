@@ -233,19 +233,19 @@ class DbAuthTestCase(unittest.TestCase):
         self.assertEqual(
             auth.getUrl("postgresql://user@host.example.com:5432/my_database"),
             "postgresql://user:bar@host.example.com:5432/my_database",
-        ),
+        )
         self.assertEqual(
             auth.getUrl("postgresql://user@host.example.com/my_database"),
             "postgresql://user:bar@host.example.com/my_database",
-        ),
+        )
         self.assertEqual(
             auth.getUrl("postgresql://host.example.com/my_database"),
             "postgresql://foo:bar@host.example.com/my_database",
-        ),
+        )
         self.assertEqual(
             auth.getUrl("postgresql://host.example.com:5432/my_database"),
             "postgresql://foo:bar@host.example.com:5432/my_database",
-        ),
+        )
 
         filePath = os.path.join(TESTDIR, "db-auth.yaml")
         os.chmod(filePath, 0o600)
