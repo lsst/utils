@@ -24,4 +24,5 @@ nitpick_ignore = [
     ("py:obj", "logging.DEBUG"),  # Python 3 constant can not be found.
     ("py:class", "unittest.case.TestCase"),  # Sphinx can not see TestCase.
     ("py:obj", "deprecated.sphinx.deprecated"),  # No intersphinx for deprecated package.
+    ("py:class", "LsstLoggers"),  # Sphinx does not understand type aliases
 ]

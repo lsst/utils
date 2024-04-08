@@ -76,7 +76,7 @@ def logPairs(
     pairs: Collection[tuple[str, Any]],
     logLevel: int = logging.DEBUG,
     metadata: MutableMapping | None = None,
-    logger: logging.Logger | None = None,
+    logger: LsstLoggers | None = None,
     stacklevel: int | None = None,
 ) -> None:
     """Log ``(name, value)`` pairs to ``obj.metadata`` and ``obj.log``.
@@ -99,7 +99,7 @@ def logPairs(
         Log level (an `logging` level constant, such as `logging.DEBUG`).
     metadata : `collections.abc.MutableMapping`, optional
         Metadata object to write entries to.  Ignored if `None`.
-    logger : `logging.Logger`
+    logger : `logging.Logger` or `lsst.utils.logging.LsstLogAdapter`
         Log object to write entries to.  Ignored if `None`.
     stacklevel : `int`, optional
         The stack level to pass to the logger to adjust which stack frame
@@ -141,7 +141,7 @@ def logInfo(
     prefix: str,
     logLevel: int = logging.DEBUG,
     metadata: MutableMapping | None = None,
-    logger: logging.Logger | None = None,
+    logger: LsstLoggers | None = None,
     stacklevel: int | None = None,
 ) -> None:
     """Log timer information to ``obj.metadata`` and ``obj.log``.
@@ -166,7 +166,7 @@ def logInfo(
         Log level (a `logging` level constant, such as `logging.DEBUG`).
     metadata : `collections.abc.MutableMapping`, optional
         Metadata object to write entries to, overriding ``obj.metadata``.
-    logger : `logging.Logger`
+    logger : `logging.Logger` or `lsst.utils.logging.LsstLogAdapter`
         Log object to write entries to, overriding ``obj.log``.
     stacklevel : `int`, optional
         The stack level to pass to the logger to adjust which stack frame
@@ -231,7 +231,7 @@ def timeMethod(
     _func: Any | None = None,
     *,
     metadata: MutableMapping | None = None,
-    logger: logging.Logger | None = None,
+    logger: LsstLoggers | None = None,
     logLevel: int = logging.DEBUG,
 ) -> Callable:
     """Measure duration of a method.
@@ -243,7 +243,7 @@ def timeMethod(
     metadata : `collections.abc.MutableMapping`, optional
         Metadata to use as override if the instance object attached
         to this timer does not support a ``metadata`` property.
-    logger : `logging.Logger`, optional
+    logger : `logging.Logger` or `lsst.utils.logging.LsstLogAdapter`, optional
         Logger to use when the class containing the decorated method does not
         have a ``log`` property.
     logLevel : `int`, optional
@@ -429,7 +429,7 @@ def time_this(
 
 
 @contextmanager
-def profile(filename: str | None, log: logging.Logger | None = None) -> Iterator[cProfile.Profile | None]:
+def profile(filename: str | None, log: LsstLoggers | None = None) -> Iterator[cProfile.Profile | None]:
     """Profile the enclosed code block and save the result to a file.
 
     Parameters
@@ -437,7 +437,7 @@ def profile(filename: str | None, log: logging.Logger | None = None) -> Iterator
     filename : `str` or `None`
         Filename to which to write profile (profiling disabled if `None` or
         empty string).
-    log : `logging.Logger`, optional
+    log : `logging.Logger` or `lsst.utils.logging.LsstLogAdapter`, optional
         Log object for logging the profile operations.
 
     Yields
