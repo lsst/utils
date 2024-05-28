@@ -1,6 +1,8 @@
 lsst-utils 27.0.0 (2024-05-28)
 ==============================
 
+Now requires Python 3.10 or newer.
+
 New Features
 ------------
 
