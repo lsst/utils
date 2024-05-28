@@ -1,2 +1,0 @@
-Changed how Conda package versions are discovered, resulting in a 10x speed up.
-No longer uses ``conda list``.

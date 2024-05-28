@@ -1,3 +1,28 @@
+lsst-utils 27.0.0 (2024-05-28)
+==============================
+
+New Features
+------------
+
+- Allow for skipping files in ``ImportTestCase`` using ``SKIP_FILES`` class variable. (`DM-40817 <https://jira.lsstcorp.org/browse/DM-40817>`_)
+
+
+Bug Fixes
+---------
+
+- Fixed ``inheritDoc`` to insert newlines between the parent and child docstrings and also correct for indentation differences. (`DM-22287 <https://jira.lsstcorp.org/browse/DM-22287>`_)
+- Fixed a race condition in ``Singleton`` that could cause more than one instance of a class to be created if two threads concurrently attempted to create the instance. (`DM-42317 <https://jira.lsstcorp.org/browse/DM-42317>`_)
+
+
+Miscellaneous Changes of Minor Interest
+---------------------------------------
+
+- Export type aliases for LSST log adapters for use in downstream static typing. (`DM-40441 <https://jira.lsstcorp.org/browse/DM-40441>`_)
+- Changed how Conda package versions are discovered, resulting in a 10x speed up.
+  No longer uses ``conda list``. (`DM-40803 <https://jira.lsstcorp.org/browse/DM-40803>`_)
+- Use ``packages_distributions()`` from `importlib.metadata` to get mapping from import name to distribution name. (`DM-42391 <https://jira.lsstcorp.org/browse/DM-42391>`_)
+
+
 lsst-utils v26.0.0 (2023-09-22)
 ===============================
 
