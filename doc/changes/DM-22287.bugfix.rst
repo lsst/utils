@@ -1,1 +1,0 @@
-Fixed ``inheritDoc`` to insert newlines between the parent and child docstrings and also correct for indentation differences.
