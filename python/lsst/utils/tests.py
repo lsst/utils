@@ -614,11 +614,20 @@ def plotImageDiff(
     wrapped in a try/except block within packages that do not depend on
     `matplotlib` (including `~lsst.utils`).
     """
-    from matplotlib import pyplot
+    if plotFileName is None:
+        # We need to create an interactive plot with pyplot.
+        from matplotlib import pyplot
+
+        fig = pyplot.figure()
+    else:
+        # We can create a non-interactive figure.
+        from .plotting import make_figure
+
+        fig = make_figure()
 
     if diff is None:
         diff = lhs - rhs
-    pyplot.figure()
+
     if bad is not None:
         # make an rgba image that's red and transparent where not bad
         badImage = numpy.zeros(bad.shape + (4,), dtype=numpy.uint8)
@@ -631,29 +640,29 @@ def plotImageDiff(
     vmin2 = numpy.min(diff)
     vmax2 = numpy.max(diff)
     for n, (image, title) in enumerate([(lhs, "lhs"), (rhs, "rhs"), (diff, "diff")]):
-        pyplot.subplot(2, 3, n + 1)
-        im1 = pyplot.imshow(
+        ax = fig.add_subplot(2, 3, n + 1)
+        im1 = ax.imshow(
             image, cmap=pyplot.cm.gray, interpolation="nearest", origin="lower", vmin=vmin1, vmax=vmax1
         )
         if bad is not None:
-            pyplot.imshow(badImage, alpha=0.2, interpolation="nearest", origin="lower")
-        pyplot.axis("off")
-        pyplot.title(title)
-        pyplot.subplot(2, 3, n + 4)
-        im2 = pyplot.imshow(
+            ax.imshow(badImage, alpha=0.2, interpolation="nearest", origin="lower")
+        ax.axis("off")
+        ax.set_title(title)
+        ax = fig.add_subplot(2, 3, n + 4)
+        im2 = ax.imshow(
             image, cmap=pyplot.cm.gray, interpolation="nearest", origin="lower", vmin=vmin2, vmax=vmax2
         )
         if bad is not None:
-            pyplot.imshow(badImage, alpha=0.2, interpolation="nearest", origin="lower")
-        pyplot.axis("off")
-        pyplot.title(title)
-    pyplot.subplots_adjust(left=0.05, bottom=0.05, top=0.92, right=0.75, wspace=0.05, hspace=0.05)
-    cax1 = pyplot.axes([0.8, 0.55, 0.05, 0.4])
-    pyplot.colorbar(im1, cax=cax1)
-    cax2 = pyplot.axes([0.8, 0.05, 0.05, 0.4])
-    pyplot.colorbar(im2, cax=cax2)
+            ax.imshow(badImage, alpha=0.2, interpolation="nearest", origin="lower")
+        ax.axis("off")
+        ax.set_title(title)
+    fig.subplots_adjust(left=0.05, bottom=0.05, top=0.92, right=0.75, wspace=0.05, hspace=0.05)
+    cax1 = fig.add_subplot([0.8, 0.55, 0.05, 0.4])
+    fig.colorbar(im1, cax=cax1)
+    cax2 = fig.add_subplot([0.8, 0.05, 0.05, 0.4])
+    fig.colorbar(im2, cax=cax2)
     if plotFileName:
-        pyplot.savefig(plotFileName)
+        fig.savefig(plotFileName)
     else:
         pyplot.show()
 
