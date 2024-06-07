@@ -11,6 +11,8 @@
 
 from __future__ import annotations
 
+__all__ = ["calculate_safe_plotting_limits", "make_calculate_safe_plotting_limits"]
+
 from collections.abc import Callable, Iterable, Sequence
 
 import numpy as np

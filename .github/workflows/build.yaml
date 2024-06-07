@@ -38,7 +38,7 @@ jobs:
       # We have two cores so we can speed up the testing with xdist
       - name: Install pytest packages
         shell: bash -l {0}
-        run: mamba install -y -q pytest pytest-xdist pytest-openfiles pytest-cov
+        run: mamba install -y -q pytest pytest-xdist pytest-cov
 
       - name: Install numexpr for tests
         shell: bash -l {0}
@@ -81,12 +81,13 @@ jobs:
           setup -k -r .
           cd -
           eups list
-          pytest -r a -v -n 3 --open-files --cov=tests --cov=lsst.utils --cov-report=xml --cov-report=term
+          pytest -r a -v -n 3 --cov=tests --cov=lsst.utils --cov-report=xml --cov-report=term
 
       - name: Upload coverage to codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   pypi:
 
