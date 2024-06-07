@@ -36,7 +36,6 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest >= 3.2",
-    "pytest-openfiles >= 0.5.0",
 ]
 plotting = [
     "matplotlib",
