@@ -20,12 +20,14 @@ __all__ = [
     "get_caller_name",
     "find_outside_stacklevel",
     "take_object_census",
+    "trace_object_references",
 ]
 
 import builtins
 import collections
 import gc
 import inspect
+import itertools
 import sys
 import types
 import warnings
@@ -237,7 +239,7 @@ def find_outside_stacklevel(
 
     Examples
     --------
-    .. code-block :: python
+    .. code-block:: python
 
         warnings.warn(
             "A warning message",
@@ -327,3 +329,122 @@ def take_object_census() -> collections.Counter[type]:
     for obj in gc.get_objects():
         counts[type(obj)] += 1
     return counts
+
+
+def trace_object_references(
+    target_class: type,
+    count: int = 5,
+    max_level: int = 10,
+) -> tuple[list[list], bool]:
+    """Find the chain(s) of references that make(s) objects of a class
+    reachable.
+
+    Parameters
+    ----------
+    target_class : `type`
+        The class whose objects need to be traced. This is typically a class
+        that is known to be leaking.
+    count : `int`, optional
+        The number of example objects to trace, if that many exist.
+    max_level : `int`, optional
+        The number of levels of references to trace. ``max_level=1`` means
+        finding only objects that directly refer to the examples.
+
+    Returns
+    -------
+    traces : `list` [`list`]
+        A sequence whose first element (index 0) is the set of example objects
+        of type ``target_class``, whose second element (index 1) is the set of
+        objects that refer to the examples, and so on. Contains at most
+        ``max_level + 1`` elements.
+    trace_complete : `bool`
+        `True` if the trace for all objects terminated in at most
+        ``max_level`` references, and `False` if more references exist.
+
+    Examples
+    --------
+    An example with two levels of references:
+
+    >>> from collections import namedtuple
+    >>> class Foo:
+    ...     pass
+    >>> holder = namedtuple("Holder", ["bar", "baz"])
+    >>> myholder = holder(bar={"object": Foo()}, baz=42)
+    >>> # In doctest, the trace extends up to the whole global dict
+    >>> # if you let it.
+    >>> trace_object_references(Foo, max_level=2)  # doctest: +ELLIPSIS
+    ...                                      # doctest: +NORMALIZE_WHITESPACE
+    ([[<lsst.utils.introspection.Foo object at ...>],
+      [{'object': <lsst.utils.introspection.Foo object at ...>}],
+      [Holder(bar={'object': <lsst.utils.introspection.Foo object at ...>},
+              baz=42)]], False)
+    """
+
+    def class_filter(o: Any) -> bool:
+        return isinstance(o, target_class)
+
+    # set() would be more appropriate, but objects may not be hashable.
+    objs = list(itertools.islice(filter(class_filter, gc.get_objects()), count))
+    if objs:
+        return _recurse_trace(objs, remaining=max_level)
+    else:
+        return [objs], True
+
+
+def _recurse_trace(objs: list, remaining: int) -> tuple[list[list], bool]:
+    """Recursively find references to a set of objects.
+
+    Parameters
+    ----------
+    objs : `list`
+        The objects to trace.
+    remaining : `int`
+        The number of levels of references to trace.
+
+    Returns
+    -------
+    traces : `list` [`list`]
+        A sequence whose first element (index 0) is ``objs``, whose second
+        element (index 1) is the set of objects that refer to those, and so on.
+        Contains at most ``remaining + 1``.
+    trace_complete : `bool`
+        `True` if the trace for all objects terminated in at most
+        ``remaining`` references, and `False` if more references exist.
+    """
+    # Filter out our own references to the objects. This is needed to avoid
+    # circular recursion.
+    refs = _get_clean_refs(objs)
+
+    if refs:
+        if remaining > 1:
+            more_refs, complete = _recurse_trace(refs, remaining=remaining - 1)
+            more_refs.insert(0, objs)
+            return more_refs, complete
+        else:
+            more_refs = _get_clean_refs(refs)
+            return [objs, refs], (not more_refs)
+    else:
+        return [objs], True
+
+
+def _get_clean_refs(objects: list) -> list:
+    """Find references to a set of objects, excluding those needed to query
+    for references.
+
+    Parameters
+    ----------
+    objects : `list`
+        The objects to find references for.
+
+    Returns
+    -------
+    refs : `list`
+        The objects that refer to the elements of ``objects``, not counting
+        ``objects`` itself.
+    """
+    refs = gc.get_referrers(*objects)
+    refs.remove(objects)
+    iterators = [x for x in refs if type(x).__name__.endswith("_iterator")]
+    for i in iterators:
+        refs.remove(i)
+    return refs

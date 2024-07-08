@@ -34,6 +34,7 @@ from lsst.utils.introspection import (
     get_full_type_name,
     get_instance_of,
     take_object_census,
+    trace_object_references,
 )
 
 
@@ -179,6 +180,68 @@ class TestInstropection(unittest.TestCase):
         counts = take_object_census()
         self.assertIsInstance(counts, Counter)
         self.assertEqual(counts[DummyClass], 1)
+
+    def test_trace_object_references_simple(self):
+        class RefTester:
+            pass
+
+        obj1 = RefTester()
+        obj2 = RefTester()
+        mapping = {"2": obj2}
+
+        trace, complete = trace_object_references(RefTester)  # max_level = 10
+        self.assertTrue(complete)
+        self.assertEqual(len(trace), 2)
+        # The local namespace is *not* counted as a referring object.
+        self.assertEqual(set(trace[0]), {obj1, obj2})
+        self.assertEqual(list(trace[1]), [mapping])
+
+    def test_trace_object_references_atlimit(self):
+        """Test that completion is detected when trace ends *just* at
+        the limit.
+        """
+
+        class RefTester:
+            pass
+
+        obj1 = RefTester()
+        obj2 = RefTester()
+        mapping = {"2": obj2}
+
+        trace, complete = trace_object_references(RefTester, max_level=1)
+        self.assertTrue(complete)
+        self.assertEqual(len(trace), 2)
+        # The local namespace is *not* counted as a referring object.
+        self.assertEqual(set(trace[0]), {obj1, obj2})
+        self.assertEqual(list(trace[1]), [mapping])
+
+    def test_trace_object_references_cyclic(self):
+        class RefTester:
+            pass
+
+        obj1 = RefTester()
+        obj2 = RefTester()
+        mapping = {"2": obj2}
+        cyclic = {"back": mapping}
+        mapping["forth"] = cyclic
+
+        trace, complete = trace_object_references(RefTester, max_level=3)
+        self.assertFalse(complete)
+        self.assertEqual(len(trace), 4)
+        # The local namespace is *not* counted as a referring object.
+        self.assertEqual(set(trace[0]), {obj1, obj2})
+        self.assertEqual(list(trace[1]), [mapping])
+        self.assertEqual(list(trace[2]), [cyclic])
+        self.assertEqual(list(trace[3]), [mapping])
+
+    def test_trace_object_references_null(self):
+        class UnusedClass:
+            pass
+
+        trace, complete = trace_object_references(UnusedClass)
+        self.assertTrue(complete)
+        self.assertEqual(len(trace), 1)
+        self.assertEqual(list(trace[0]), [])
 
 
 if __name__ == "__main__":
