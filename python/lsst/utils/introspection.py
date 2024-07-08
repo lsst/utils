@@ -19,9 +19,12 @@ __all__ = [
     "get_instance_of",
     "get_caller_name",
     "find_outside_stacklevel",
+    "take_object_census",
 ]
 
 import builtins
+import collections
+import gc
 import inspect
 import sys
 import types
@@ -301,3 +304,26 @@ def find_outside_stacklevel(
         stacklevel = i
 
     return stacklevel
+
+
+def take_object_census() -> collections.Counter[type]:
+    """Count the number of existing objects, by type.
+
+    The census is returned as a `~collections.Counter` object. Expected usage
+    involves taking the difference with a different `~collections.Counter` and
+    examining any changes.
+
+    Returns
+    -------
+    census : `collections.Counter` [`type`]
+        The number of objects found of each type.
+
+    Notes
+    -----
+    This function counts _all_ Python objects in memory. To count only
+    reachable objects, run `gc.collect` first.
+    """
+    counts: collections.Counter[type] = collections.Counter()
+    for obj in gc.get_objects():
+        counts[type(obj)] += 1
+    return counts

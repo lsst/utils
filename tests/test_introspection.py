@@ -33,6 +33,7 @@ from lsst.utils.introspection import (
     get_class_of,
     get_full_type_name,
     get_instance_of,
+    take_object_census,
 )
 
 
@@ -166,6 +167,18 @@ class TestInstropection(unittest.TestCase):
             level = c.indirect_level(allow_methods=allow_methods)
         self.assertEqual(level, stacklevel)
         self.assertTrue(cm.filename.endswith("success.py"))
+
+    def test_take_object_census(self):
+        # Full output cannot be validated, because it depends on the global
+        # state of the test process.
+        class DummyClass:
+            pass
+
+        dummy = DummyClass()  # noqa: F841, unused variable
+
+        counts = take_object_census()
+        self.assertIsInstance(counts, Counter)
+        self.assertEqual(counts[DummyClass], 1)
 
 
 if __name__ == "__main__":
