@@ -240,10 +240,12 @@ def _get_python_package_version(
 
         found = False
         for dist_name in dist_names:
-            try:
-                dist_name_parts = re.split("[._-]", dist_name)
-            except Exception as e:
-                raise RuntimeError(f"Problem with {name} in {namespace} in {dist_name}: {e}")
+            # It should be impossible for this to happen but it has happened
+            # so check for it.
+            if dist_name is None:
+                continue  # type: ignore
+            dist_name_parts = re.split("[._-]", dist_name)
+
             # Check if the components start with the namespace; this is
             # needed because (at least) lsst.ts packages do not use
             # ``lsst`` in the package name.
