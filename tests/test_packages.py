@@ -20,7 +20,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import sys
 import unittest
 from collections.abc import Mapping
 
@@ -122,14 +121,9 @@ class PackagesTestCase(unittest.TestCase):
         # Now load an obscure python package and the list of packages should
         # change. Shouldn't be used by anything we've previously imported and
         # preferably should not be a deprecated package.
-        if sys.version_info < (3, 10, 0):
-            import smtpd  # noqa: F401
+        import wave  # noqa: F401
 
-            new_package = "smtpd"
-        else:
-            import wave  # noqa: F401
-
-            new_package = "wave"
+        new_package = "wave"
         self.assertNotIn(new_package, packages)
 
         new = lsst.utils.packages.Packages.fromSystem()

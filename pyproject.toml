@@ -28,7 +28,6 @@ dependencies = [
     "pyyaml >= 5.1",
     "astropy >= 5.0",
     "threadpoolctl",
-    "importlib_resources",
 ]
 dynamic = ["version"]
 [project.urls]
