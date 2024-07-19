@@ -382,6 +382,9 @@ class PeriodicLogger:
     be useful to issue a log message periodically to show that the
     algorithm is progressing.
 
+    The first time threshold is counted from object construction, so in general
+    the first call to `log` does not log.
+
     Parameters
     ----------
     logger : `logging.Logger` or `LsstLogAdapter`
@@ -413,6 +416,9 @@ class PeriodicLogger:
 
     def log(self, msg: str, *args: Any) -> bool:
         """Issue a log message if the interval has elapsed.
+
+        The interval is measured from the previous call to ``log``, or from the
+        creation of this object.
 
         Parameters
         ----------
