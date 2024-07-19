@@ -387,14 +387,14 @@ class PeriodicLogger:
     logger : `logging.Logger` or `LsstLogAdapter`
         Logger to use when issuing a message.
     interval : `float`
-        The minimum interval between log messages. If `None` the class
-        default will be used.
+        The minimum interval in seconds between log messages. If `None`,
+        `LOGGING_INTERVAL` will be used.
     level : `int`, optional
         Log level to use when issuing messages.
     """
 
     LOGGING_INTERVAL = 600.0
-    """Default interval between log messages."""
+    """Default interval between log messages in seconds."""
 
     def __init__(self, logger: LsstLoggers, interval: float | None = None, level: int = VERBOSE):
         self.logger = logger
