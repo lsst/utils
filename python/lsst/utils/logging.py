@@ -419,7 +419,8 @@ class PeriodicLogger:
         msg : `str`
             Message to issue if the time has been exceeded.
         *args : Any
-            Parameters to be passed to the log system.
+            Arguments to be merged into the message string, as described under
+            `logging.Logger.debug`.
 
         Returns
         -------
