@@ -390,7 +390,8 @@ class PeriodicLogger:
         The minimum interval in seconds between log messages. If `None`,
         `LOGGING_INTERVAL` will be used.
     level : `int`, optional
-        Log level to use when issuing messages.
+        Log level to use when issuing messages, default is
+        `~lsst.utils.logging.VERBOSE`.
     """
 
     LOGGING_INTERVAL = 600.0
