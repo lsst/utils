@@ -382,22 +382,28 @@ class PeriodicLogger:
     be useful to issue a log message periodically to show that the
     algorithm is progressing.
 
+    The first time threshold is counted from object construction, so in general
+    the first call to `log` does not log.
+
     Parameters
     ----------
     logger : `logging.Logger` or `LsstLogAdapter`
         Logger to use when issuing a message.
     interval : `float`
-        The minimum interval between log messages. If `None` the class
-        default will be used.
+        The minimum interval in seconds between log messages. If `None`,
+        `LOGGING_INTERVAL` will be used.
     level : `int`, optional
-        Log level to use when issuing messages.
+        Log level to use when issuing messages, default is
+        `~lsst.utils.logging.VERBOSE`.
     """
 
     LOGGING_INTERVAL = 600.0
-    """Default interval between log messages."""
+    """Default interval between log messages in seconds."""
 
     def __init__(self, logger: LsstLoggers, interval: float | None = None, level: int = VERBOSE):
         self.logger = logger
+        # None -> LOGGING_INTERVAL conversion done so that unit tests (e.g., in
+        # pipe_base) can tweak log interval without access to the constructor.
         self.interval = interval if interval is not None else self.LOGGING_INTERVAL
         self.level = level
         self.next_log_time = time.time() + self.interval
@@ -413,12 +419,16 @@ class PeriodicLogger:
     def log(self, msg: str, *args: Any) -> bool:
         """Issue a log message if the interval has elapsed.
 
+        The interval is measured from the previous call to ``log``, or from the
+        creation of this object.
+
         Parameters
         ----------
         msg : `str`
             Message to issue if the time has been exceeded.
         *args : Any
-            Parameters to be passed to the log system.
+            Arguments to be merged into the message string, as described under
+            `logging.Logger.debug`.
 
         Returns
         -------
