@@ -402,6 +402,8 @@ class PeriodicLogger:
 
     def __init__(self, logger: LsstLoggers, interval: float | None = None, level: int = VERBOSE):
         self.logger = logger
+        # None -> LOGGING_INTERVAL conversion done so that unit tests (e.g., in
+        # pipe_base) can tweak log interval without access to the constructor.
         self.interval = interval if interval is not None else self.LOGGING_INTERVAL
         self.level = level
         self.next_log_time = time.time() + self.interval
