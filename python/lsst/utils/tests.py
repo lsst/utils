@@ -153,6 +153,7 @@ class MemoryTestCase(unittest.TestCase):
             for f in now_open
             if not f.endswith(".car")
             and not f.startswith("/proc/")
+            and not f.startswith("/sys/")
             and not f.endswith(".ttf")
             and not (f.startswith("/var/lib/") and f.endswith("/passwd"))
             and not f.endswith("astropy.log")
