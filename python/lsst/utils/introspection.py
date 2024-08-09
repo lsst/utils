@@ -322,7 +322,7 @@ def take_object_census() -> collections.Counter[type]:
 
     Notes
     -----
-    This function counts _all_ Python objects in memory. To count only
+    This function counts *all* Python objects in memory. To count only
     reachable objects, run `gc.collect` first.
     """
     counts: collections.Counter[type] = collections.Counter()
