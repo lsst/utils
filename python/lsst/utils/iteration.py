@@ -151,10 +151,10 @@ def sequence_to_range_str(values: list[Union[int, str]]) -> str:
 
     values = sorted(set(values))
 
-    pureIntsOrPureStrings = all(isinstance(item, int) for item in values) or all(
+    pure_ints_or_pure_strings = all(isinstance(item, int) for item in values) or all(
         isinstance(item, str) for item in values
     )
-    if not pureIntsOrPureStrings:
+    if not pure_ints_or_pure_strings:
         types = set(type(item) for item in values)
         raise TypeError(f"All items in the input list must be either integers or strings, got {types}")
 
@@ -188,11 +188,11 @@ def sequence_to_range_str(values: list[Union[int, str]]) -> str:
         else:
             return s, None
 
-    def addPairToName(
-        valName: list[str], val0: Union[int, str], val1: Union[int, str], stride: int = 1
+    def add_pair_to_name(
+        val_name: list[str], val0: Union[int, str], val1: Union[int, str], stride: int = 1
     ) -> None:
         """Format a pair of values (val0 and val1) and appends the result to
-        valName.
+        val_name.
 
         This helper function takes the starting and ending values of a sequence
         and formats them into a compact string representation, considering the
@@ -201,7 +201,7 @@ def sequence_to_range_str(values: list[Union[int, str]]) -> str:
 
         Parameters
         ----------
-        valName : List[str]
+        val_name : List[str]
             The list to append the formatted string to.
         val0 : Union[int, str]
             The starting value of the sequence.
@@ -237,7 +237,7 @@ def sequence_to_range_str(values: list[Union[int, str]]) -> str:
                         dvn += f":{stride}"
             else:
                 dvn = f"{sval0}^{sval1}"
-        valName.append(dvn)
+        val_name.append(dvn)
 
     def is_list_of_ints(values: List[Union[int, str]]) -> TypeGuard[List[int]]:
         """Check if a list is composed entirely of integers.
@@ -261,13 +261,13 @@ def sequence_to_range_str(values: list[Union[int, str]]) -> str:
         stride = min(differences) if differences else 1
         stride = max(stride, 1)
 
-    valName: list[str] = []
+    val_name: list[str] = []
     val0 = values[0]
     val1 = val0
     for val in values[1:]:
         if type(val) is not type(val1):
             # Type changed, end current sequence
-            addPairToName(valName, val0, val1, stride)
+            add_pair_to_name(val_name, val0, val1, stride)
             val0 = val
             val1 = val
             continue
@@ -276,7 +276,7 @@ def sequence_to_range_str(values: list[Union[int, str]]) -> str:
             if val == val1 + stride:
                 val1 = val
             else:
-                addPairToName(valName, val0, val1, stride)
+                add_pair_to_name(val_name, val0, val1, stride)
                 val0 = val
                 val1 = val0
         elif isinstance(val, str):
@@ -287,14 +287,14 @@ def sequence_to_range_str(values: list[Union[int, str]]) -> str:
                 if num_suffix == num_suffix1 + stride:
                     val1 = val
                 else:
-                    addPairToName(valName, val0, val1)
+                    add_pair_to_name(val_name, val0, val1)
                     val0 = val
                     val1 = val0
             else:
-                addPairToName(valName, val0, val1)
+                add_pair_to_name(val_name, val0, val1)
                 val0 = val
                 val1 = val0
 
-    addPairToName(valName, val0, val1, stride)
+    add_pair_to_name(val_name, val0, val1, stride)
 
-    return "^".join(valName)
+    return "^".join(val_name)
