@@ -266,12 +266,6 @@ def sequence_to_range_str(values: list[int | str]) -> str:
     val0 = values[0]
     val1 = val0
     for val in values[1:]:
-        if type(val) is not type(val1):
-            # Type changed, end current sequence
-            _add_pair_to_name(val_name, val0, val1, stride)
-            val0 = val
-            val1 = val
-            continue
         if isinstance(val, int):
             assert isinstance(val1, int)
             if val == val1 + stride:
