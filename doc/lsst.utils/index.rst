@@ -52,4 +52,3 @@ Python API reference
    :no-main-docstr:
 .. automodapi:: lsst.utils.threads
    :no-main-docstr:
-.. automodapi:: lsst.utils.ellipsis
