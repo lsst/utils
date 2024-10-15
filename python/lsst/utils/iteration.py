@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-__all__ = ["chunk_iterable", "ensure_iterable", "isplit"]
+__all__ = ["chunk_iterable", "ensure_iterable", "isplit", "sequence_to_string"]
 
 import itertools
 from collections.abc import Iterable, Iterator, Mapping
@@ -206,11 +206,11 @@ def _is_list_of_ints(values: list[int | str]) -> TypeGuard[list[int]]:
     return all(isinstance(v, int) for v in values)
 
 
-def sequence_to_range_str(values: list[int | str]) -> str:
-    """Convert a list of numbers or strings into a compact string
+def sequence_to_string(values: list[int | str]) -> str:
+    """Convert a list of integers or strings into a compact string
     representation by merging consecutive values or sequences.
 
-    This function takes a list of numbers or strings, sorts them, identifies
+    This function takes a list of integers or strings, sorts them, identifies
     sequences where consecutive numbers differ by a consistent stride, or
     strings with common prefixes, and returns a string that compactly
     represents these sequences. Consecutive numbers are merged into ranges, and
@@ -226,12 +226,12 @@ def sequence_to_range_str(values: list[int | str]) -> str:
 
     Parameters
     ----------
-    values : List[int, str]:
+    values : list[int, str]:
         A list of items to be compacted. Must all be of the same type.
 
     Returns
     -------
-    range_string : str
+    sequence_as_string : str
         A compact string representation of the input list.
 
     Notes

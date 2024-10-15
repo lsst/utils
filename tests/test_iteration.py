@@ -22,7 +22,7 @@
 import itertools
 import unittest
 
-from lsst.utils.iteration import chunk_iterable, ensure_iterable, isplit, sequence_to_range_str
+from lsst.utils.iteration import chunk_iterable, ensure_iterable, isplit, sequence_to_string
 
 
 class IterationTestCase(unittest.TestCase):
@@ -85,87 +85,87 @@ class IterationTestCase(unittest.TestCase):
 
     def test_empty_list(self):
         """Test that an empty list returns an empty string."""
-        self.assertEqual(sequence_to_range_str([]), "")
+        self.assertEqual(sequence_to_string([]), "")
 
     def test_single_element(self):
         """Test a list with a single element returns it as a string."""
-        self.assertEqual(sequence_to_range_str([5]), "5")
+        self.assertEqual(sequence_to_string([5]), "5")
 
     def test_consecutive_numbers(self):
         """Test a list of consecutive numbers with stride 1."""
-        self.assertEqual(sequence_to_range_str([1, 2, 3, 4, 5]), "1..5")
+        self.assertEqual(sequence_to_string([1, 2, 3, 4, 5]), "1..5")
 
     def test_non_consecutive_numbers(self):
         """Test a list of non-consecutive numbers."""
-        self.assertEqual(sequence_to_range_str([1, 3, 5, 7]), "1..7:2")
+        self.assertEqual(sequence_to_string([1, 3, 5, 7]), "1..7:2")
 
     def test_mixed_sequences(self):
         """Test a list with both consecutive and non-consecutive numbers."""
-        self.assertEqual(sequence_to_range_str([1, 2, 3, 5, 7, 8, 9]), "1..3^5^7..9")
+        self.assertEqual(sequence_to_string([1, 2, 3, 5, 7, 8, 9]), "1..3^5^7..9")
 
     def test_stride_greater_than_one(self):
         """Test sequences where the stride is greater than one."""
-        self.assertEqual(sequence_to_range_str([2, 4, 6, 8]), "2..8:2")
+        self.assertEqual(sequence_to_string([2, 4, 6, 8]), "2..8:2")
 
     def test_negative_numbers(self):
         """Test a list that includes negative numbers."""
-        self.assertEqual(sequence_to_range_str([-5, -4, -3, -1, 0, 1]), "-5..-3^-1..1")
+        self.assertEqual(sequence_to_string([-5, -4, -3, -1, 0, 1]), "-5..-3^-1..1")
 
     def test_duplicate_numbers(self):
         """Test a list with duplicate numbers."""
-        self.assertEqual(sequence_to_range_str([1, 2, 2, 3, 4]), "1..4")
+        self.assertEqual(sequence_to_string([1, 2, 2, 3, 4]), "1..4")
 
     def test_strings_with_common_prefix(self):
         """Test a list of strings with a common prefix."""
-        self.assertEqual(sequence_to_range_str(["node1", "node2", "node3"]), "node1..node3")
+        self.assertEqual(sequence_to_string(["node1", "node2", "node3"]), "node1..node3")
 
     def test_strings_without_common_prefix(self):
         """Test a list of strings without a common prefix."""
-        self.assertEqual(sequence_to_range_str(["alpha", "beta", "gamma"]), "alpha^beta^gamma")
+        self.assertEqual(sequence_to_string(["alpha", "beta", "gamma"]), "alpha^beta^gamma")
 
     def test_large_sequence(self):
         """Test a large sequence of consecutive numbers."""
         large_list = list(range(1, 101))
-        self.assertEqual(sequence_to_range_str(large_list), "1..100")
+        self.assertEqual(sequence_to_string(large_list), "1..100")
 
     def test_mixed_types(self):
         """Test a list with mixed data types."""
         with self.assertRaises(TypeError):
-            sequence_to_range_str([1, "2", 3])
+            sequence_to_string([1, "2", 3])
 
     def test_wrong_types(self):
         """Test that passing floats raises an appropriate exception."""
         with self.assertRaises(TypeError):
-            sequence_to_range_str([1, 2, 3, 1.2])
+            sequence_to_string([1, 2, 3, 1.2])
 
     def test_stride_calculation(self):
         """Test that the stride is correctly calculated for single strides."""
-        self.assertEqual(sequence_to_range_str([1, 3, 5, 7, 9]), "1..9:2")
+        self.assertEqual(sequence_to_string([1, 3, 5, 7, 9]), "1..9:2")
 
     def test_single_value_sequences(self):
         """Test sequences that should remain as single values."""
-        self.assertEqual(sequence_to_range_str([1, 3, 6, 10]), "1^3^6^10")
+        self.assertEqual(sequence_to_string([1, 3, 6, 10]), "1^3^6^10")
 
     def test_overlapping_ranges(self):
         """Test a list with duplicate values"""
-        self.assertEqual(sequence_to_range_str([1, 2, 2, 3, 4, 4, 5]), "1..5")
+        self.assertEqual(sequence_to_string([1, 2, 2, 3, 4, 4, 5]), "1..5")
 
     def test_unordered_input(self):
         """Test that the function correctly handles unordered input."""
-        self.assertEqual(sequence_to_range_str([5, 3, 1, 4, 2]), "1..5")
+        self.assertEqual(sequence_to_string([5, 3, 1, 4, 2]), "1..5")
 
     def test_large_stride(self):
         """Test sequences with a large stride."""
-        self.assertEqual(sequence_to_range_str([10, 20, 30, 40]), "10..40:10")
+        self.assertEqual(sequence_to_string([10, 20, 30, 40]), "10..40:10")
 
     def test_single_character_strings(self):
         """Test a list of single-character strings."""
-        self.assertEqual(sequence_to_range_str(["a", "b", "c"]), "a^b^c")
+        self.assertEqual(sequence_to_string(["a", "b", "c"]), "a^b^c")
 
     def test_strings_with_prefix(self):
         """Test a list of longer strings."""
         self.assertEqual(
-            sequence_to_range_str(
+            sequence_to_string(
                 [
                     "node1",
                     "node2",
