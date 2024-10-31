@@ -22,6 +22,7 @@ import functools
 import logging
 import sys
 import time
+import traceback
 from collections.abc import Callable, Collection, Iterable, Iterator, MutableMapping
 from contextlib import contextmanager, suppress
 from typing import TYPE_CHECKING, Any
@@ -340,8 +341,8 @@ def time_this(
         Context to include in log message.
     level : `int`, optional
         Python logging level to use to issue the log message. If the
-        code block raises an exception the log message will automatically
-        switch to level ERROR.
+        code block raises an exception the log message will include some
+        information about the exception that occurred.
     prefix : `str`, optional
         Prefix to use to prepend to the supplied logger to
         create a new logger to use instead. No prefix is used if the value
@@ -366,7 +367,6 @@ def time_this(
         log_name = f"{prefix}.{log.name}" if not isinstance(log, logging.RootLogger) else prefix
         log = logging.getLogger(log_name)
 
-    success = False
     start = time.time()
 
     if mem_usage and not log.isEnabledFor(level):
@@ -376,9 +376,13 @@ def time_this(
         current_usages_start = get_current_mem_usage()
         peak_usages_start = get_peak_mem_usage()
 
+    errmsg = ""
     try:
         yield
-        success = True
+    except BaseException as e:
+        frame, lineno = list(traceback.walk_tb(e.__traceback__))[-1]
+        errmsg = f"{e!r} @ {frame.f_code.co_filename}:{lineno}"
+        raise
     finally:
         end = time.time()
 
@@ -392,15 +396,12 @@ def time_this(
         # mypy stop complaining when additional parameters will be added below.
         params = list(args) if args else []
 
-        if not success:
-            # Something went wrong so change the log level to indicate
-            # this.
-            level = logging.ERROR
-
         # Specify stacklevel to ensure the message is reported from the
         # caller (1 is this file, 2 is contextlib, 3 is user)
         params += (": " if msg else "", end - start)
         msg += "%sTook %.4f seconds"
+        if errmsg:
+            msg += f" (timed code triggered exception of {errmsg!r})"
         if mem_usage:
             current_usages_end = get_current_mem_usage()
             peak_usages_end = get_peak_mem_usage()

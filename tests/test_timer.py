@@ -313,12 +313,13 @@ class TimerTestCase(unittest.TestCase):
         self.assertEqual(cm.records[0].name, f"{prefix}.{logname}")
 
         # Trigger a problem.
-        with self.assertLogs(level="ERROR") as cm:
+        with self.assertLogs(level="DEBUG") as cm:
             with self.assertRaises(RuntimeError):
                 with time_this(log=logging.getLogger(logname), prefix=prefix):
                     raise RuntimeError("A problem")
         self.assertEqual(cm.records[0].name, f"{prefix}.{logname}")
-        self.assertEqual(cm.records[0].levelname, "ERROR")
+        self.assertIn("A problem", cm.records[0].message)
+        self.assertEqual(cm.records[0].levelname, "DEBUG")
 
 
 class ProfileTestCase(unittest.TestCase):

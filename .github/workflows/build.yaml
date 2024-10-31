@@ -33,7 +33,7 @@ jobs:
       - name: Install eups and any other conda packages
         shell: bash -l {0}
         run: |
-          mamba install -y -q eups conda pip
+          mamba install -y -q eups
 
       # We have two cores so we can speed up the testing with xdist
       - name: Install pytest packages
