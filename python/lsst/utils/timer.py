@@ -401,7 +401,8 @@ def time_this(
         params += (": " if msg else "", end - start)
         msg += "%sTook %.4f seconds"
         if errmsg:
-            msg += f" (timed code triggered exception of {errmsg!r})"
+            params += (f" (timed code triggered exception of {errmsg!r})",)
+            msg += "%s"
         if mem_usage:
             current_usages_end = get_current_mem_usage()
             peak_usages_end = get_peak_mem_usage()
