@@ -1,3 +1,13 @@
+lsst-utils v28.0.0 (2024-11-19)
+===============================
+
+New Features
+------------
+
+- Added ``lsst.utils.iteration.sequence_to_range_str()`` to compactify lists of numbers for human reading and understanding. (`DM-46813 <https://rubinobs.atlassian.net/browse/DM-46813>`_)
+- Added ``lsst.utils.introspection.take_object_census`` and ``lsst.utils.introspection.trace_object_references`` functions for characterizing memory leaks. (`DM-45007 <https://rubinobs.atlassian.net/browse/DM-45007>`_)
+- Added ``lsst.utils.plotting.make_figure()`` utility to create a non-interactive ``matplotlib`` ``matploblib.figure.Figure`` without ``matplotlib.pyplot``. (`DM-44725 <https://rubinobs.atlassian.net/browse/DM-44725>`_)
+
 lsst-utils 27.0.0 (2024-05-28)
 ==============================
 
