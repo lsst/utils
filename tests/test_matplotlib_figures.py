@@ -22,7 +22,12 @@
 import unittest
 
 import lsst.utils.tests
-from lsst.utils.plotting import make_figure
+from lsst.utils.plotting import (
+    get_multiband_plot_colors,
+    get_multiband_plot_linestyles,
+    get_multiband_plot_symbols,
+    make_figure,
+)
 
 try:
     from matplotlib.backends.backend_agg import FigureCanvasAgg
@@ -45,7 +50,22 @@ class MakeFigureTestCase(unittest.TestCase):
             self.assertEqual(fig.get_figheight(), 6)
             self.assertEqual(fig.get_dpi(), 300)
 
+            bands = ["u", "g", "r", "i", "z", "y"]
+
             ax = fig.add_subplot(111)
-            ax.plot([0, 1], [0, 1], "r-")
+            for dark_background in True, False:
+                colors = get_multiband_plot_colors(dark_background=dark_background)
+                symbols = get_multiband_plot_symbols()
+                linestyles = get_multiband_plot_linestyles()
+
+                ax = fig.add_subplot(111)
+                for band in bands:
+                    ax.plot(
+                        [0, 1],
+                        [0, 1],
+                        c=colors[band],
+                        marker=symbols[band],
+                        linestyle=linestyles[band],
+                    )
 
             fig.savefig(tmpFile)
