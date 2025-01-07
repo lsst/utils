@@ -22,3 +22,4 @@ examples/demangle
 _build.*
 .coverage
 .pytest_cache
+python/*.dist-info/
