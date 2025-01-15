@@ -292,7 +292,7 @@ def _get_python_package_version(
 _eups: Any | None = None  # Singleton Eups object
 
 
-@lru_cache(maxsize=1)
+@lru_cache(maxsize=2)
 def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
     """Get products and their versions from the environment.
 
