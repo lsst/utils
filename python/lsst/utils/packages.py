@@ -141,6 +141,11 @@ def getPythonPackages() -> dict[str, str]:
     *already* been imported.
 
     We don't include any module for which we cannot determine a version.
+
+    Whilst distribution names are used to determine package versions, the
+    key returned for the package version is the package name that was imported.
+    This means that ``yaml`` will appear as the version key even though the
+    distribution would be called ``PyYAML``.
     """
     # Attempt to import libraries that only report their version in python
     for module_name in PYTHON:
