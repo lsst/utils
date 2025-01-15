@@ -344,7 +344,7 @@ def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
         if not prod.version.startswith(Product.LocalVersionPrefix):
             if include_all:
                 tags = {t for t in prod.tags if t != "current"}
-                tag_msg = " (" + " ".join(tags) + ")" if tags else ""
+                tag_msg = " (" + " ".join(sorted(tags)) + ")" if tags else ""
                 packages[prod.name] = prod.version + tag_msg
             continue
         ver = prod.version
