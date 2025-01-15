@@ -315,6 +315,9 @@ def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
     provide a means to determine the version any other way) and to check if
     uninstalled packages are being used. We only report the product/version
     for these packages unless ``include_all`` is `True`.
+
+    Assumes that no new EUPS packages are set up after this function is
+    called the first time.
     """
     try:
         from eups import Eups
