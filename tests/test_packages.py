@@ -128,15 +128,14 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(new.missing(packages), {})
         self.assertDictEqual(new.extra(packages), {})
 
-        # Now load an obscure python package and the list of packages should
-        # change. Shouldn't be used by anything we've previously imported and
-        # preferably should not be a deprecated package.
-        import wave  # noqa: F401
-
-        new_package = "wave"
+        # Check comparison functionality. Can not import a package that we
+        # do not know is present (and standard library packages are not
+        # reported) so instead pretend.
+        new_package = "pretend_package"
         self.assertNotIn(new_package, packages)
 
-        new = lsst.utils.packages.Packages.fromSystem()
+        new = lsst.utils.packages.Packages(packages.copy())
+        new[new_package] = new["python"]
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
         missing = packages.missing(new)
