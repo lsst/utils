@@ -131,9 +131,8 @@ def getPythonPackages() -> dict[str, str]:
 
     Returns
     -------
-    packages : `dict`
-        Keys (type `str`) are package names; values (type `str`) are their
-        versions.
+    packages : `dict` [ `str`, `str` ]
+        Keys are package names; values are their versions.
 
     Notes
     -----
