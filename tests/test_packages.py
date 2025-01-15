@@ -46,6 +46,15 @@ class PackagesTestCase(unittest.TestCase):
         expected = lsst.utils.version.__version__
         self.assertEqual(versions["utils"], expected)
 
+        # This does include Python builtins.
+        self.assertIn("os", versions)
+        self.assertEqual(versions["os"], versions["python"])
+
+        # Also for all installed distributions.
+        versions2 = lsst.utils.packages.getAllPythonDistributions()
+        self.assertEqual(versions2["utils"], expected)
+        self.assertNotIn("os", versions2)
+
     def testEnvironment(self):
         """Test getting versions from the environment.
 

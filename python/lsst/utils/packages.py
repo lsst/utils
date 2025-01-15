@@ -27,7 +27,7 @@ import subprocess
 import sys
 import types
 from collections.abc import Mapping
-from functools import lru_cache
+from functools import cache, lru_cache
 from importlib.metadata import packages_distributions
 from typing import Any, ClassVar
 
@@ -37,6 +37,7 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     "getVersionFromPythonModule",
+    "getAllPythonDistributions",
     "getPythonPackages",
     "getEnvironmentPackages",
     "getCondaPackages",
@@ -99,6 +100,30 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
         if buildtime:
             version += " with " + " ".join(f"{pkg}={deps[pkg]}" for pkg in sorted(buildtime))
     return str(version)
+
+
+@cache
+def getAllPythonDistributions() -> dict[str, str]:
+    """Get the versions for all Python distributions that are installed.
+
+    Returns
+    -------
+    packages : `dict` [ `str`, `str` ]
+        Keys are distribution names; values are their versions.
+        Unlike `getPythonPackages` this function will not include
+        standard library packages defined in `sys.stdlib_module_names` but
+        will include a special ``python`` key reporting the Python version.
+
+    Notes
+    -----
+    If this function is called a second time an identical result will be
+    returned even if a new distribution has been installed.
+    """
+    packages = {"python": sys.version}
+
+    for dist in importlib.metadata.distributions():
+        packages[dist.name] = dist.version
+    return _mangle_lsst_package_names(packages)
 
 
 def getPythonPackages() -> dict[str, str]:
