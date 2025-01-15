@@ -54,6 +54,7 @@ class PackagesTestCase(unittest.TestCase):
         can do is test that this doesn't fall over.
         """
         lsst.utils.packages.getEnvironmentPackages()
+        lsst.utils.packages.getEnvironmentPackages(include_all=True)
 
     def testConda(self):
         """Test getting versions from conda environment.
