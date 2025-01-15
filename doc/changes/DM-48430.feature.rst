@@ -1,0 +1,3 @@
+* Add new ``lsst.utils.packages.getAllPythonDistributions`` function for retrieving the versions of all installed Python distributions regardless of what has been imported.
+* Modified ``Packages.fromSystem`` to add a flag, ``include_all``, to control whether all installed Python distributions and EUPS packages should be reported and not solely the (default) imported distributions and locally-setup EUPS packages. All installed Conda packages are always reported.
+* Modified ``lsst.utils.packages.getPythonPackages`` to no longer report packages that are part of the Python standard library. It is sufficient to record the Python version (via the ``python`` key).
