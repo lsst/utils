@@ -196,15 +196,24 @@ def getPythonPackages() -> dict[str, str]:
         n_versions,
     )
 
+    return _mangle_lsst_package_names(packages)
+
+
+def _mangle_lsst_package_names(packages: dict[str, str]) -> dict[str, str]:
     for name in list(packages.keys()):
         # Use LSST package names instead of python module names
         # This matches the names we get from the environment (i.e., EUPS)
         # so we can clobber these build-time versions if the environment
         # reveals that we're not using the packages as-built.
         if name.startswith("lsst."):
-            new_name = name.replace("lsst.", "").replace(".", "_")
-            packages[new_name] = packages[name]
-            del packages[name]
+            sep = "."
+        elif name.startswith("lsst-"):
+            sep = "-"
+        else:
+            continue
+        new_name = name.replace(f"lsst{sep}", "").replace(sep, "_")
+        packages[new_name] = packages[name]
+        del packages[name]
 
     return packages
 
