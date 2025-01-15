@@ -531,22 +531,43 @@ class Packages(dict):
         self.update(state["_packages"])
 
     @classmethod
-    def fromSystem(cls) -> Packages:
+    def fromSystem(cls, include_all: bool = False) -> Packages:
         """Construct a `Packages` by examining the system.
 
-        Determine packages by examining python's `sys.modules`, conda
+        Determine packages by examining python's installed packages
+        (by default filtered by `sys.modules`) or distributions, conda
         libraries and EUPS. EUPS packages take precedence over conda and
         general python packages.
+
+        Parameters
+        ----------
+        include_all : `bool`, optional
+            If `False`, will only include imported Python packages, installed
+            Conda packages and locally-setup EUPS packages. If `True` all
+            installed Python distributions and conda packages will be reported
+            as well as all EUPS packages that are set up.
 
         Returns
         -------
         packages : `Packages`
             All version package information that could be obtained.
+
+        Note
+        ----
+        The names of Python distributions can differ from the names of the
+        Python packages installed by those distributions. Since ``include_all``
+        set to `True` uses Python distributions and `False` uses Python
+        packages do not expect that the answers are directly comparable.
         """
         packages = {}
-        packages.update(getPythonPackages())
+        if include_all:
+            packages.update(getAllPythonDistributions())
+        else:
+            packages.update(getPythonPackages())
+        # Conda list always reports all Conda packages.
         packages.update(getCondaPackages())
-        packages.update(getEnvironmentPackages())  # Should be last, to override products with LOCAL versions
+        # Should be last, to override products with LOCAL versions
+        packages.update(getEnvironmentPackages(include_all=include_all))
         return cls(packages)
 
     @classmethod

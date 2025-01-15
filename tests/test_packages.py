@@ -183,6 +183,10 @@ class PackagesTestCase(unittest.TestCase):
             some_yaml = b"list: [1, 2]"
             lsst.utils.packages.Packages.fromBytes(some_yaml, "yaml")
 
+        # Check that "all" packages runs and does not include stdlib.
+        all = lsst.utils.packages.Packages.fromSystem(include_all=True)
+        self.assertNotIn("os", all)
+
     def testBackwardsCompatibility(self):
         """Test if we can read old data files."""
         # Pickle contents changed when moving to dict base class.
