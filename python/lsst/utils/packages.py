@@ -140,6 +140,9 @@ def getPythonPackages() -> dict[str, str]:
     module.  Note, therefore, that we can only report on modules that have
     *already* been imported.
 
+    Python standard library packages are not included in the report. A
+    ``python`` key is inserted that records the Python version.
+
     We don't include any module for which we cannot determine a version.
 
     Whilst distribution names are used to determine package versions, the
@@ -187,13 +190,6 @@ def getPythonPackages() -> dict[str, str]:
             # packages such as _abc and __future__.
             continue
 
-        if name in _STDLIB:
-            # Assign all standard library packages the python version
-            # since they almost all lack explicit versions.
-            packages[name] = sys.version
-            previous = name
-            continue
-
         if name.startswith(previous + ".") and previous in packages:
             # Already have this version. Use the same previous name
             # for the line after this.
@@ -201,6 +197,13 @@ def getPythonPackages() -> dict[str, str]:
 
         # Find the namespace which we need to use package_dist.
         namespace = name.split(".")[0]
+
+        if namespace in _STDLIB:
+            # If this is an import from the standard library, skip it.
+            # Standard library names only refer to top-level namespace
+            # so "importlib" appears but "importlib.metadata" does not.
+            previous = name
+            continue
 
         # package_dist is a mapping from import namespace to distribution
         # package names. This may be a one-to-many mapping due to namespace

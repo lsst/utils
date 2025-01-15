@@ -46,14 +46,21 @@ class PackagesTestCase(unittest.TestCase):
         expected = lsst.utils.version.__version__
         self.assertEqual(versions["utils"], expected)
 
-        # This does include Python builtins.
-        self.assertIn("os", versions)
-        self.assertEqual(versions["os"], versions["python"])
+        # Check that standard python library packages are not included.
+        self.assertNotIn("os", versions)
+
+        # Should always include the python version information.
+        self.assertIn("python", versions)
 
         # Also for all installed distributions.
         versions2 = lsst.utils.packages.getAllPythonDistributions()
         self.assertEqual(versions2["utils"], expected)
         self.assertNotIn("os", versions2)
+        self.assertIn("python", versions2)
+
+        # Packages import yaml and so it should have a version.
+        # yaml is a package but PyYAML is the distribution.
+        self.assertEqual(versions["yaml"], versions2["PyYAML"])
 
     def testEnvironment(self):
         """Test getting versions from the environment.
