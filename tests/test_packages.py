@@ -46,6 +46,22 @@ class PackagesTestCase(unittest.TestCase):
         expected = lsst.utils.version.__version__
         self.assertEqual(versions["utils"], expected)
 
+        # Check that standard python library packages are not included.
+        self.assertNotIn("os", versions)
+
+        # Should always include the python version information.
+        self.assertIn("python", versions)
+
+        # Also for all installed distributions.
+        versions2 = lsst.utils.packages.getAllPythonDistributions()
+        self.assertEqual(versions2["utils"], expected)
+        self.assertNotIn("os", versions2)
+        self.assertIn("python", versions2)
+
+        # Packages import yaml and so it should have a version.
+        # yaml is a package but PyYAML is the distribution.
+        self.assertEqual(versions["yaml"], versions2["PyYAML"])
+
     def testEnvironment(self):
         """Test getting versions from the environment.
 
@@ -54,6 +70,7 @@ class PackagesTestCase(unittest.TestCase):
         can do is test that this doesn't fall over.
         """
         lsst.utils.packages.getEnvironmentPackages()
+        lsst.utils.packages.getEnvironmentPackages(include_all=True)
 
     def testConda(self):
         """Test getting versions from conda environment.
@@ -118,15 +135,14 @@ class PackagesTestCase(unittest.TestCase):
         self.assertDictEqual(new.missing(packages), {})
         self.assertDictEqual(new.extra(packages), {})
 
-        # Now load an obscure python package and the list of packages should
-        # change. Shouldn't be used by anything we've previously imported and
-        # preferably should not be a deprecated package.
-        import wave  # noqa: F401
-
-        new_package = "wave"
+        # Check comparison functionality. Can not import a package that we
+        # do not know is present (and standard library packages are not
+        # reported) so instead pretend.
+        new_package = "pretend_package"
         self.assertNotIn(new_package, packages)
 
-        new = lsst.utils.packages.Packages.fromSystem()
+        new = lsst.utils.packages.Packages(packages.copy())
+        new[new_package] = new["python"]
         self.assertDictEqual(packages.difference(new), {})  # No inconsistencies
         self.assertDictEqual(packages.extra(new), {})  # Nothing in 'packages' that's not in 'new'
         missing = packages.missing(new)
@@ -172,6 +188,10 @@ class PackagesTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             some_yaml = b"list: [1, 2]"
             lsst.utils.packages.Packages.fromBytes(some_yaml, "yaml")
+
+        # Check that "all" packages runs and does not include stdlib.
+        all = lsst.utils.packages.Packages.fromSystem(include_all=True)
+        self.assertNotIn("os", all)
 
     def testBackwardsCompatibility(self):
         """Test if we can read old data files."""

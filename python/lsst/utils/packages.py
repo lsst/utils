@@ -27,7 +27,7 @@ import subprocess
 import sys
 import types
 from collections.abc import Mapping
-from functools import lru_cache
+from functools import cache, lru_cache
 from importlib.metadata import packages_distributions
 from typing import Any, ClassVar
 
@@ -37,6 +37,7 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     "getVersionFromPythonModule",
+    "getAllPythonDistributions",
     "getPythonPackages",
     "getEnvironmentPackages",
     "getCondaPackages",
@@ -101,14 +102,37 @@ def getVersionFromPythonModule(module: types.ModuleType) -> str:
     return str(version)
 
 
+@cache
+def getAllPythonDistributions() -> dict[str, str]:
+    """Get the versions for all Python distributions that are installed.
+
+    Returns
+    -------
+    packages : `dict` [ `str`, `str` ]
+        Keys are distribution names; values are their versions.
+        Unlike `getPythonPackages` this function will not include
+        standard library packages defined in `sys.stdlib_module_names` but
+        will include a special ``python`` key reporting the Python version.
+
+    Notes
+    -----
+    If this function is called a second time an identical result will be
+    returned even if a new distribution has been installed.
+    """
+    packages = {"python": sys.version}
+
+    for dist in importlib.metadata.distributions():
+        packages[dist.name] = dist.version
+    return _mangle_lsst_package_names(packages)
+
+
 def getPythonPackages() -> dict[str, str]:
     """Get imported python packages and their versions.
 
     Returns
     -------
-    packages : `dict`
-        Keys (type `str`) are package names; values (type `str`) are their
-        versions.
+    packages : `dict` [ `str`, `str` ]
+        Keys are package names; values are their versions.
 
     Notes
     -----
@@ -116,7 +140,15 @@ def getPythonPackages() -> dict[str, str]:
     module.  Note, therefore, that we can only report on modules that have
     *already* been imported.
 
+    Python standard library packages are not included in the report. A
+    ``python`` key is inserted that records the Python version.
+
     We don't include any module for which we cannot determine a version.
+
+    Whilst distribution names are used to determine package versions, the
+    key returned for the package version is the package name that was imported.
+    This means that ``yaml`` will appear as the version key even though the
+    distribution would be called ``PyYAML``.
     """
     # Attempt to import libraries that only report their version in python
     for module_name in PYTHON:
@@ -158,13 +190,6 @@ def getPythonPackages() -> dict[str, str]:
             # packages such as _abc and __future__.
             continue
 
-        if name in _STDLIB:
-            # Assign all standard library packages the python version
-            # since they almost all lack explicit versions.
-            packages[name] = sys.version
-            previous = name
-            continue
-
         if name.startswith(previous + ".") and previous in packages:
             # Already have this version. Use the same previous name
             # for the line after this.
@@ -172,6 +197,13 @@ def getPythonPackages() -> dict[str, str]:
 
         # Find the namespace which we need to use package_dist.
         namespace = name.split(".")[0]
+
+        if namespace in _STDLIB:
+            # If this is an import from the standard library, skip it.
+            # Standard library names only refer to top-level namespace
+            # so "importlib" appears but "importlib.metadata" does not.
+            previous = name
+            continue
 
         # package_dist is a mapping from import namespace to distribution
         # package names. This may be a one-to-many mapping due to namespace
@@ -196,15 +228,24 @@ def getPythonPackages() -> dict[str, str]:
         n_versions,
     )
 
+    return _mangle_lsst_package_names(packages)
+
+
+def _mangle_lsst_package_names(packages: dict[str, str]) -> dict[str, str]:
     for name in list(packages.keys()):
         # Use LSST package names instead of python module names
         # This matches the names we get from the environment (i.e., EUPS)
         # so we can clobber these build-time versions if the environment
         # reveals that we're not using the packages as-built.
         if name.startswith("lsst."):
-            new_name = name.replace("lsst.", "").replace(".", "_")
-            packages[new_name] = packages[name]
-            del packages[name]
+            sep = "."
+        elif name.startswith("lsst-"):
+            sep = "-"
+        else:
+            continue
+        new_name = name.replace(f"lsst{sep}", "").replace(sep, "_")
+        packages[new_name] = packages[name]
+        del packages[name]
 
     return packages
 
@@ -292,7 +333,7 @@ def _get_python_package_version(
 _eups: Any | None = None  # Singleton Eups object
 
 
-@lru_cache(maxsize=1)
+@lru_cache(maxsize=2)
 def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
     """Get products and their versions from the environment.
 
@@ -315,6 +356,9 @@ def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
     provide a means to determine the version any other way) and to check if
     uninstalled packages are being used. We only report the product/version
     for these packages unless ``include_all`` is `True`.
+
+    Assumes that no new EUPS packages are set up after this function is
+    called the first time.
     """
     try:
         from eups import Eups
@@ -344,7 +388,7 @@ def getEnvironmentPackages(include_all: bool = False) -> dict[str, str]:
         if not prod.version.startswith(Product.LocalVersionPrefix):
             if include_all:
                 tags = {t for t in prod.tags if t != "current"}
-                tag_msg = " (" + " ".join(tags) + ")" if tags else ""
+                tag_msg = " (" + " ".join(sorted(tags)) + ")" if tags else ""
                 packages[prod.name] = prod.version + tag_msg
             continue
         ver = prod.version
@@ -494,22 +538,43 @@ class Packages(dict):
         self.update(state["_packages"])
 
     @classmethod
-    def fromSystem(cls) -> Packages:
+    def fromSystem(cls, include_all: bool = False) -> Packages:
         """Construct a `Packages` by examining the system.
 
-        Determine packages by examining python's `sys.modules`, conda
+        Determine packages by examining python's installed packages
+        (by default filtered by `sys.modules`) or distributions, conda
         libraries and EUPS. EUPS packages take precedence over conda and
         general python packages.
+
+        Parameters
+        ----------
+        include_all : `bool`, optional
+            If `False`, will only include imported Python packages, installed
+            Conda packages and locally-setup EUPS packages. If `True` all
+            installed Python distributions and conda packages will be reported
+            as well as all EUPS packages that are set up.
 
         Returns
         -------
         packages : `Packages`
             All version package information that could be obtained.
+
+        Note
+        ----
+        The names of Python distributions can differ from the names of the
+        Python packages installed by those distributions. Since ``include_all``
+        set to `True` uses Python distributions and `False` uses Python
+        packages do not expect that the answers are directly comparable.
         """
         packages = {}
-        packages.update(getPythonPackages())
+        if include_all:
+            packages.update(getAllPythonDistributions())
+        else:
+            packages.update(getPythonPackages())
+        # Conda list always reports all Conda packages.
         packages.update(getCondaPackages())
-        packages.update(getEnvironmentPackages())  # Should be last, to override products with LOCAL versions
+        # Should be last, to override products with LOCAL versions
+        packages.update(getEnvironmentPackages(include_all=include_all))
         return cls(packages)
 
     @classmethod
