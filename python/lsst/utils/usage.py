@@ -20,6 +20,7 @@ import platform
 import resource
 import time
 
+import numpy as np
 import astropy.units as u
 import psutil
 
@@ -111,6 +112,10 @@ class _UsageInfo:
     blockOutputs: int
     voluntaryContextSwitches: int
     involuntaryContextSwitches: int
+    nodeLoadAverage: float
+    """Number of node-wide runnable processes over the last 15 minutes."""
+    nodeCpuFreq: float
+    """Average CPU frequency in MHz, weighted by per-CPU values reported by psutil.cpu_percent"""
 
     def dict(self) -> dict[str, float | int]:
         return dataclasses.asdict(self)
@@ -136,6 +141,12 @@ def _get_current_rusage(for_children: bool = False) -> _UsageInfo:
     # Convert the memory usage to bytes.
     max_rss = res.ru_maxrss * _RUSAGE_MEMORY_MULTIPLIER
 
+    # Compute average of cpu_freq weighting by cpu_percent.
+    interval = 1e-2  # cpu_freqs are instantaneous, so use a small interval here
+    cpu_percents = np.array(psutil.cpu_percent(interval=interval, percpu=True))
+    cpu_freqs = np.array([_.current for _ in psutil.cpu_freq(percpu=True)])
+    mean_cpu_freq = np.sum(cpu_percents*cpu_freqs)/np.sum(cpu_percents)
+
     return _UsageInfo(
         cpuTime=time.process_time(),
         userTime=res.ru_utime,
@@ -147,4 +158,6 @@ def _get_current_rusage(for_children: bool = False) -> _UsageInfo:
         blockOutputs=res.ru_oublock,
         voluntaryContextSwitches=res.ru_nvcsw,
         involuntaryContextSwitches=res.ru_nivcsw,
+        nodeLoadAverage=psutil.getloadavg()[2],
+        nodeCpuFreq=mean_cpu_freq,
     )
