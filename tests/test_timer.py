@@ -114,6 +114,7 @@ class TestTimeMethod(unittest.TestCase):
         self.assertEqual(cm.records[0].filename, THIS_FILE)
         self.assertIn("PrefixUtc", metadata)
         self.assertIn("PrefixMaxResidentSetSize", metadata)
+        self.assertIn("nodeName", metadata)
         self.assertEqual(metadata["__version__"], 1)
 
         # Again with no log output.
