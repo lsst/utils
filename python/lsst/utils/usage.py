@@ -9,8 +9,7 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 
-"""Utilities for measuring resource consumption.
-"""
+"""Utilities for measuring resource consumption."""
 from __future__ import annotations
 
 __all__ = ["get_current_mem_usage", "get_peak_mem_usage"]

@@ -10,8 +10,7 @@
 # license that can be found in the LICENSE file.
 #
 
-"""Utilities for measuring execution time.
-"""
+"""Utilities for measuring execution time."""
 
 from __future__ import annotations
 

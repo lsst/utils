@@ -10,8 +10,7 @@
 # license that can be found in the LICENSE file.
 #
 
-"""Utilities to help with class creation.
-"""
+"""Utilities to help with class creation."""
 
 from __future__ import annotations
 
