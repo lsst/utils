@@ -29,7 +29,7 @@ import unittest
 from dataclasses import dataclass
 
 from astropy import units as u
-from lsst.utils.timer import logInfo, logPairs, profile, time_this, timeMethod
+from lsst.utils.timer import duration_from_timeMethod, logInfo, logPairs, profile, time_this, timeMethod
 
 log = logging.getLogger("test_timer")
 
@@ -164,6 +164,9 @@ class TestTimeMethod(unittest.TestCase):
             with self.subTest(log=log, metadata=metadata):
                 task = Example1(log=log, metadata=metadata)
                 self.assertTimer(duration, task)
+                exampleDuration = duration_from_timeMethod(task.metadata, "sleeper")
+                if metadata is not None:
+                    self.assertGreater(exampleDuration, 0)
 
     def testDecorated(self):
         """Test timeMethod on non-Task like instances."""
