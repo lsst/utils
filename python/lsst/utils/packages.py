@@ -9,8 +9,7 @@
 # Use of this source code is governed by a 3-clause BSD-style
 # license that can be found in the LICENSE file.
 #
-"""Determine which packages are being used in the system and their versions.
-"""
+"""Determine which packages are being used in the system and their versions."""
 
 from __future__ import annotations
 

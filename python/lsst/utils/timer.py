@@ -10,12 +10,11 @@
 # license that can be found in the LICENSE file.
 #
 
-"""Utilities for measuring execution time.
-"""
+"""Utilities for measuring execution time."""
 
 from __future__ import annotations
 
-__all__ = ["profile", "logInfo", "timeMethod", "time_this"]
+__all__ = ["duration_from_timeMethod", "profile", "logInfo", "timeMethod", "time_this"]
 
 import datetime
 import functools
@@ -480,3 +479,33 @@ def profile(filename: str | None, log: LsstLoggers | None = None) -> Iterator[cP
     profile.dump_stats(filename)
     if log is not None:
         log.info("cProfile stats written to %s", filename)
+
+
+def duration_from_timeMethod(
+    metadata: MutableMapping | None, method_name: str, clock: str = "Cpu"
+) -> float | None:
+    """Parse the metadata entries from ``timeMethod`` and return a duration
+
+    Parameters
+    ----------
+    metadata : `collections.abc.MutableMapping`
+        The Task metadata that timing metrics were added to.
+    method_name : `str`
+        Name of the timed method to extract a duration for.
+    clock : `str`, optional
+        Options are "Cpu", "User", or "System"
+
+    Returns
+    -------
+    duration : `float`
+        The time elapsed between the start and end of the timed method.
+    """
+    if metadata is None:
+        return None
+    start = metadata[method_name + "Start" + clock + "Time"]
+    if isinstance(start, list):
+        start = start[-1]
+    end = metadata[method_name + "End" + clock + "Time"]
+    if isinstance(end, list):
+        end = end[-1]
+    return end - start
