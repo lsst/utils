@@ -73,6 +73,7 @@ def continueClass(cls):
         class Foo:
             pass
 
+
         @continueClass
         class Foo:
             def run(self):
@@ -122,6 +123,7 @@ def inClass(cls, name: str | None = None):
 
         class Foo:
             pass
+
 
         @inClass(Foo)
         def run(self):
@@ -191,8 +193,10 @@ class TemplateMeta(type):
         import numpy as np
         from ._image import ImageF, ImageD
 
+
         class Image(metaclass=TemplateMeta):
             pass
+
 
         Image.register(np.float32, ImageF)
         Image.register(np.float64, ImageD)
@@ -234,9 +238,9 @@ class TemplateMeta(type):
     .. code-block:: python
 
         class Image(metaclass=TemplateMeta):
-
             def sum(self):
                 return np.sum(self.getArray())
+
 
         Image.register(np.float32, ImageF)
         Image.register(np.float64, ImageD)

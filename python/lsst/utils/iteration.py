@@ -219,7 +219,7 @@ def sequence_to_string(values: list[int | str]) -> str:
 
     >>> getNameOfSet([1, 2, 3, 5, 7, 8, 9])
     '1..3^5^7..9'
-    >>> getNameOfSet(['node1', 'node2', 'node3'])
+    >>> getNameOfSet(["node1", "node2", "node3"])
     'node1..node3'
     >>> getNameOfSet([10, 20, 30, 40])
     '10..40:10'

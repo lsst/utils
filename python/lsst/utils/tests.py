@@ -447,6 +447,8 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
         # file tests/testFoo.py
         import unittest
         import lsst.utils.tests
+
+
         class FooTestCase(unittest.TestCase):
             def testBasics(self):
                 self.runTest()
@@ -460,6 +462,8 @@ def getTempFilePath(ext: str, expectOutput: bool = True) -> Iterator[str]:
                     # at the end of this "with" block the path tmpFile will be
                     # deleted, but only if the file exists and the "with"
                     # block terminated normally (rather than with an exception)
+
+
         ...
     """
     stack = inspect.stack()
@@ -949,8 +953,7 @@ def classParameters(**settings: Sequence[Any]) -> Callable:
     ::
 
         @classParameters(foo=[1, 2], bar=[3, 4])
-        class MyTestCase(unittest.TestCase):
-            ...
+        class MyTestCase(unittest.TestCase): ...
 
     will generate two classes, as if you wrote::
 
@@ -958,6 +961,7 @@ def classParameters(**settings: Sequence[Any]) -> Callable:
             foo = 1
             bar = 3
             ...
+
 
         class MyTestCase_2_4(unittest.TestCase):
             foo = 2
@@ -995,8 +999,7 @@ def methodParameters(**settings: Sequence[Any]) -> Callable:
     .. code-block:: python
 
         @methodParameters(foo=[1, 2], bar=[3, 4])
-        def testSomething(self, foo, bar):
-            ...
+        def testSomething(self, foo, bar): ...
 
     will run:
 
@@ -1069,8 +1072,7 @@ def classParametersProduct(**settings: Sequence[Any]) -> Callable:
     .. code-block:: python
 
         @classParametersProduct(foo=[1, 2], bar=[3, 4])
-        class MyTestCase(unittest.TestCase):
-            ...
+        class MyTestCase(unittest.TestCase): ...
 
     will generate four classes, as if you wrote::
 
@@ -1081,15 +1083,18 @@ def classParametersProduct(**settings: Sequence[Any]) -> Callable:
             bar = 3
             ...
 
+
         class MyTestCase_1_4(unittest.TestCase):
             foo = 1
             bar = 4
             ...
 
+
         class MyTestCase_2_3(unittest.TestCase):
             foo = 2
             bar = 3
             ...
+
 
         class MyTestCase_2_4(unittest.TestCase):
             foo = 2
