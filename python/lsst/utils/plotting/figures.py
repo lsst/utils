@@ -14,8 +14,8 @@ from __future__ import annotations
 
 __all__ = [
     "get_multiband_plot_colors",
-    "get_multiband_plot_symbols",
     "get_multiband_plot_linestyles",
+    "get_multiband_plot_symbols",
     "make_figure",
 ]
 

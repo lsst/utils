@@ -14,11 +14,11 @@ from __future__ import annotations
 __all__ = (
     "TRACE",
     "VERBOSE",
-    "getLogger",
-    "getTraceLogger",
     "LsstLogAdapter",
     "LsstLoggers",
     "PeriodicLogger",
+    "getLogger",
+    "getTraceLogger",
     "trace_set_at",
 )
 

@@ -35,12 +35,12 @@ import yaml
 log = logging.getLogger(__name__)
 
 __all__ = [
-    "getVersionFromPythonModule",
-    "getAllPythonDistributions",
-    "getPythonPackages",
-    "getEnvironmentPackages",
-    "getCondaPackages",
     "Packages",
+    "getAllPythonDistributions",
+    "getCondaPackages",
+    "getEnvironmentPackages",
+    "getPythonPackages",
+    "getVersionFromPythonModule",
 ]
 
 

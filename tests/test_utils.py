@@ -22,8 +22,9 @@
 import sys
 import unittest
 
-import lsst.utils.tests
 import numpy as np
+
+import lsst.utils.tests
 
 # set to True to test plotting and printing by-eye when tests fail
 display = False

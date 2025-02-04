@@ -13,7 +13,7 @@
 
 from __future__ import annotations
 
-__all__ = ["set_thread_envvars", "disable_implicit_threading"]
+__all__ = ["disable_implicit_threading", "set_thread_envvars"]
 
 import os
 

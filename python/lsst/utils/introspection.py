@@ -14,11 +14,11 @@
 from __future__ import annotations
 
 __all__ = [
+    "find_outside_stacklevel",
+    "get_caller_name",
     "get_class_of",
     "get_full_type_name",
     "get_instance_of",
-    "get_caller_name",
-    "find_outside_stacklevel",
     "take_object_census",
     "trace_object_references",
 ]
@@ -242,8 +242,7 @@ def find_outside_stacklevel(
     .. code-block:: python
 
         warnings.warn(
-            "A warning message",
-            stacklevel=find_outside_stacklevel("lsst.daf")
+            "A warning message", stacklevel=find_outside_stacklevel("lsst.daf")
         )
     """
     if sys.version_info < (3, 11, 0):
@@ -373,7 +372,7 @@ def trace_object_references(
     >>> # In doctest, the trace extends up to the whole global dict
     >>> # if you let it.
     >>> trace_object_references(Foo, max_level=2)  # doctest: +ELLIPSIS
-    ...                                      # doctest: +NORMALIZE_WHITESPACE
+    ... # doctest: +NORMALIZE_WHITESPACE
     ([[<lsst.utils.introspection.Foo object at ...>],
       [{'object': <lsst.utils.introspection.Foo object at ...>}],
       [Holder(bar={'object': <lsst.utils.introspection.Foo object at ...>},
