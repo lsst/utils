@@ -22,6 +22,7 @@
 import unittest
 
 import numpy as np
+
 from lsst.utils.plotting.limits import calculate_safe_plotting_limits, make_calculate_safe_plotting_limits
 
 

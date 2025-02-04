@@ -22,6 +22,7 @@
 import unittest
 
 from astropy import units as u
+
 from lsst.utils.usage import get_current_mem_usage, get_peak_mem_usage
 
 
