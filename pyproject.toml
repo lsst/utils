@@ -183,6 +183,7 @@ checks = [
     "RT01",  # Unfortunately our @property trigger this.
     "RT02",  # Does not want named return value. DM style says we do.
     "SS05",  # pydocstyle is better at finding infinitive verb.
+    "GL03",  # ruff format of docstrings disagrees.
 ]
 exclude = [
     "^test_.*",  # Do not test docstrings in test code.
