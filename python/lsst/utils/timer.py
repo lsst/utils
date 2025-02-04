@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-__all__ = ["duration_from_timeMethod", "profile", "logInfo", "timeMethod", "time_this"]
+__all__ = ["duration_from_timeMethod", "logInfo", "profile", "timeMethod", "time_this"]
 
 import datetime
 import functools

@@ -17,7 +17,7 @@ from typing import Any
 
 import numpy as np
 
-__all__ = ("continueClass", "inClass", "TemplateMeta")
+__all__ = ("TemplateMeta", "continueClass", "inClass")
 
 
 INTRINSIC_SPECIAL_ATTRIBUTES = frozenset(

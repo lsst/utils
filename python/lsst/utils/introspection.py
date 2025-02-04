@@ -14,11 +14,11 @@
 from __future__ import annotations
 
 __all__ = [
+    "find_outside_stacklevel",
+    "get_caller_name",
     "get_class_of",
     "get_full_type_name",
     "get_instance_of",
-    "get_caller_name",
-    "find_outside_stacklevel",
     "take_object_census",
     "trace_object_references",
 ]
