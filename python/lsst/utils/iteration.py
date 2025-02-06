@@ -252,7 +252,7 @@ def sequence_to_string(values: list[int | str]) -> str:
         isinstance(item, str) for item in values
     )
     if not pure_ints_or_pure_strings:
-        types = set(type(item) for item in values)
+        types = {type(item) for item in values}
         raise TypeError(f"All items in the input list must be either integers or strings, got {types}")
 
     # Determine the stride for integers

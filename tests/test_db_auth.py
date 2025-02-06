@@ -40,7 +40,7 @@ class DbAuthTestCase(unittest.TestCase):
             "postgresql://host.example.com:5432/my_database",
             "postgresql://user@host.example.com/my_database",
         ]:
-            auth = DbAuth(authList=[dict(url=matchPattern, username="foo", password="bar")])
+            auth = DbAuth(authList=[{"url": matchPattern, "username": "foo", "password": "bar"}])
             user, pwd = auth.getAuth("postgresql", "user", "host.example.com", "5432", "my_database")
             self.assertEqual(user, "user")
             self.assertEqual(pwd, "bar")
@@ -48,7 +48,9 @@ class DbAuthTestCase(unittest.TestCase):
     def test_connStrings(self):
         """Test various connection URLs against a fixed pattern."""
         auth = DbAuth(
-            authList=[dict(url="postgresql://host.example.com/my_database", username="foo", password="bar")]
+            authList=[
+                {"url": "postgresql://host.example.com/my_database", "username": "foo", "password": "bar"}
+            ]
         )
         for connComponents in [
             ("postgresql", "user", "host.example.com", 5432, "my_database"),
@@ -96,10 +98,10 @@ class DbAuthTestCase(unittest.TestCase):
         """Test IPv6 addresses as host names."""
         auth = DbAuth(
             authList=[
-                dict(url="postgresql://user@[fe80::1ff:fe23:4567:890a]:5432/db", password="pwd"),
-                dict(url="postgresql://[fe80::1ff:fe23:4567:890a]:5432/db", password="pwd2"),
-                dict(url="postgresql://user3@[fe80::1ff:fe23:4567:890a]/db", password="pwd3"),
-                dict(url="postgresql://[fe80::1ff:fe23:4567:890a]/db", password="pwd4"),
+                {"url": "postgresql://user@[fe80::1ff:fe23:4567:890a]:5432/db", "password": "pwd"},
+                {"url": "postgresql://[fe80::1ff:fe23:4567:890a]:5432/db", "password": "pwd2"},
+                {"url": "postgresql://user3@[fe80::1ff:fe23:4567:890a]/db", "password": "pwd3"},
+                {"url": "postgresql://[fe80::1ff:fe23:4567:890a]/db", "password": "pwd4"},
             ]
         )
         self.assertEqual(
@@ -119,17 +121,25 @@ class DbAuthTestCase(unittest.TestCase):
         """Test ordered searching."""
         auth = DbAuth(
             authList=[
-                dict(url="postgresql://user1@host2.example.com:3360/database3", password="first"),
-                dict(
-                    url="postgresql://host2.example.com:3360/database3",
-                    username="second_u",
-                    password="second",
-                ),
-                dict(url="postgresql://host2.example.com:5432/database3", username="wrong", password="port"),
-                dict(url="postgresql://host3.example.com/", username="third_u", password="third"),
-                dict(url="oracle://oracle.example.com/other_database", username="scott", password="tiger"),
-                dict(url="postgresql://*.example.com/database3", username="fourth_u", password="fourth"),
-                dict(url="postgresql://*.example.com", username="fifth_u", password="fifth"),
+                {"url": "postgresql://user1@host2.example.com:3360/database3", "password": "first"},
+                {
+                    "url": "postgresql://host2.example.com:3360/database3",
+                    "username": "second_u",
+                    "password": "second",
+                },
+                {
+                    "url": "postgresql://host2.example.com:5432/database3",
+                    "username": "wrong",
+                    "password": "port",
+                },
+                {"url": "postgresql://host3.example.com/", "username": "third_u", "password": "third"},
+                {
+                    "url": "oracle://oracle.example.com/other_database",
+                    "username": "scott",
+                    "password": "tiger",
+                },
+                {"url": "postgresql://*.example.com/database3", "username": "fourth_u", "password": "fourth"},
+                {"url": "postgresql://*.example.com", "username": "fifth_u", "password": "fifth"},
             ]
         )
         self.assertEqual(
@@ -199,15 +209,15 @@ class DbAuthTestCase(unittest.TestCase):
         ):
             auth.getAuth("postgresql", None, "example.com", None, "foo")
 
-        auth = DbAuth(authList=[dict(password="testing")])
+        auth = DbAuth(authList=[{"password": "testing"}])
         with self.assertRaisesRegex(DbAuthError, r"^Missing URL in DbAuth configuration$"):
             auth.getAuth("postgresql", None, "example.com", None, "foo")
 
-        auth = DbAuth(authList=[dict(url="testing", password="testing")])
+        auth = DbAuth(authList=[{"url": "testing", "password": "testing"}])
         with self.assertRaisesRegex(DbAuthError, r"^Missing database dialect in URL: testing$"):
             auth.getAuth("postgresql", None, "example.com", None, "foo")
 
-        auth = DbAuth(authList=[dict(url="postgresql:///foo", password="testing")])
+        auth = DbAuth(authList=[{"url": "postgresql:///foo", "password": "testing"}])
         with self.assertRaisesRegex(DbAuthError, r"^Missing host in URL: postgresql:///foo$"):
             auth.getAuth("postgresql", None, "example.com", None, "foo")
 
@@ -221,14 +231,16 @@ class DbAuthTestCase(unittest.TestCase):
             "postgresql://host.example.com:5432/my_database",
             "postgresql://user@host.example.com/my_database",
         ]:
-            auth = DbAuth(authList=[dict(url=matchPattern, username="foo", password="bar")])
+            auth = DbAuth(authList=[{"url": matchPattern, "username": "foo", "password": "bar"}])
             self.assertEqual(
                 auth.getUrl("postgresql://user@host.example.com:5432/my_database"),
                 "postgresql://user:bar@host.example.com:5432/my_database",
             )
 
         auth = DbAuth(
-            authList=[dict(url="postgresql://host.example.com/my_database", username="foo", password="bar")]
+            authList=[
+                {"url": "postgresql://host.example.com/my_database", "username": "foo", "password": "bar"}
+            ]
         )
         self.assertEqual(
             auth.getUrl("postgresql://user@host.example.com:5432/my_database"),
@@ -281,10 +293,10 @@ class DbAuthTestCase(unittest.TestCase):
 
         auth = DbAuth(
             authList=[
-                dict(url="postgresql://user@[fe80::1ff:fe23:4567:890a]:5432/db", password="pwd"),
-                dict(url="postgresql://[fe80::1ff:fe23:4567:890a]:5432/db", password="pwd2"),
-                dict(url="postgresql://user3@[fe80::1ff:fe23:4567:890a]/db", password="pwd3"),
-                dict(url="postgresql://[fe80::1ff:fe23:4567:890a]/db", password="pwd4"),
+                {"url": "postgresql://user@[fe80::1ff:fe23:4567:890a]:5432/db", "password": "pwd"},
+                {"url": "postgresql://[fe80::1ff:fe23:4567:890a]:5432/db", "password": "pwd2"},
+                {"url": "postgresql://user3@[fe80::1ff:fe23:4567:890a]/db", "password": "pwd3"},
+                {"url": "postgresql://[fe80::1ff:fe23:4567:890a]/db", "password": "pwd4"},
             ]
         )
         self.assertEqual(
@@ -306,17 +318,25 @@ class DbAuthTestCase(unittest.TestCase):
 
         auth = DbAuth(
             authList=[
-                dict(url="postgresql://user1@host2.example.com:3360/database3", password="first"),
-                dict(
-                    url="postgresql://host2.example.com:3360/database3",
-                    username="second_u",
-                    password="second",
-                ),
-                dict(url="postgresql://host2.example.com:5432/database3", username="wrong", password="port"),
-                dict(url="postgresql://host3.example.com/", username="third_u", password="third"),
-                dict(url="oracle://oracle.example.com/other_database", username="scott", password="tiger"),
-                dict(url="postgresql://*.example.com/database3", username="fourth_u", password="fourth"),
-                dict(url="postgresql://*.example.com", username="fifth_u", password="fifth"),
+                {"url": "postgresql://user1@host2.example.com:3360/database3", "password": "first"},
+                {
+                    "url": "postgresql://host2.example.com:3360/database3",
+                    "username": "second_u",
+                    "password": "second",
+                },
+                {
+                    "url": "postgresql://host2.example.com:5432/database3",
+                    "username": "wrong",
+                    "password": "port",
+                },
+                {"url": "postgresql://host3.example.com/", "username": "third_u", "password": "third"},
+                {
+                    "url": "oracle://oracle.example.com/other_database",
+                    "username": "scott",
+                    "password": "tiger",
+                },
+                {"url": "postgresql://*.example.com/database3", "username": "fourth_u", "password": "fourth"},
+                {"url": "postgresql://*.example.com", "username": "fifth_u", "password": "fifth"},
             ]
         )
         self.assertEqual(
@@ -367,11 +387,11 @@ class DbAuthTestCase(unittest.TestCase):
         """Test URL encoding of username and password."""
         auth = DbAuth(
             authList=[
-                dict(
-                    url="postgresql://host.example.com/my_database",
-                    username="foo:étude",
-                    password="bar,.@%&/*[]",
-                )
+                {
+                    "url": "postgresql://host.example.com/my_database",
+                    "username": "foo:étude",
+                    "password": "bar,.@%&/*[]",
+                }
             ]
         )
         self.assertEqual(
