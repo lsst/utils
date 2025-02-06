@@ -27,34 +27,32 @@ jobs:
           channels: conda-forge,defaults
           channel-priority: strict
           show-channel-urls: true
-          miniforge-variant: Miniforge3
-          use-mamba: true
 
       - name: Install eups and any other conda packages
         shell: bash -l {0}
         run: |
-          mamba install -y -q eups
-
-      # We have two cores so we can speed up the testing with xdist
-      - name: Install pytest packages
-        shell: bash -l {0}
-        run: mamba install -y -q pytest pytest-xdist pytest-cov
+          conda install -y -q eups
 
       - name: Install numexpr for tests
         shell: bash -l {0}
         run: |
-          mamba install numexpr
+          conda install numexpr
 
       - name: Install lsst-ts-xml for test coverage of installing into lsst namespace
         shell: bash -l {0}
         run: |
-          mamba install lsst-ts-xml
+          conda install lsst-ts-xml
 
       - name: Install dependencies
         shell: bash -l {0}
         run: |
           pip install uv
           uv pip install --system -r requirements.txt
+
+      # We have two cores so we can speed up the testing with xdist
+      - name: Install pytest packages
+        shell: bash -l {0}
+        run: uv pip install --system pytest pytest-xdist pytest-cov
 
       - name: List installed packages
         shell: bash -l {0}
