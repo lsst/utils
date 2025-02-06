@@ -128,7 +128,7 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 110
-target-version = "py311"
+target-version = "py310"
 exclude = [
     "__init__.py",
 ]
@@ -159,6 +159,7 @@ select = [
     "D",  # pydocstyle
     "I",  # isort
     "C4",  # comprehensions
+    "UP",  # pyupgrade
 ]
 extend-select = [
     "RUF100", # Warn about unused noqa
