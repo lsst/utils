@@ -19,7 +19,7 @@ __all__ = [
     "make_figure",
 ]
 
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
@@ -62,7 +62,7 @@ def make_figure(**kwargs: Any) -> Figure:
     return fig
 
 
-def get_multiband_plot_colors(dark_background: bool = False) -> Dict:
+def get_multiband_plot_colors(dark_background: bool = False) -> dict:
     """Get color mappings for multiband plots using SDSS filter names.
 
     Notes
@@ -102,7 +102,7 @@ def get_multiband_plot_colors(dark_background: bool = False) -> Dict:
         return plot_filter_colors_white_background
 
 
-def get_multiband_plot_symbols() -> Dict:
+def get_multiband_plot_symbols() -> dict:
     """Get symbol mappings for multiband plots using SDSS filter names.
 
     Notes
@@ -125,7 +125,7 @@ def get_multiband_plot_symbols() -> Dict:
     return plot_symbols
 
 
-def get_multiband_plot_linestyles() -> Dict:
+def get_multiband_plot_linestyles() -> dict:
     """Get line style mappings for multiband plots using SDSS filter names.
 
     Notes
