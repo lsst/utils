@@ -166,7 +166,7 @@ class MemoryTestCase(unittest.TestCase):
         if diff:
             for f in diff:
                 print(f"File open: {f}")
-            self.fail("Failed to close %d file%s" % (len(diff), "s" if len(diff) != 1 else ""))
+            self.fail(f"Failed to close {len(diff)} file{'s' if len(diff) != 1 else ''}")
 
 
 class ExecutablesTestCase(unittest.TestCase):
