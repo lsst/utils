@@ -35,12 +35,12 @@ import yaml
 log = logging.getLogger(__name__)
 
 __all__ = [
-    "getVersionFromPythonModule",
-    "getAllPythonDistributions",
-    "getPythonPackages",
-    "getEnvironmentPackages",
-    "getCondaPackages",
     "Packages",
+    "getAllPythonDistributions",
+    "getCondaPackages",
+    "getEnvironmentPackages",
+    "getPythonPackages",
+    "getVersionFromPythonModule",
 ]
 
 
@@ -161,7 +161,7 @@ def getPythonPackages() -> dict[str, str]:
 
     # Not iterating with sys.modules.iteritems() because it's not atomic and
     # subject to race conditions
-    module_names = sorted(list(sys.modules.keys()))
+    module_names = sorted(sys.modules.keys())
 
     # Use knowledge of package hierarchy to find the versions rather than
     # using each name independently. Group all the module names into the
@@ -464,7 +464,7 @@ def getCondaPackages() -> dict[str, str]:
             except KeyError:
                 continue
 
-    packages = {n: v for n, v in sorted(packages.items())}
+    packages = dict(sorted(packages.items()))
 
     # Try to work out the conda environment name and include it as a fake
     # package. The "obvious" way of running "conda info --json" does give

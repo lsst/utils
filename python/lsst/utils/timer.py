@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-__all__ = ["duration_from_timeMethod", "profile", "logInfo", "timeMethod", "time_this"]
+__all__ = ["duration_from_timeMethod", "logInfo", "profile", "timeMethod", "time_this"]
 
 import datetime
 import functools
@@ -484,7 +484,7 @@ def profile(filename: str | None, log: LsstLoggers | None = None) -> Iterator[cP
 def duration_from_timeMethod(
     metadata: MutableMapping | None, method_name: str, clock: str = "Cpu"
 ) -> float | None:
-    """Parse the metadata entries from ``timeMethod`` and return a duration
+    """Parse the metadata entries from ``timeMethod`` and return a duration.
 
     Parameters
     ----------
@@ -493,7 +493,7 @@ def duration_from_timeMethod(
     method_name : `str`
         Name of the timed method to extract a duration for.
     clock : `str`, optional
-        Options are "Cpu", "User", or "System"
+        Options are "Cpu", "User", or "System".
 
     Returns
     -------

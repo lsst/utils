@@ -99,6 +99,7 @@ target-version = ["py311"]
 [tool.isort]
 profile = "black"
 line_length = 110
+known_first_party = ["lsst"]
 
 [tool.lsst_versions]
 write_to = "python/lsst/utils/version.py"
@@ -127,7 +128,7 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 110
-target-version = "py311"
+target-version = "py310"
 exclude = [
     "__init__.py",
 ]
@@ -156,16 +157,27 @@ select = [
     "N",  # pep8-naming
     "W",  # pycodestyle
     "D",  # pydocstyle
+    "I",  # isort
+    "C4",  # comprehensions
+    "UP",  # pyupgrade
+    "RUF022",  # sort __all__
 ]
 extend-select = [
     "RUF100", # Warn about unused noqa
 ]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lsst"]
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 79
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 79
 
 [tool.numpydoc_validation]
 checks = [
@@ -179,6 +191,7 @@ checks = [
     "RT01",  # Unfortunately our @property trigger this.
     "RT02",  # Does not want named return value. DM style says we do.
     "SS05",  # pydocstyle is better at finding infinitive verb.
+    "GL03",  # ruff format of docstrings disagrees.
 ]
 exclude = [
     "^test_.*",  # Do not test docstrings in test code.

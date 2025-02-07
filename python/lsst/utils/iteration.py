@@ -219,7 +219,7 @@ def sequence_to_string(values: list[int | str]) -> str:
 
     >>> getNameOfSet([1, 2, 3, 5, 7, 8, 9])
     '1..3^5^7..9'
-    >>> getNameOfSet(['node1', 'node2', 'node3'])
+    >>> getNameOfSet(["node1", "node2", "node3"])
     'node1..node3'
     >>> getNameOfSet([10, 20, 30, 40])
     '10..40:10'
@@ -252,7 +252,7 @@ def sequence_to_string(values: list[int | str]) -> str:
         isinstance(item, str) for item in values
     )
     if not pure_ints_or_pure_strings:
-        types = set(type(item) for item in values)
+        types = {type(item) for item in values}
         raise TypeError(f"All items in the input list must be either integers or strings, got {types}")
 
     # Determine the stride for integers

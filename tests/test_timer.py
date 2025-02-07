@@ -29,6 +29,7 @@ import unittest
 from dataclasses import dataclass
 
 from astropy import units as u
+
 from lsst.utils.timer import duration_from_timeMethod, logInfo, logPairs, profile, time_this, timeMethod
 
 log = logging.getLogger("test_timer")

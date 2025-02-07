@@ -21,9 +21,10 @@
 
 import unittest
 
+import numpy as np
+
 import lsst.utils
 import lsst.utils.tests
-import numpy as np
 
 
 class MockClass:  # continued class needs to be at module scope

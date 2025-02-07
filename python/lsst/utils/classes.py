@@ -19,7 +19,7 @@ __all__ = ["Singleton", "cached_getter", "immutable"]
 import functools
 from collections.abc import Callable
 from threading import RLock
-from typing import Any, ClassVar, Type, TypeVar
+from typing import Any, ClassVar, TypeVar
 
 
 class Singleton(type):
@@ -51,7 +51,7 @@ class Singleton(type):
             return cls._instances[cls]
 
 
-_T = TypeVar("_T", bound="Type")
+_T = TypeVar("_T", bound=Any)
 
 
 def immutable(cls: _T) -> _T:
@@ -88,13 +88,13 @@ def immutable(cls: _T) -> _T:
 
     # mypy says the variable here has signature (str, Any) i.e. no "self";
     # I think it's just confused by descriptor stuff.
-    cls.__setattr__ = __setattr__  # type: ignore
+    cls.__setattr__ = __setattr__
 
     def __getstate__(self: _T) -> dict:  # noqa: N807
         # Disable default state-setting when unpickled.
         return {}
 
-    cls.__getstate__ = __getstate__  # type: ignore[assignment]
+    cls.__getstate__ = __getstate__
 
     def __setstate__(self: _T, state: Any) -> None:  # noqa: N807
         # Disable default state-setting when copied.
