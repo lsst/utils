@@ -11,7 +11,6 @@
 """General LSST Utilities."""
 
 from ._packaging import *
-from .argparsing import *
 from .deprecated import *
 from .doImport import *
 from .inheritDoc import *

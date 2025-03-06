@@ -19,6 +19,7 @@ __all__ = ["AppendDict"]
 import argparse
 import copy
 from collections.abc import Mapping
+from typing import Any
 
 
 class AppendDict(argparse.Action):
@@ -33,16 +34,16 @@ class AppendDict(argparse.Action):
 
     def __init__(
         self,
-        option_strings,
-        dest,
-        nargs=None,
-        const=None,
-        default=None,
-        type=None,
-        choices=None,
-        required=False,
-        help=None,
-        metavar=None,
+        option_strings: str | list[str],
+        dest: str,
+        nargs: int | str | None = None,
+        const: Any | None = None,
+        default: Any | None = None,
+        type: type | None = None,
+        choices: Any | None = None,
+        required: bool = False,
+        help: str | None = None,
+        metavar: str | None = None,
     ):
         if default is None:
             default = {}
@@ -51,7 +52,9 @@ class AppendDict(argparse.Action):
             raise TypeError(f"Default for {argname} must be a mapping or None, got {default!r}.")
         super().__init__(option_strings, dest, nargs, const, default, type, choices, required, help, metavar)
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self, parser: argparse.ArgumentParser, namespace: Any, values: Any, option_string: str | None = None
+    ) -> None:
         # argparse doesn't make defensive copies, so namespace.dest may be
         # the same object as self.default. Do the copy ourselves and avoid
         # modifying the object previously in namespace.dest.
