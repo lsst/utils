@@ -23,7 +23,7 @@ from typing import Any
 
 
 class AppendDict(argparse.Action):
-    """An action analogous to the build-in 'append' that appends to a `dict`
+    """An action analogous to the built-in 'append' that appends to a `dict`
     instead of a `list`.
 
     Inputs are assumed to be strings in the form "key=value"; any input that
