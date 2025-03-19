@@ -12,3 +12,4 @@
 
 from .figures import *
 from .limits import *
+from .publication_plots import *
