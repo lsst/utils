@@ -19,6 +19,7 @@ __all__ = ["duration_from_timeMethod", "logInfo", "profile", "timeMethod", "time
 import datetime
 import functools
 import logging
+import os
 import sys
 import time
 import traceback
@@ -236,6 +237,8 @@ def timeMethod(
 ) -> Callable:
     """Measure duration of a method.
 
+    Set LSST_UTILS_DISABLE_TIMER in your environment to disable this method.
+
     Parameters
     ----------
     _func : `~collections.abc.Callable` or `None`
@@ -313,6 +316,8 @@ def timeMethod(
 
     if _func is None:
         return decorator_timer
+    elif "LSST_UTILS_DISABLE_TIMER" in os.environ:
+        return _func
     else:
         return decorator_timer(_func)
 
