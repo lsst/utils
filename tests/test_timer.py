@@ -21,6 +21,7 @@
 
 import datetime
 import logging
+import os
 import os.path
 import pstats
 import tempfile
@@ -195,6 +196,24 @@ class TestTimeMethod(unittest.TestCase):
             logging.getLogger("timer.test_timer").debug("sentinel")
         self.assertEqual(len(cm.output), 1)
         self.assertIn("decorated_sleeper_metadataStartUserTime", test_metadata)
+
+    def testDisabled(self):
+        """Test that setting the appropriate envvar disables the decorator.
+        """
+        duration = 0.1
+
+        os.environ["LSST_UTILS_DISABLE_TIMER"] = ""
+
+        # Use a function decorated for logging.
+        with self.assertNoLogs("timer.test_timer", level=logging.DEBUG) as cm:
+            decorated_sleeper_logger(self, duration)
+        self.assertEqual(cm.records[0].filename, THIS_FILE, "log message should originate from here")
+
+        # And adjust the log level
+        with self.assertNoLogs("timer.test_timer", level=logging.INFO):
+            decorated_sleeper_logger_level(self, duration)
+
+        del os.environ["LSST_UTILS_DISABLE_TIMER"]
 
 
 class TimerTestCase(unittest.TestCase):

@@ -299,6 +299,7 @@ def timeMethod(
                 logLevel=logLevel,
                 stacklevel=stacklevel,
             )
+            print("THINGYH!")
             try:
                 res = func(self, *args, **keyArgs)
             finally:
