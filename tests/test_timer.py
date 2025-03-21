@@ -21,6 +21,7 @@
 
 import datetime
 import logging
+import os
 import os.path
 import pstats
 import tempfile
@@ -195,6 +196,21 @@ class TestTimeMethod(unittest.TestCase):
             logging.getLogger("timer.test_timer").debug("sentinel")
         self.assertEqual(len(cm.output), 1)
         self.assertIn("decorated_sleeper_metadataStartUserTime", test_metadata)
+
+    def testDisabled(self):
+        """Test that setting the appropriate envvar disables the decorator."""
+        duration = 0.1
+
+        with unittest.mock.patch.dict(os.environ, {"LSST_UTILS_DISABLE_TIMER": "1"}, clear=True):
+            import decorator_test.disable_timer
+
+            # For an empty decorator, we have to check for the attribute that
+            # `functools.wraps` attaches to the function.
+            self.assertFalse(hasattr(decorator_test.disable_timer.sleep_and_nothing, "__wrapped__"))
+
+            # For a decorator with kwargs, no logs should be emitted.
+            with self.assertNoLogs("timer.disable_timer", level=logging.INFO):
+                decorator_test.disable_timer.sleep_and_log(self, duration)
 
 
 class TimerTestCase(unittest.TestCase):
