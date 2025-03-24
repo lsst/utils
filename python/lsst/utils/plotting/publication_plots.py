@@ -24,8 +24,8 @@ def set_rubin_plotstyle():
     """
     Set the matplotlib style for Rubin publications
     """
-    matplotlib.pyplot.style.use('lsst.utils.plotting.rubin')
-    print('Set up Rubin matplotlib plot style.')
+    matplotlib.pyplot.style.use("lsst.utils.plotting.rubin")
+    print("Set up Rubin matplotlib plot style.")
 
 
 def get_band_dicts():
@@ -38,9 +38,13 @@ def get_band_dicts():
     symbols = lsst.utils.plotting.get_multiband_plot_symbols()
     line_styles = lsst.utils.plotting.get_multiband_plot_linestyles()
 
-    print('This includes dicts for colors_white (bandpass colors for white background),')
-    print('  colors_black (bandpass colors for black background), symbols, and line_styles,')
-    print('  keyed on band (ugrizy).')
+    print("This includes dicts for colors_white (bandpass colors for white background),")
+    print("  colors_black (bandpass colors for black background), symbols, and line_styles,")
+    print("  keyed on band (ugrizy).")
 
-    return {'colors_white': colors_white, 'colors_black': colors_black,
-            'symbols': symbols, 'line_styles': line_styles}
+    return {
+        "colors_white": colors_white,
+        "colors_black": colors_black,
+        "symbols": symbols,
+        "line_styles": line_styles,
+    }
