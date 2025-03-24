@@ -36,20 +36,20 @@ def get_band_dicts():
     Returns
     -------
     band_dict : `dict` of `dict`
-        Dicts of colors_white, colors_black, symbols, and line_styles,
+        Dicts of colors, colors_black, symbols, and line_styles,
         keyed on bands 'u', 'g', 'r', 'i', 'z', and 'y'.
     """
-    colors_white = lsst.utils.plotting.get_multiband_plot_colors()
+    colors = lsst.utils.plotting.get_multiband_plot_colors()
     colors_black = lsst.utils.plotting.get_multiband_plot_colors(dark_background=True)
     symbols = lsst.utils.plotting.get_multiband_plot_symbols()
     line_styles = lsst.utils.plotting.get_multiband_plot_linestyles()
 
-    print("This includes dicts for colors_white (bandpass colors for white background),")
+    print("This includes dicts for colors (bandpass colors for white background),")
     print("  colors_black (bandpass colors for black background), symbols, and line_styles,")
     print("  keyed on band (ugrizy).")
 
     return {
-        "colors_white": colors_white,
+        "colors": colors,
         "colors_black": colors_black,
         "symbols": symbols,
         "line_styles": line_styles,
