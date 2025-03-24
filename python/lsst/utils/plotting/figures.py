@@ -147,8 +147,8 @@ def get_multiband_plot_linestyles() -> dict:
     }
 
     # Note, Mar. 18, 2025: The initial version of this used the following for
-    #   z and y bands. Due to a matplotlib bug, this does not work. It should be
-    #   restored to this behavior beginning with rubinenv 11, if possible.
+    #   z and y bands. Due to a matplotlib bug, this does not work. It should
+    #   be restored to this behavior beginning with rubinenv 11, if possible.
     # "z": (0, (3, 5, 1, 5, 1, 5)),
     # "y": (0, (3, 1, 1, 1)),
 
