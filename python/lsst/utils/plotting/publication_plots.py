@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-def set_rubin_plotstyle():
+def set_rubin_plotstyle() -> None:
     """
     Set the matplotlib style for Rubin publications
     """
@@ -32,6 +32,12 @@ def get_band_dicts():
     """
     Define palettes, from RTN-045.
     Module works with LSST Science Pipelines version >= daily 2024_12_02
+
+    Returns
+    -------
+    band_dict : `dict` of `dict`
+        Dicts of colors_white, colors_black, symbols, and line_styles,
+        keyed on bands 'u', 'g', 'r', 'i', 'z', and 'y'.
     """
     colors_white = lsst.utils.plotting.get_multiband_plot_colors()
     colors_black = lsst.utils.plotting.get_multiband_plot_colors(dark_background=True)
