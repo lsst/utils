@@ -28,7 +28,7 @@ def set_rubin_plotstyle() -> None:
     print("Set up Rubin matplotlib plot style.")
 
 
-def get_band_dicts():
+def get_band_dicts() -> dict:
     """
     Define palettes, from RTN-045.
     Module works with LSST Science Pipelines version >= daily 2024_12_02
