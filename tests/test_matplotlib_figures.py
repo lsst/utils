@@ -83,11 +83,11 @@ class PublicationPlotsTestCase(unittest.TestCase):
         # Set the plot style
         set_rubin_plotstyle()
         # Confirm that the settings took effect by checking one of them
-        self.assertEqual(matplotlib.pyplot.rcParams['errorbar.capsize'], 3.0)
+        self.assertEqual(matplotlib.pyplot.rcParams["errorbar.capsize"], 3.0)
 
     def testMultibandPlotColors(self):
         bands_dict = get_band_dicts()
-        self.assertEqual(bands_dict['colors']['r'], '#c61c00')
-        self.assertEqual(bands_dict['colors_black']['r'], '#ff7e00')
-        self.assertEqual(bands_dict['symbols']['r'], 'v')
-        self.assertEqual(bands_dict['line_styles']['r'], '-')
+        self.assertEqual(bands_dict["colors"]["r"], "#c61c00")
+        self.assertEqual(bands_dict["colors_black"]["r"], "#ff7e00")
+        self.assertEqual(bands_dict["symbols"]["r"], "v")
+        self.assertEqual(bands_dict["line_styles"]["r"], "-")
