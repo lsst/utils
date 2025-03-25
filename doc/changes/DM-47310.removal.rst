@@ -1,2 +1,0 @@
-Removed ``lsst.utils.ellipsis``.
-This code was no longer necessary since python 3.10 and has been replaced by `types.EllipsisType`.
