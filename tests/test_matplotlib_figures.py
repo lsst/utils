@@ -21,12 +21,16 @@
 
 import unittest
 
+import matplotlib.pyplot
+
 import lsst.utils.tests
 from lsst.utils.plotting import (
+    get_band_dicts,
     get_multiband_plot_colors,
     get_multiband_plot_linestyles,
     get_multiband_plot_symbols,
     make_figure,
+    set_rubin_plotstyle,
 )
 
 try:
@@ -69,3 +73,21 @@ class MakeFigureTestCase(unittest.TestCase):
                     )
 
             fig.savefig(tmpFile)
+
+
+@unittest.skipIf(Figure is None, "matplotlib is not available.")
+class PublicationPlotsTestCase(unittest.TestCase):
+    """Tests for publication_plots."""
+
+    def testMplStyle(self):
+        # Set the plot style
+        set_rubin_plotstyle()
+        # Confirm that the settings took effect by checking one of them
+        self.assertEqual(matplotlib.pyplot.rcParams['errorbar.capsize'], 3.0)
+
+    def testMultibandPlotColors(self):
+        bands_dict = get_band_dicts()
+        self.assertEqual(bands_dict['colors']['r'], '#c61c00')
+        self.assertEqual(bands_dict['colors_black']['r'], '#ff7e00')
+        self.assertEqual(bands_dict['symbols']['r'], 'v')
+        self.assertEqual(bands_dict['line_styles']['r'], '-')
