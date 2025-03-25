@@ -1,1 +1,0 @@
-Added ``lsst.utils.plotting.get_multiband_plot_colors``, ``lsst.utils.plotting.get_multiband_plot_linestyles``, and ``lsst.utils.plotting.get_multiband_plot_symbols`` utilities for making consistent multi-band plots.
