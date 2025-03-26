@@ -1,3 +1,30 @@
+lsst-utils v29.0.0 (2025-03-24)
+===============================
+
+New Features
+------------
+
+- Added ``lsst.utils.plotting.get_multiband_plot_colors``, ``lsst.utils.plotting.get_multiband_plot_linestyles``, and ``lsst.utils.plotting.get_multiband_plot_symbols`` utilities for making consistent multi-band plots. (`DM-47821 <https://rubinobs.atlassian.net/browse/DM-47821>`_)
+- * Add new ``lsst.utils.packages.getAllPythonDistributions`` function for retrieving the versions of all installed Python distributions regardless of what has been imported.
+  * Modified ``Packages.fromSystem`` to add a flag, ``include_all``, to control whether all installed Python distributions and EUPS packages should be reported and not solely the (default) imported distributions and locally-setup EUPS packages. All installed Conda packages are always reported.
+  * Modified ``lsst.utils.packages.getPythonPackages`` to no longer report packages that are part of the Python standard library. It is sufficient to record the Python version (via the ``python`` key). (`DM-48430 <https://rubinobs.atlassian.net/browse/DM-48430>`_)
+
+
+Miscellaneous Changes of Minor Interest
+---------------------------------------
+
+- Modified ``time_this`` so that exceptions occurring within the timer no longer change the log level to ``ERROR``.
+  Instead the log level remains unchanged but the exception information is included in the log message.
+  This allows the viewer to see why the timing might be different but also prevents log messages appearing when some code higher up caught the exception and continued on. (`DM-47310 <https://rubinobs.atlassian.net/browse/DM-47310>`_)
+
+
+An API Removal or Deprecation
+-----------------------------
+
+- Removed ``lsst.utils.ellipsis``.
+  This code was no longer necessary since python 3.10 and has been replaced by `types.EllipsisType`. (`DM-47310 <https://rubinobs.atlassian.net/browse/DM-47310>`_)
+
+
 lsst-utils v28.0.0 (2024-11-19)
 ===============================
 

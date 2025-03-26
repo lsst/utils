@@ -1,3 +1,0 @@
-Modified ``time_this`` so that exceptions occurring within the timer no longer change the log level to ``ERROR``.
-Instead the log level remains unchanged but the exception information is included in the log message.
-This allows the viewer to see why the timing might be different but also prevents log messages appearing when some code higher up caught the exception and continued on.
