@@ -27,6 +27,7 @@ def set_rubin_plotstyle() -> None:
     Set the matplotlib style for Rubin publications
     """
     from matplotlib import style
+
     style.use("lsst.utils.plotting.rubin")
 
 
