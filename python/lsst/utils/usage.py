@@ -20,8 +20,8 @@ import platform
 import resource
 import time
 
-import numpy as np
 import astropy.units as u
+import numpy as np
 import psutil
 
 
@@ -115,7 +115,8 @@ class _UsageInfo:
     nodeLoadAverage: float
     """Number of node-wide runnable processes over the last 15 minutes."""
     nodeCpuFreq: float
-    """Average CPU frequency in MHz, weighted by per-CPU values reported by psutil.cpu_percent"""
+    """Average CPU frequency in MHz, weighted by per-CPU values reported by
+       psutil.cpu_percent"""
 
     def dict(self) -> dict[str, float | int]:
         return dataclasses.asdict(self)
@@ -145,7 +146,7 @@ def _get_current_rusage(for_children: bool = False) -> _UsageInfo:
     interval = 1e-2  # cpu_freqs are instantaneous, so use a small interval here
     cpu_percents = np.array(psutil.cpu_percent(interval=interval, percpu=True))
     cpu_freqs = np.array([_.current for _ in psutil.cpu_freq(percpu=True)])
-    mean_cpu_freq = np.sum(cpu_percents*cpu_freqs)/np.sum(cpu_percents)
+    mean_cpu_freq = np.sum(cpu_percents * cpu_freqs) / np.sum(cpu_percents)
 
     return _UsageInfo(
         cpuTime=time.process_time(),
