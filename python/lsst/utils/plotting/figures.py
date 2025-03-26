@@ -146,7 +146,7 @@ def get_multiband_plot_linestyles() -> dict:
         "y": ":",
     }
 
-    # Note, Mar. 18, 2025: The initial version of this used the following for
+    # TODO [DM-49724]: The initial version of this used the following for
     #   z and y bands. Due to a matplotlib bug, this does not work. It should
     #   be restored to this behavior beginning with rubinenv 11, if possible.
     # "z": (0, (3, 5, 1, 5, 1, 5)),

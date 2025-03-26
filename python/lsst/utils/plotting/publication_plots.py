@@ -10,28 +10,35 @@
 # license that can be found in the LICENSE file.
 """Utilities for making publication-quality figures."""
 
-import matplotlib.pyplot
-
-import lsst.utils.plotting
-
 __all__ = [
     "get_band_dicts",
     "set_rubin_plotstyle",
 ]
+
+from matplotlib import style
+
+from lsst.utils import getPackageDir
+from . import (
+    get_multiband_plot_colors,
+    get_multiband_plot_linestyles,
+    get_multiband_plot_symbols,
+)
 
 
 def set_rubin_plotstyle() -> None:
     """
     Set the matplotlib style for Rubin publications
     """
-    matplotlib.pyplot.style.use("lsst.utils.plotting.rubin")
-    print("Set up Rubin matplotlib plot style.")
+    utilsPath = getPackageDir("utils")
+    styleFile = utilsPath + "/python/lsst/utils/plotting/rubin.mplstyle"
+    style.use(styleFile)
 
 
 def get_band_dicts() -> dict:
     """
-    Define palettes, from RTN-045.
-    Module works with LSST Science Pipelines version >= daily 2024_12_02
+    Define palettes, from RTN-045. This includes dicts for colors (bandpass
+    colors for white background), colors_black (bandpass colors for
+    black background), plot symbols, and line_styles, keyed on band (ugrizy).
 
     Returns
     -------
@@ -39,14 +46,10 @@ def get_band_dicts() -> dict:
         Dicts of colors, colors_black, symbols, and line_styles,
         keyed on bands 'u', 'g', 'r', 'i', 'z', and 'y'.
     """
-    colors = lsst.utils.plotting.get_multiband_plot_colors()
-    colors_black = lsst.utils.plotting.get_multiband_plot_colors(dark_background=True)
-    symbols = lsst.utils.plotting.get_multiband_plot_symbols()
-    line_styles = lsst.utils.plotting.get_multiband_plot_linestyles()
-
-    print("This includes dicts for colors (bandpass colors for white background),")
-    print("  colors_black (bandpass colors for black background), symbols, and line_styles,")
-    print("  keyed on band (ugrizy).")
+    colors = get_multiband_plot_colors()
+    colors_black = get_multiband_plot_colors(dark_background=True)
+    symbols = get_multiband_plot_symbols()
+    line_styles = get_multiband_plot_linestyles()
 
     return {
         "colors": colors,
