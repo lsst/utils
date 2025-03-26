@@ -17,8 +17,6 @@ __all__ = [
 
 from matplotlib import style
 
-from lsst.utils import getPackageDir
-
 from . import (
     get_multiband_plot_colors,
     get_multiband_plot_linestyles,
@@ -30,9 +28,7 @@ def set_rubin_plotstyle() -> None:
     """
     Set the matplotlib style for Rubin publications
     """
-    utilsPath = getPackageDir("utils")
-    styleFile = utilsPath + "/python/lsst/utils/plotting/rubin.mplstyle"
-    style.use(styleFile)
+    style.use("lsst.utils.plotting.rubin")
 
 
 def get_band_dicts() -> dict:
