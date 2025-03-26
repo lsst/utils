@@ -18,6 +18,7 @@ __all__ = [
 from matplotlib import style
 
 from lsst.utils import getPackageDir
+
 from . import (
     get_multiband_plot_colors,
     get_multiband_plot_linestyles,
