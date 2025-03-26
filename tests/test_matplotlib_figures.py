@@ -21,7 +21,7 @@
 
 import unittest
 
-import matplotlib.pyplot
+from matplotlib import rcParams
 
 import lsst.utils.tests
 from lsst.utils.plotting import (
@@ -83,7 +83,7 @@ class PublicationPlotsTestCase(unittest.TestCase):
         # Set the plot style
         set_rubin_plotstyle()
         # Confirm that the settings took effect by checking one of them
-        self.assertEqual(matplotlib.pyplot.rcParams["errorbar.capsize"], 3.0)
+        self.assertEqual(rcParams["errorbar.capsize"], 3.0)
 
     def testMultibandPlotColors(self):
         bands_dict = get_band_dicts()
