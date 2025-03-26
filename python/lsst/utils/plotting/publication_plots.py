@@ -15,8 +15,6 @@ __all__ = [
     "set_rubin_plotstyle",
 ]
 
-from matplotlib import style
-
 from . import (
     get_multiband_plot_colors,
     get_multiband_plot_linestyles,
@@ -28,6 +26,7 @@ def set_rubin_plotstyle() -> None:
     """
     Set the matplotlib style for Rubin publications
     """
+    from matplotlib import style
     style.use("lsst.utils.plotting.rubin")
 
 

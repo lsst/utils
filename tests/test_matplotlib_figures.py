@@ -21,8 +21,6 @@
 
 import unittest
 
-from matplotlib import rcParams
-
 import lsst.utils.tests
 from lsst.utils.plotting import (
     get_band_dicts,
@@ -34,6 +32,7 @@ from lsst.utils.plotting import (
 )
 
 try:
+    from matplotlib import rcParams
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
 except ImportError:
