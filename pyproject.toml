@@ -49,6 +49,7 @@ license-files = ["COPYRIGHT", "LICENSE"]
 
 [tool.setuptools.package-data]
 "lsst.utils" = ["py.typed"]
+"lsst.utils.plotting" = ["rubin.mplstyle"]
 
 [tool.setuptools.dynamic]
 version = { attr = "lsst_versions.get_lsst_version" }
