@@ -30,6 +30,13 @@ import yaml
 
 __all__ = ["DbAuth", "DbAuthError", "DbAuthPermissionsError"]
 
+DB_AUTH_ENVVAR = "LSST_DB_AUTH"
+"""Default name of the environmental variable that will be used to locate DB
+credentials configuration file. """
+
+DB_AUTH_PATH = "~/.lsst/db-auth.yaml"
+"""Default path at which it is expected that DB credentials are found."""
+
 
 class DbAuthError(RuntimeError):
     """Exception raised when a problem has occurred retrieving database
@@ -57,9 +64,10 @@ class DbAuth:
     Parameters
     ----------
     path : `str` or None, optional
-        Path to configuration file.
+        Path to configuration file, default path is ``~/.lsst/db-auth.yaml``.
     envVar : `str` or None, optional
-        Name of environment variable pointing to configuration file.
+        Name of environment variable pointing to configuration file, default is
+        ``LSST_DB_AUTH``.
     authList : `list` [`dict`] or None, optional
         Authentication configuration.
 
@@ -78,12 +86,8 @@ class DbAuth:
         if authList is not None:
             self.authList = authList
             return
-        if envVar is not None and envVar in os.environ:
-            secretPath = os.path.expanduser(os.environ[envVar])
-        elif path is None:
-            raise DbAuthNotFoundError("No default path provided to DbAuth configuration file")
-        else:
-            secretPath = os.path.expanduser(path)
+        secretPath = os.environ.get(envVar or DB_AUTH_ENVVAR, path or DB_AUTH_PATH)
+        secretPath = os.path.expanduser(secretPath)
         if not os.path.isfile(secretPath):
             raise DbAuthNotFoundError(f"No DbAuth configuration file: {secretPath}")
         mode = os.stat(secretPath).st_mode
