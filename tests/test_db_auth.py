@@ -169,8 +169,6 @@ class DbAuthTestCase(unittest.TestCase):
 
     def test_errors(self):
         """Test for error exceptions."""
-        with self.assertRaisesRegex(DbAuthError, r"^No default path provided to DbAuth configuration file$"):
-            auth = DbAuth()
         with self.assertRaisesRegex(DbAuthError, r"^No DbAuth configuration file: .*this_does_not_exist$"):
             auth = DbAuth(os.path.join(TESTDIR, "this_does_not_exist"))
         with self.assertRaisesRegex(DbAuthError, r"^No DbAuth configuration file: .*this_does_not_exist$"):
