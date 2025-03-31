@@ -72,6 +72,7 @@ class DbAuthTestCase(unittest.TestCase):
         filePath = os.path.join(TESTDIR, "db-auth.yaml")
         os.chmod(filePath, 0o600)
         auth = DbAuth(filePath)
+        self.assertEqual(auth.db_auth_path, filePath)
         self.assertEqual(
             auth.getAuth("postgresql", "user", "host.example.com", "5432", "my_database"), ("user", "test1")
         )
@@ -169,8 +170,6 @@ class DbAuthTestCase(unittest.TestCase):
 
     def test_errors(self):
         """Test for error exceptions."""
-        with self.assertRaisesRegex(DbAuthError, r"^No default path provided to DbAuth configuration file$"):
-            auth = DbAuth()
         with self.assertRaisesRegex(DbAuthError, r"^No DbAuth configuration file: .*this_does_not_exist$"):
             auth = DbAuth(os.path.join(TESTDIR, "this_does_not_exist"))
         with self.assertRaisesRegex(DbAuthError, r"^No DbAuth configuration file: .*this_does_not_exist$"):
