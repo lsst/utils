@@ -84,6 +84,7 @@ class DbAuth:
         authList: list[dict[str, str]] | None = None,
     ):
         if authList is not None:
+            self._db_auth_path = "<auth-list>"
             self.authList = authList
             return
         secretPath = os.environ.get(envVar or DB_AUTH_ENVVAR, path or DB_AUTH_PATH)
@@ -101,6 +102,12 @@ class DbAuth:
                 self.authList = yaml.safe_load(secretFile)
         except Exception as exc:
             raise DbAuthError(f"Unable to load DbAuth configuration file: {secretPath}.") from exc
+        self._db_auth_path = secretPath
+
+    @property
+    def db_auth_path(self) -> str:
+        """The path to the secrets file used to load credentials (`str`)."""
+        return self._db_auth_path
 
     # dialectname, host, and database are tagged as Optional only because other
     # routines delegate to this one in order to raise a consistent exception

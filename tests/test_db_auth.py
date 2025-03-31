@@ -72,6 +72,7 @@ class DbAuthTestCase(unittest.TestCase):
         filePath = os.path.join(TESTDIR, "db-auth.yaml")
         os.chmod(filePath, 0o600)
         auth = DbAuth(filePath)
+        self.assertEqual(auth.db_auth_path, filePath)
         self.assertEqual(
             auth.getAuth("postgresql", "user", "host.example.com", "5432", "my_database"), ("user", "test1")
         )
