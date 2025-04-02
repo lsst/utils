@@ -1,0 +1,1 @@
+- Added support for ``LSST_UTILS_DISABLE_TIMER`` environment variable to turn off the timing decorator to produce more useful profiling output.
