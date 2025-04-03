@@ -19,8 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import os
 import unittest
+import unittest.mock
+
+import yaml
 
 from lsst.utils.db_auth import DbAuth, DbAuthError
 
@@ -94,6 +98,39 @@ class DbAuthTestCase(unittest.TestCase):
         self.assertEqual(
             auth.getAuth("postgresql", "user", "host4.other.com", None, "other_database"), ("user", "test8")
         )
+
+    def test_json_envvar(self):
+        """Test loading from JSON string in environment variable."""
+        filepath = os.path.join(TESTDIR, "db-auth.yaml")
+        with open(filepath) as fd:
+            auth_list = yaml.safe_load(fd)
+        json_content = json.dumps(auth_list)
+
+        with unittest.mock.patch.dict(os.environ, {"LSST_DB_AUTH_CREDENTIALS": json_content}):
+            auth = DbAuth()
+            self.assertEqual(
+                auth.getAuth("postgresql", "user", "host.example.com", "5432", "my_database"),
+                ("user", "test1"),
+            )
+            self.assertEqual(
+                auth.getAuth("postgresql", "user", "host.example.com", "3360", "my_database"),
+                ("user", "test2"),
+            )
+
+        with unittest.mock.patch.dict(os.environ, {"TEST_CREDS": json_content}):
+            auth = DbAuth(credsEnvVar="TEST_CREDS")
+            self.assertEqual(
+                auth.getAuth("postgresql", "user", "host.example.com", "5432", "my_database"),
+                ("user", "test1"),
+            )
+            self.assertEqual(
+                auth.getAuth("postgresql", "user", "host.example.com", "3360", "my_database"),
+                ("user", "test2"),
+            )
+
+        with unittest.mock.patch.dict(os.environ, {"TEST_CREDS": "Bad ' : JSON"}):
+            with self.assertRaises(DbAuthError):
+                DbAuth(credsEnvVar="TEST_CREDS")
 
     def test_ipv6(self):
         """Test IPv6 addresses as host names."""
