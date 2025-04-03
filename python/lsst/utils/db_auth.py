@@ -31,18 +31,6 @@ import yaml
 
 __all__ = ["DbAuth", "DbAuthError", "DbAuthPermissionsError"]
 
-DB_AUTH_ENVVAR = "LSST_DB_AUTH"
-"""Default name of the environmental variable that will be used to locate DB
-credentials configuration file. """
-
-DB_AUTH_PATH = "~/.lsst/db-auth.yaml"
-"""Default path at which it is expected that DB credentials are found."""
-
-DB_AUTH_CREDENTIALS_ENVVAR = "LSST_DB_AUTH_CREDENTIALS"
-"""Name of an environment variable containing the DB credentials directly
-in JSON format.
-"""
-
 
 class DbAuthError(RuntimeError):
     """Exception raised when a problem has occurred retrieving database
@@ -69,15 +57,16 @@ class DbAuth:
 
     Parameters
     ----------
-    path : `str` or None, optional
+    path : `str`, optional
         Path to configuration file, default path is ``~/.lsst/db-auth.yaml``.
-    envVar : `str` or None, optional
+    envVar : `str`, optional
         Name of environment variable pointing to configuration file, default is
-        ``LSST_DB_AUTH``.
-    authList : `list` [`dict`] or None, optional
+        ``LSST_DB_AUTH``. This is used if the environment variable is available
+        even if the path is specified.
+    authList : `list` [`dict`] or `None`, optional
         Authentication configuration. Used directly if given without referring
         to the environment.
-    credsEnvVar : `str` or None, optional
+    credsEnvVar : `str`, optional
         Name of environment variable containing the authentication
         configuration in JSON format. Default is ``LSST_DB_AUTH_CREDENTIALS``.
         If defined, this takes priority over reading credentials from file.
@@ -92,10 +81,10 @@ class DbAuth:
 
     def __init__(
         self,
-        path: str | None = None,
-        envVar: str | None = None,
+        path: str = "~/.lsst/db-auth.yaml",
+        envVar: str = "LSST_DB_AUTH",
         authList: list[dict[str, str]] | None = None,
-        credsEnvVar: str | None = None,
+        credsEnvVar: str = "LSST_DB_AUTH_CREDENTIALS",
     ):
         if authList is not None:
             self._db_auth_path = "<auth-list>"
@@ -103,18 +92,17 @@ class DbAuth:
             return
 
         # Credentials in JSON takes priority.
-        jsonEnvVar = credsEnvVar or DB_AUTH_CREDENTIALS_ENVVAR
-        if jsonCreds := os.getenv(jsonEnvVar):
+        if jsonCreds := os.getenv(credsEnvVar):
             try:
                 self.authList = json.loads(jsonCreds)
             except json.JSONDecodeError as exc:
                 raise DbAuthError(
-                    f"Unable to load DbAuth configuration using JSON environment variable {jsonEnvVar}"
+                    f"Unable to load DbAuth configuration using JSON environment variable {credsEnvVar}"
                 ) from exc
             self._db_auth_path = "<json-env-var>"
             return
 
-        secretPath = os.environ.get(envVar or DB_AUTH_ENVVAR, path or DB_AUTH_PATH)
+        secretPath = os.getenv(envVar, path)
         secretPath = os.path.expanduser(secretPath)
         if not os.path.isfile(secretPath):
             raise DbAuthNotFoundError(f"No DbAuth configuration file: {secretPath}")
