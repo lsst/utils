@@ -20,6 +20,7 @@ import datetime
 import functools
 import logging
 import os
+import platform
 import sys
 import time
 import traceback
@@ -212,6 +213,9 @@ def logInfo(
         # Force a version number into the metadata.
         # v1: Ensure that max_rss field is always bytes.
         metadata["__version__"] = 1
+
+        # Add node information.
+        metadata["nodeName"] = platform.node()
     if stacklevel is not None:
         # Account for the caller of this routine not knowing that we
         # are going one down in the stack.
