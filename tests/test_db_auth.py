@@ -26,7 +26,7 @@ import unittest.mock
 
 import yaml
 
-from lsst.utils.db_auth import DbAuth, DbAuthError
+from lsst.utils.db_auth import DbAuth, DbAuthError, DbAuthNotFoundError
 
 TESTDIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "config", "dbAuth")
 
@@ -99,6 +99,22 @@ class DbAuthTestCase(unittest.TestCase):
             auth.getAuth("postgresql", "user", "host4.other.com", None, "other_database"), ("user", "test8")
         )
 
+    def test_envvar_path(self):
+        """Test loading from envvar path location."""
+        filePath = os.path.join(TESTDIR, "db-auth.yaml")
+        os.chmod(filePath, 0o600)
+        with unittest.mock.patch.dict(os.environ, {"LSST_DB_AUTH": filePath}):
+            auth = DbAuth()
+            self.assertEqual(
+                auth.getAuth("postgresql", "user", "host4.other.com", None, "other_database"),
+                ("user", "test8"),
+            )
+            auth = DbAuth(envVar=None)  # Should fallback to default
+            self.assertEqual(
+                auth.getAuth("postgresql", "user", "host4.other.com", None, "other_database"),
+                ("user", "test8"),
+            )
+
     def test_json_envvar(self):
         """Test loading from JSON string in environment variable."""
         filepath = os.path.join(TESTDIR, "db-auth.yaml")
@@ -115,6 +131,13 @@ class DbAuthTestCase(unittest.TestCase):
             self.assertEqual(
                 auth.getAuth("postgresql", "user", "host.example.com", "3360", "my_database"),
                 ("user", "test2"),
+            )
+
+        with unittest.mock.patch.dict(os.environ, {"LSST_DB_AUTH_CREDENTIALS": json_content}):
+            auth = DbAuth(credsEnvVar=None)
+            self.assertEqual(
+                auth.getAuth("postgresql", "user", "host.example.com", "5432", "my_database"),
+                ("user", "test1"),
             )
 
         with unittest.mock.patch.dict(os.environ, {"TEST_CREDS": json_content}):
@@ -223,8 +246,8 @@ class DbAuthTestCase(unittest.TestCase):
         ):
             filePath = os.path.join(TESTDIR, "badDbAuth2.yaml")
             os.chmod(filePath, 0o600)
-            os.environ["LSST_DB_AUTH_TEST"] = filePath
-            auth = DbAuth(envVar="LSST_DB_AUTH_TEST")
+            with unittest.mock.patch.dict(os.environ, {"LSST_DB_AUTH_TEST": filePath}):
+                auth = DbAuth(envVar="LSST_DB_AUTH_TEST")
 
         auth = DbAuth(authList=[])
         with self.assertRaisesRegex(DbAuthError, r"^Missing dialectname parameter$"):
@@ -256,6 +279,11 @@ class DbAuthTestCase(unittest.TestCase):
         auth = DbAuth(authList=[{"url": "postgresql:///foo", "password": "testing"}])
         with self.assertRaisesRegex(DbAuthError, r"^Missing host in URL: postgresql:///foo$"):
             auth.getAuth("postgresql", None, "example.com", None, "foo")
+
+        with unittest.mock.patch("lsst.utils.db_auth._DEFAULT_PATH", new="/tmp/non-existant-file.yaml"):
+            with self.assertRaises(DbAuthNotFoundError):
+                # The file we have made the default should never exist.
+                DbAuth(None)
 
     def test_getUrl(self):
         """Repeat relevant tests using getUrl interface."""
