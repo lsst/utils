@@ -1,19 +1,19 @@
 axes.labelweight: normal
 figure.titleweight : normal
 axes.labelsize : large
-axes.linewidth: 2
+axes.linewidth: 1
 axes.titleweight: normal
 axes.titlesize : small
 figure.titlesize: small
 errorbar.capsize: 3.0
 
-lines.linewidth : 3
+lines.linewidth : 2
 lines.markersize : 10
 
-xtick.labelsize : large
-ytick.labelsize : large
+xtick.labelsize : small
+ytick.labelsize : small
 
-figure.dpi : 150.0
+figure.dpi : 300.0
 figure.facecolor: White
 figure.figsize : 6.4, 4.8
 
@@ -24,16 +24,16 @@ patch.facecolor: 006BA4
 font.size : 14
 legend.fontsize: x-small
 
-xtick.major.width: 2.0
-xtick.minor.width: 1.5
+xtick.major.width: 1.0
+xtick.minor.width: 0.5
 xtick.major.size: 7
 xtick.minor.size: 4
 xtick.minor.visible: True
 xtick.direction: in
 xtick.top: True
 xtick.bottom: True
-ytick.major.width: 2.0
-ytick.minor.width: 1.5
+ytick.major.width: 1.0
+ytick.minor.width: 0.5
 ytick.major.size: 7
 ytick.minor.size: 4
 ytick.minor.visible: True
