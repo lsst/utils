@@ -11,9 +11,18 @@
 """Utilities for making publication-quality figures."""
 
 __all__ = [
+    "accent_color",
+    "divergent_cmap",
+    "galaxies_cmap",
+    "galaxies_color",
     "get_band_dicts",
+    "mk_colormap",
     "set_rubin_plotstyle",
+    "stars_cmap",
+    "stars_color",
 ]
+
+import numpy as np
 
 from . import (
     get_multiband_plot_colors,
@@ -29,6 +38,112 @@ def set_rubin_plotstyle() -> None:
     from matplotlib import style
 
     style.use("lsst.utils.plotting.rubin")
+
+
+def mk_colormap(colorNames):  # type: ignore
+    """Make a colormap from the list of color names.
+
+    Parameters
+    ----------
+    colorNames : `list`
+        A list of strings that correspond to matplotlib named colors.
+
+    Returns
+    -------
+    cmap : `matplotlib.colors.LinearSegmentedColormap`
+        A colormap stepping through the supplied list of names.
+    """
+    from matplotlib import colors
+
+    blues = []
+    greens = []
+    reds = []
+    alphas = []
+
+    if len(colorNames) == 1:
+        # Alpha is between 0 and 1 really but
+        # using 1.5 saturates out the top of the
+        # colorscale, this looks good for ComCam data
+        # but might want to be changed in the future.
+        alphaRange = [0.2, 1.0]
+        nums = np.linspace(0, 1, len(alphaRange))
+        r, g, b = colors.colorConverter.to_rgb(colorNames[0])
+        for num, alpha in zip(nums, alphaRange):
+            blues.append((num, b, b))
+            greens.append((num, g, g))
+            reds.append((num, r, r))
+            alphas.append((num, alpha, alpha))
+
+    else:
+        nums = np.linspace(0, 1, len(colorNames))
+        if len(colorNames) == 3:
+            alphaRange = [1.0, 0.3, 1.0]
+        elif len(colorNames) == 5:
+            alphaRange = [1.0, 0.7, 0.3, 0.7, 1.0]
+        else:
+            alphaRange = np.ones(len(colorNames))
+
+        for num, color, alpha in zip(nums, colorNames, alphaRange):
+            r, g, b = colors.colorConverter.to_rgb(color)
+            blues.append((num, b, b))
+            greens.append((num, g, g))
+            reds.append((num, r, r))
+            alphas.append((num, alpha, alpha))
+
+    colorDict = {"blue": blues, "red": reds, "green": greens, "alpha": alphas}
+    cmap = colors.LinearSegmentedColormap("newCmap", colorDict)
+    return cmap
+
+
+def divergent_cmap():  # type: ignore
+    """
+    Make a divergent color map.
+    """
+    import seaborn as sns
+    from matplotlib.colors import ListedColormap
+
+    cmap = ListedColormap(sns.color_palette("icefire", 256))
+
+    return cmap
+
+
+def stars_cmap(single_color=False):  # type: ignore
+    """Make a color map for stars."""
+    import seaborn as sns
+    from matplotlib.colors import ListedColormap
+
+    if single_color:
+        cmap = mk_colormap([stars_color()])
+    else:
+        cmap = ListedColormap(sns.color_palette("mako", 256))
+    return cmap
+
+
+def stars_color() -> str:
+    """Return the star color string for lines"""
+    return "#357BA3"
+
+
+def accent_color() -> str:
+    """Return a contrasting color for overplotting,
+    black is the best for this but if you need two colors
+    this works well on blue.
+    """
+    return "#DE8F05"
+
+
+def galaxies_cmap(single_color=False):  # type: ignore
+    """Make a color map for galaxies."""
+    if single_color:
+        cmap = mk_colormap([galaxies_color()])
+    else:
+        cmap = "inferno"
+    return cmap
+
+
+def galaxies_color() -> str:
+    """Return the galaxy color string for lines"""
+    return "#961A45"
 
 
 def get_band_dicts() -> dict:
