@@ -38,6 +38,7 @@ test = [
 ]
 plotting = [
     "matplotlib",
+    "seaborn",
 ]
 
 [tool.setuptools.packages.find]
