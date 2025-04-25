@@ -23,12 +23,19 @@ import unittest
 
 import lsst.utils.tests
 from lsst.utils.plotting import (
+    accent_color,
+    divergent_cmap,
+    galaxies_cmap,
+    galaxies_color,
     get_band_dicts,
     get_multiband_plot_colors,
     get_multiband_plot_linestyles,
     get_multiband_plot_symbols,
     make_figure,
+    mk_colormap,
     set_rubin_plotstyle,
+    stars_cmap,
+    stars_color,
 )
 
 try:
@@ -90,3 +97,40 @@ class PublicationPlotsTestCase(unittest.TestCase):
         self.assertEqual(bands_dict["colors_black"]["r"], "#ff7e00")
         self.assertEqual(bands_dict["symbols"]["r"], "v")
         self.assertEqual(bands_dict["line_styles"]["r"], "-")
+
+    def testStarColors(self):
+        with lsst.utils.tests.getTempFilePath(".png") as tmpFile:
+            fig = make_figure()
+            ax = fig.add_subplot(111)
+            xs = [0, 1]
+            ys = [0, 1]
+            for cmap in [stars_cmap(), stars_cmap(single_color=True)]:
+                ax.hexbin(xs, ys, cmap=cmap)
+            ax.axhline(0, color=stars_color())
+            fig.savefig(tmpFile)
+
+    def testGalaxyColor(self):
+        with lsst.utils.tests.getTempFilePath(".png") as tmpFile:
+            fig = make_figure()
+            ax = fig.add_subplot(111)
+            xs = [0, 1]
+            ys = [0, 1]
+            for cmap in [galaxies_cmap(), galaxies_cmap(single_color=True)]:
+                ax.hexbin(xs, ys, cmap=cmap)
+            ax.axhline(0, color=galaxies_color())
+            fig.savefig(tmpFile)
+
+    def testDivergentColor(self):
+        with lsst.utils.tests.getTempFilePath(".png") as tmpFile:
+            fig = make_figure()
+            ax = fig.add_subplot(111)
+            xs = [0, 1]
+            ys = [0, 1]
+            ax.hexbin(xs, ys, cmap=divergent_cmap())
+            ax.axhline(0, color=accent_color())
+            fig.savefig(tmpFile)
+
+    def testMkColormap(self):
+        mk_colormap(["#fde725", "#21918c", "#440154"])
+        mk_colormap(["#fde725", "#5ec962", "#21918c", "#3b528b"])
+        mk_colormap(["#fde725", "#5ec962", "#21918c", "#3b528b", "#440154"])
