@@ -16,6 +16,7 @@ from __future__ import annotations
 
 __all__ = ["duration_from_timeMethod", "logInfo", "profile", "timeMethod", "time_this"]
 
+import dataclasses
 import datetime
 import functools
 import logging
@@ -338,6 +339,18 @@ def timeMethod(
         return decorator_timer(_func)
 
 
+@dataclasses.dataclass
+class _TimerResult:
+    duration: float = 0.0
+    """Duration of context in seconds."""
+    mem_current_usage: float | None = None
+    """Memory usage at end of context in requested units."""
+    mem_peak_delta: float | None = None
+    """Peak differential between entering and leaving context."""
+    mem_current_delta: float | None = None
+    """Difference in usage between entering and leaving context."""
+
+
 @contextmanager
 def time_this(
     log: LsstLoggers | None = None,
@@ -349,7 +362,8 @@ def time_this(
     mem_child: bool = False,
     mem_unit: u.Quantity = u.byte,
     mem_fmt: str = ".0f",
-) -> Iterator[None]:
+    force_mem_usage: bool = False,
+) -> Iterator[_TimerResult]:
     """Time the enclosed block and issue a log message.
 
     Parameters
@@ -372,7 +386,8 @@ def time_this(
         written to ``msg``.
     mem_usage : `bool`, optional
         Flag indicating whether to include the memory usage in the report.
-        Defaults, to False.
+        Defaults, to False. Does nothing if the log message will not be
+        generated.
     mem_child : `bool`, optional
         Flag indication whether to include memory usage of the child processes.
     mem_unit : `astropy.units.Unit`, optional
@@ -380,6 +395,16 @@ def time_this(
     mem_fmt : `str`, optional
         Format specifier to use when displaying values related to memory usage.
         Defaults to '.0f'.
+    force_mem_usage : `bool`, optional
+        If `True` memory usage is always calculated even if the log message
+        will not be delivered. Use this if you want the information recorded
+        by the context manager.
+
+    Yields
+    ------
+    timer_result : `_TimerResult`
+        Simple data class containing the duration of the block in seconds via
+        the ``duration`` property.
     """
     if log is None:
         log = logging.getLogger()
@@ -391,14 +416,17 @@ def time_this(
 
     if mem_usage and not log.isEnabledFor(level):
         mem_usage = False
+    if force_mem_usage:
+        mem_usage = True
 
     if mem_usage:
         current_usages_start = get_current_mem_usage()
         peak_usages_start = get_peak_mem_usage()
 
+    timer_result = _TimerResult()
     errmsg = ""
     try:
-        yield
+        yield timer_result
     except BaseException as e:
         frame, lineno = list(traceback.walk_tb(e.__traceback__))[-1]
         errmsg = f"{e!r} @ {frame.f_code.co_filename}:{lineno}"
@@ -416,9 +444,12 @@ def time_this(
         # mypy stop complaining when additional parameters will be added below.
         params = list(args) if args else []
 
+        duration = end - start
+        timer_result.duration = duration
+
         # Specify stacklevel to ensure the message is reported from the
         # caller (1 is this file, 2 is contextlib, 3 is user)
-        params += (": " if msg else "", end - start)
+        params += (": " if msg else "", duration)
         msg += "%sTook %.4f seconds"
         if errmsg:
             params += (f" (timed code triggered exception of {errmsg!r})",)
@@ -442,10 +473,18 @@ def time_this(
                 _LOG.warning("Invalid memory unit '%s', using '%s' instead", mem_unit, u.byte)
                 mem_unit = u.byte
 
+            current_usage = current_usage.to(mem_unit)
+            current_delta = current_delta.to(mem_unit)
+            peak_delta = peak_delta.to(mem_unit)
+
+            timer_result.mem_current_usage = float(current_usage.value)
+            timer_result.mem_current_delta = float(current_delta.value)
+            timer_result.mem_peak_delta = float(peak_delta.value)
+
             msg += (
-                f"; current memory usage: {current_usage.to(mem_unit):{mem_fmt}}"
-                f", delta: {current_delta.to(mem_unit):{mem_fmt}}"
-                f", peak delta: {peak_delta.to(mem_unit):{mem_fmt}}"
+                f"; current memory usage: {current_usage:{mem_fmt}}"
+                f", delta: {current_delta:{mem_fmt}}"
+                f", peak delta: {peak_delta:{mem_fmt}}"
             )
         log.log(level, msg, *params, stacklevel=3)
 

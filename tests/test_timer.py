@@ -342,6 +342,38 @@ class TimerTestCase(unittest.TestCase):
         self.assertIn("A problem %s", cm.records[0].message)
         self.assertEqual(cm.records[0].levelname, "DEBUG")
 
+    def test_time_this_return(self):
+        """Test that the context manager returns the duration."""
+        # Return duration but not memory usage.
+        with self.assertNoLogs(level="INFO"):
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=False) as timer:
+                time.sleep(0.01)
+        self.assertGreater(timer.duration, 0.0)
+        self.assertIsNone(timer.mem_current_usage)
+
+        # Ask for memory usage that will be calculated.
+        with self.assertLogs(level="DEBUG"):
+            # mem usage will be requested but not calculated.
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True) as timer:
+                time.sleep(0.01)
+        self.assertGreater(timer.duration, 0.0)
+        self.assertGreaterEqual(timer.mem_current_delta, 0.0)
+
+        # Ask for memory usage but will not be calculated.
+        with self.assertNoLogs(level="WARNING"):
+            # mem usage will be requested but not calculated.
+            with time_this(level=logging.DEBUG, prefix=None, mem_usage=True) as timer:
+                time.sleep(0.01)
+        self.assertGreater(timer.duration, 0.0)
+        self.assertIsNone(timer.mem_current_usage)
+
+        # Require memory usage is returned in context manager.
+        with self.assertNoLogs(level="WARNING"):
+            with time_this(level=logging.DEBUG, prefix=None, force_mem_usage=True) as timer:
+                time.sleep(0.01)
+        self.assertGreater(timer.duration, 0.0)
+        self.assertGreater(timer.mem_current_usage, 0.0)
+
 
 class ProfileTestCase(unittest.TestCase):
     """Test profiling decorator."""
