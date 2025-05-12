@@ -139,17 +139,21 @@ def get_multiband_plot_linestyles() -> dict:
     """
     plot_line_styles = {
         "u": "--",
-        "g": ":",
-        "r": "-",
-        "i": "-.",
-        "z": "--",
+        "g": (0, (3, 1, 1, 1)),
+        "r": "-.",
+        "i": "-",
+        "z": (0, (3, 1, 1, 1, 1, 1)),
         "y": ":",
     }
 
-    # TODO [DM-49724]: The initial version of this used the following for
-    #   z and y bands. Due to a matplotlib bug, this does not work. It should
-    #   be restored to this behavior beginning with rubinenv 11, if possible.
-    # "z": (0, (3, 5, 1, 5, 1, 5)),
-    # "y": (0, (3, 1, 1, 1)),
-
+    # [SP-2200]: Restored to using parametric values.
+    # To avoid matplotlib v3.10 bug (see DM-49724),
+    # manually iterate over `patches` object returned
+    # by `plt.hist` when using histtype='step':
+    #     _, _, patches = plt.hist()
+    #     linestyle = plot_line_styles[band]
+    #     for patch in patches:
+    #         patch.set_linestyle(linestyle)
+    # It seems the bug will be fixed in matplotlib v.3.10.2,
+    # see DM-49724[TODO]
     return plot_line_styles

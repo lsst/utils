@@ -96,7 +96,7 @@ class PublicationPlotsTestCase(unittest.TestCase):
         self.assertEqual(bands_dict["colors"]["r"], "#c61c00")
         self.assertEqual(bands_dict["colors_black"]["r"], "#ff7e00")
         self.assertEqual(bands_dict["symbols"]["r"], "v")
-        self.assertEqual(bands_dict["line_styles"]["r"], "-")
+        self.assertEqual(bands_dict["line_styles"]["r"], "-.")
 
     def testStarColors(self):
         with lsst.utils.tests.getTempFilePath(".png") as tmpFile:
