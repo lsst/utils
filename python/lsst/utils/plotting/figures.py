@@ -88,6 +88,7 @@ def get_multiband_plot_colors(dark_background: bool = False) -> dict:
         "z": "#BA52FF",
         "y": "#370201",
     }
+
     plot_filter_colors_black_background = {
         "u": "#3eb7ff",
         "g": "#30c39f",
