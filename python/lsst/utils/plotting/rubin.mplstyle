@@ -18,7 +18,7 @@ figure.facecolor: White
 figure.figsize : 6.4, 4.8
 
 # From seaborn-v0_8-colorblind colormap: https://seaborn.pydata.org/tutorial/color_palettes.html
-axes.prop_cycle: cycler('color', ['#0173B2', '#DE8F05', '#029E73', '#D55E00', '#CC78BC', '#CA9161', '#FBAFE4', '#949494', '#ECE133', '#56B4E9'])
+axes.prop_cycle: cycler('color', ['0173B2', 'DE8F05', '029E73', 'D55E00', 'CC78BC', 'CA9161', 'FBAFE4', '949494', 'ECE133', '56B4E9'])
 patch.facecolor: 006BA4
 
 font.size : 14
