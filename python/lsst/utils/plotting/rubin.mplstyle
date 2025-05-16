@@ -17,8 +17,8 @@ figure.dpi : 300.0
 figure.facecolor: White
 figure.figsize : 6.4, 4.8
 
-# From tableau-colorblind10 style: https://viscid-hub.github.io/Viscid-docs/docs/dev/styles/tableau-colorblind10.html
-axes.prop_cycle: cycler('color', ['006BA4', 'FF800E', 'ABABAB', '595959', '5F9ED1', 'C85200', '898989', 'A2C8EC', 'FFBC79', 'CFCFCF'])
+# From seaborn-v0_8-colorblind colormap: https://seaborn.pydata.org/tutorial/color_palettes.html
+axes.prop_cycle: cycler('color', ['0173B2', 'DE8F05', '029E73', 'D55E00', 'CC78BC', 'CA9161', 'FBAFE4', '949494', 'ECE133', '56B4E9'])
 patch.facecolor: 006BA4
 
 font.size : 14
