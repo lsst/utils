@@ -1,1 +1,0 @@
-* Added the name of the node on which the process is running to the ``obj.metadata`` written by the logger.

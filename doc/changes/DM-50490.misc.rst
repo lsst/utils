@@ -1,3 +1,0 @@
-Modified ``lsst.utils.timer.time_this`` such that it can now return an object that will contain the duration and, potentially, memory usage when the context closes.
-This allows for metrics to be gathered even if no log message is delivered.
-As part of this a new ``force_mem_usage`` parameter has been added that will always calculate the (slow) memory statistics even if no log message was to be delivered.
