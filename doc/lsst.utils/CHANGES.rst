@@ -1,3 +1,36 @@
+lsst-utils v29.1.0 (2025-05-22)
+===============================
+
+New Features
+------------
+
+- Added support for ``LSST_UTILS_DISABLE_TIMER`` environment variable to turn off the timing decorator to produce more useful profiling output. (`DM-34978 <https://rubinobs.atlassian.net/browse/DM-34978>`_)
+- Added ``lsst.utils.argparsing.AppendDict`` which inherits from ``argparsing.Action``.
+  This utility for argument parsing enables multiple optional parameters in command line interfaces.
+  It receives ``key:value`` parameters and parses them to a dictionary. (`DM-46249 <https://rubinobs.atlassian.net/browse/DM-46249>`_)
+- Added the name of the node on which the process is running to the ``obj.metadata`` written by the logger. (`DM-48671 <https://rubinobs.atlassian.net/browse/DM-48671>`_)
+- * Added new ``lsst.utils.plotting.publication_plots``, which contains a ``set_rubin_plotstyle`` function for applying a standard matplotlib style to ensure consistency of plots across the project.
+    Also added the ``rubin.mplstyle`` file itself.
+  * Added a convenience function called ``get_band_dicts`` in ``lsst.utils.plotting.publication_plots`` to retrieve the band-dependent definitions of plotting colors, symbols, and linestyles. (`DM-49728 <https://rubinobs.atlassian.net/browse/DM-49728>`_)
+- ``DbAuth`` now supports reading the credentials directly from a JSON string stored in an environment variable.
+  The default environment variable is ``LSST_DB_AUTH_CREDENTIALS`` and takes priority over reading from files. (`DM-49860 <https://rubinobs.atlassian.net/browse/DM-49860>`_)
+
+
+API Changes
+-----------
+
+- ``DbAuth`` constructor now provides default values for path and environment variable name.
+  This avoids the need to specify the same values in each package that uses ``DbAuth``. (`DM-44862 <https://rubinobs.atlassian.net/browse/DM-44862>`_)
+
+
+Miscellaneous Changes of Minor Interest
+---------------------------------------
+
+- Modified ``lsst.utils.timer.time_this`` such that it can now return an object that will contain the duration and, potentially, memory usage when the context closes.
+  This allows for metrics to be gathered even if no log message is delivered.
+  As part of this a new ``force_mem_usage`` parameter has been added that will always calculate the (slow) memory statistics even if no log message was to be delivered. (`DM-50490 <https://rubinobs.atlassian.net/browse/DM-50490>`_)
+
+
 lsst-utils v29.0.0 (2025-03-24)
 ===============================
 
