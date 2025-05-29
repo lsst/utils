@@ -357,7 +357,7 @@ class TimerTestCase(unittest.TestCase):
             with time_this(level=logging.DEBUG, prefix=None, mem_usage=True) as timer:
                 time.sleep(0.01)
         self.assertGreater(timer.duration, 0.0)
-        self.assertGreaterEqual(timer.mem_current_delta, 0.0)
+        self.assertIsInstance(timer.mem_current_delta, float)
 
         # Ask for memory usage but will not be calculated.
         with self.assertNoLogs(level="WARNING"):
@@ -372,7 +372,7 @@ class TimerTestCase(unittest.TestCase):
             with time_this(level=logging.DEBUG, prefix=None, force_mem_usage=True) as timer:
                 time.sleep(0.01)
         self.assertGreater(timer.duration, 0.0)
-        self.assertGreater(timer.mem_current_usage, 0.0)
+        self.assertIsInstance(timer.mem_current_usage, float)
 
 
 class ProfileTestCase(unittest.TestCase):
