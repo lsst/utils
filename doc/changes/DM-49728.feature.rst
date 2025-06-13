@@ -1,2 +1,0 @@
-* Added new ``lsst.utils.plotting.publication_plots``, which contains a ``set_rubin_plotstyle`` function for applying a standard matplotlib style to ensure consistency of plots across the project. Also added the ``rubin.mplstyle`` file itself.
-* Added a convenience function called ``get_band_dicts`` in ``lsst.utils.plotting.publication_plots`` to retrieve the band-dependent definitions of plotting colors, symbols, and linestyles.

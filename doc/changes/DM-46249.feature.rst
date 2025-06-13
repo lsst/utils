@@ -1,1 +1,0 @@
-Added ``lsst.utils.argparsing.AppendDict``, inherits from `argparsing.Action`. This utility for argument parsing enables multiple optional parameters in command line interfaces. It receives `key-value` parameters and parses them to a dictionary.

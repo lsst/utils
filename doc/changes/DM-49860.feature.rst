@@ -1,2 +1,0 @@
-``DbAuth`` now supports reading the credentials directly from a JSON string stored in an environment variable.
-The default environment variable is ``LSST_DB_AUTH_CREDENTIALS`` and takes priority over reading from files.
