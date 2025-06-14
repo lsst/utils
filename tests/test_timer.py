@@ -164,7 +164,7 @@ class TestTimeMethod(unittest.TestCase):
 
         duration = 0.1
         for log, metadata in parameters:
-            with self.subTest(log=log, metadata=metadata):
+            with self.subTest(log=repr(log), metadata=repr(metadata)):
                 task = Example1(log=log, metadata=metadata)
                 self.assertTimer(duration, task)
                 exampleDuration = duration_from_timeMethod(task.metadata, "sleeper")
