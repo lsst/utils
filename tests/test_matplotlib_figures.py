@@ -34,6 +34,8 @@ from lsst.utils.plotting import (
     make_figure,
     mk_colormap,
     set_rubin_plotstyle,
+    sso_cmap,
+    sso_color,
     stars_cmap,
     stars_color,
 )
@@ -128,6 +130,17 @@ class PublicationPlotsTestCase(unittest.TestCase):
             ys = [0, 1]
             ax.hexbin(xs, ys, cmap=divergent_cmap())
             ax.axhline(0, color=accent_color())
+            fig.savefig(tmpFile)
+
+    def testSSOColor(self):
+        with lsst.utils.tests.getTempFilePath(".png") as tmpFile:
+            fig = make_figure()
+            ax = fig.add_subplot(111)
+            xs = [0, 1]
+            ys = [0, 1]
+            for cmap in [sso_cmap(), sso_cmap(single_color=True)]:
+                ax.hexbin(xs, ys, cmap=cmap)
+            ax.axhline(0, color=sso_color())
             fig.savefig(tmpFile)
 
     def testMkColormap(self):
