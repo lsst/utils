@@ -1,0 +1,1 @@
+Updated multiband plot colors (with white background) for improved colorblind accessibility, as proposed in DM-51451.
