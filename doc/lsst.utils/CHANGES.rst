@@ -5,7 +5,8 @@ Miscellaneous Changes of Minor Interest
 ---------------------------------------
 
 - Updated multiband plot colors (with white background) for improved colorblind accessibility. (`DM-51451 <https://rubinobs.atlassian.net/browse/DM-51451>`_)
-
+- Add some minor changes to plotting utilities, for example adding a default color for SSO objects
+  (`DM-50892 <https://rubinobs.atlassian.net/browse/DM-50892>`_)
 
 lsst-utils v29.1.0 (2025-05-22)
 ===============================

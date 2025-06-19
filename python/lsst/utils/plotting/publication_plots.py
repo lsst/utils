@@ -18,6 +18,8 @@ __all__ = [
     "get_band_dicts",
     "mk_colormap",
     "set_rubin_plotstyle",
+    "sso_cmap",
+    "sso_color",
     "stars_cmap",
     "stars_color",
 ]
@@ -77,7 +79,7 @@ def mk_colormap(colorNames):  # type: ignore
     else:
         nums = np.linspace(0, 1, len(colorNames))
         if len(colorNames) == 3:
-            alphaRange = [1.0, 0.3, 1.0]
+            alphaRange = [1.0, 1.0, 1.0]
         elif len(colorNames) == 5:
             alphaRange = [1.0, 0.7, 0.3, 0.7, 1.0]
         else:
@@ -99,10 +101,7 @@ def divergent_cmap():  # type: ignore
     """
     Make a divergent color map.
     """
-    import seaborn as sns
-    from matplotlib.colors import ListedColormap
-
-    cmap = ListedColormap(sns.color_palette("icefire", 256))
+    cmap = mk_colormap([stars_color(), "#D9DCDE", accent_color()])
 
     return cmap
 
@@ -121,7 +120,7 @@ def stars_cmap(single_color=False):  # type: ignore
 
 def stars_color() -> str:
     """Return the star color string for lines"""
-    return "#357BA3"
+    return "#084d96"
 
 
 def accent_color() -> str:
@@ -144,6 +143,20 @@ def galaxies_cmap(single_color=False):  # type: ignore
 def galaxies_color() -> str:
     """Return the galaxy color string for lines"""
     return "#961A45"
+
+
+def sso_color() -> str:
+    """Return the SSO color string for lines"""
+    return "#01694c"
+
+
+def sso_cmap(single_color=False):  # type: ignore
+    """Make a color map for solar system objects."""
+    if single_color:
+        cmap = mk_colormap([sso_color()])
+    else:
+        cmap = "viridis"
+    return cmap
 
 
 def get_band_dicts() -> dict:
