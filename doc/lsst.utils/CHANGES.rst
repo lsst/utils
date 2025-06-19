@@ -1,3 +1,12 @@
+lsst-utils v29.1.1 (2025-06-19)
+===============================
+
+Miscellaneous Changes of Minor Interest
+---------------------------------------
+
+- Updated multiband plot colors (with white background) for improved colorblind accessibility. (`DM-51451 <https://rubinobs.atlassian.net/browse/DM-51451>`_)
+
+
 lsst-utils v29.1.0 (2025-05-22)
 ===============================
 
