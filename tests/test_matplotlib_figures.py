@@ -93,7 +93,7 @@ class PublicationPlotsTestCase(unittest.TestCase):
 
     def testMultibandPlotColors(self):
         bands_dict = get_band_dicts()
-        self.assertEqual(bands_dict["colors"]["r"], "#c61c00")
+        self.assertEqual(bands_dict["colors"]["r"], "#B52626")
         self.assertEqual(bands_dict["colors_black"]["r"], "#ff7e00")
         self.assertEqual(bands_dict["symbols"]["r"], "v")
         self.assertEqual(bands_dict["line_styles"]["r"], "-.")
