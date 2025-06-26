@@ -553,7 +553,7 @@ def duration_from_timeMethod(
     method_name : `str`
         Name of the timed method to extract a duration for.
     clock : `str`, optional
-        Options are "Cpu", "User", or "System".
+        Options are "Cpu", "User", "System", or "Utc".
 
     Returns
     -------
@@ -562,10 +562,17 @@ def duration_from_timeMethod(
     """
     if metadata is None:
         return None
-    start = metadata[method_name + "Start" + clock + "Time"]
+    if clock.lower() == "utc":
+        start = metadata[method_name + "StartUtc"]
+        end = metadata[method_name + "EndUtc"]
+    else:
+        start = metadata[method_name + "Start" + clock + "Time"]
+        end = metadata[method_name + "End" + clock + "Time"]
     if isinstance(start, list):
         start = start[-1]
-    end = metadata[method_name + "End" + clock + "Time"]
     if isinstance(end, list):
         end = end[-1]
-    return end - start
+    if isinstance(start, str) and isinstance(end, str):
+        return (datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start)).total_seconds()
+    else:
+        return end - start
