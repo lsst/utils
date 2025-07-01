@@ -394,13 +394,13 @@ class PeriodicLogger:
         `LOGGING_INTERVAL` will be used.
     level : `int`, optional
         Log level to use when issuing messages, default is
-        `~lsst.utils.logging.VERBOSE`.
+        `~logging.INFO`.
     """
 
     LOGGING_INTERVAL = 600.0
     """Default interval between log messages in seconds."""
 
-    def __init__(self, logger: LsstLoggers, interval: float | None = None, level: int = VERBOSE):
+    def __init__(self, logger: LsstLoggers, interval: float | None = None, level: int = logging.INFO):
         self.logger = logger
         # None -> LOGGING_INTERVAL conversion done so that unit tests (e.g., in
         # pipe_base) can tweak log interval without access to the constructor.

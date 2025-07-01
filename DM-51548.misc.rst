@@ -1,0 +1,1 @@
+Set default PeriodicLogger level to logging.INFO instead of VERBOSE

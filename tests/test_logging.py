@@ -111,13 +111,13 @@ class TestLogging(unittest.TestCase):
         # Create a new periodic logger with no delay.
         # Every message should be issued.
         periodic = PeriodicLogger(logger, interval=0.0)
-        with self.assertLogs(logger.name, level=logger.VERBOSE) as cm:
+        with self.assertLogs(logger.name, level=logger.INFO) as cm:
             periodic.log("Message")
             periodic.log("Message %d", 1)
         self.assertEqual(len(cm.output), 2)
         self.assertEqual(periodic.num_issued, 2)
-        self.assertEqual(cm.output[0], f"VERBOSE:{logger.name}:Message")
-        self.assertEqual(cm.output[1], f"VERBOSE:{logger.name}:Message 1")
+        self.assertEqual(cm.output[0], f"INFO:{logger.name}:Message")
+        self.assertEqual(cm.output[1], f"INFO:{logger.name}:Message 1")
         self.assertEqual(cm.records[0].filename, "test_logging.py", str(cm.records[0]))
 
         # Create a new periodic logger with small delay.
