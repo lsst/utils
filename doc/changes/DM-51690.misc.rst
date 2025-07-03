@@ -1,0 +1,1 @@
+Swap i-band color in multiband plot colors (with white background) so that the gri triplet isn’t mapped to the counterintuitive GRB order.
