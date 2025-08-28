@@ -27,7 +27,7 @@ import time
 import traceback
 from collections.abc import Callable, Collection, Iterable, Iterator, MutableMapping
 from contextlib import contextmanager, suppress
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeVar, overload
 
 from astropy import units as u
 
@@ -231,6 +231,22 @@ def logInfo(
         logger=logger,
         stacklevel=stacklevel,
     )
+
+
+_F = TypeVar("_F", bound=Callable)
+
+
+@overload
+def timeMethod(_func: _F) -> _F: ...
+
+
+@overload
+def timeMethod(
+    *,
+    metadata: MutableMapping | None = None,
+    logger: LsstLoggers | None = None,
+    logLevel: int = logging.DEBUG,
+) -> Callable[[_F], _F]: ...
 
 
 def timeMethod(
