@@ -60,7 +60,7 @@ class IterationTestCase(unittest.TestCase):
         self.assertEqual(out, simple)
         self.assertEqual(n_chunks, 11)
 
-        test_dict = {k: 1 for k in range(101)}
+        test_dict = dict.fromkeys(range(101), 1)
         n_chunks = 0
         for chunk in chunk_iterable(test_dict, chunk_size=45):
             # Subtract 1 for each key in chunk
