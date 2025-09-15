@@ -443,6 +443,10 @@ def _get_clean_refs(objects: list) -> list:
     """
     refs = gc.get_referrers(*objects)
     refs.remove(objects)
+    # On Python 3.13 gc.get_referrers returns the original objects in a list
+    # and in a tuple. Remove both if present.
+    if (tobjects := tuple(objects)) in refs:
+        refs.remove(tobjects)
     iterators = [x for x in refs if type(x).__name__.endswith("_iterator")]
     for i in iterators:
         refs.remove(i)
