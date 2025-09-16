@@ -441,9 +441,12 @@ def _get_clean_refs(objects: list) -> list:
         The objects that refer to the elements of ``objects``, not counting
         ``objects`` itself.
     """
-    refs = gc.get_referrers(*objects)
-    refs.remove(objects)
-    iterators = [x for x in refs if type(x).__name__.endswith("_iterator")]
-    for i in iterators:
-        refs.remove(i)
+    # Pre-create the tuple so we know its id() and can filter it out.
+    # This allows for difference in behavior between python 3.12 and 3.13
+    # when calling gc.get_referrers with multiple arguments.
+    objects_tuple = tuple(objects)
+    refs = gc.get_referrers(*objects_tuple)
+    ids_to_drop = {id(objects), id(objects_tuple)}
+    refs = [ref for ref in refs if id(ref) not in ids_to_drop]
+    refs = [ref for ref in refs if not type(ref).__name__.endswith("_iterator")]
     return refs
