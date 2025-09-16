@@ -81,14 +81,13 @@ def get_multiband_plot_colors(dark_background: bool = False) -> dict:
         Mapping of the LSST bands to colors.
     """
     plot_filter_colors_white_background = {
-        "u": "#61A2B3",
+        "u": "#1600EA",
         "g": "#31DE1F",
         "r": "#B52626",
-        "i": "#1600EA",
+        "i": "#370201",
         "z": "#BA52FF",
-        "y": "#370201",
+        "y": "#61A2B3",
     }
-
     plot_filter_colors_black_background = {
         "u": "#3eb7ff",
         "g": "#30c39f",
