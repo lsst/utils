@@ -35,6 +35,11 @@ try:
 except ImportError:
     logUtils = None
 
+try:
+    from structlog import get_context as get_structlog_context
+except ImportError:
+    get_structlog_context = None  # type: ignore[assignment]
+
 
 if TYPE_CHECKING:
     try:
@@ -53,15 +58,13 @@ logging.addLevelName(VERBOSE, "VERBOSE")
 
 def _is_structlog_logger(logger: logging.Logger | LsstLogAdapter | BindableLogger) -> bool:
     """Check if the given logger is a structlog logger."""
-    try:
-        import structlog
-    except ImportError:
-        return False
+    if get_structlog_context is None:
+        return False  # type: ignore[unreachable]
 
     try:
         # Returns a dict for structlog loggers; raises for stdlib logger
         # objects.
-        structlog.get_context(logger)  # type: ignore[arg-type]
+        get_structlog_context(logger)  # type: ignore[arg-type]
         return True
     except Exception:
         # In practice this is usually ValueError or AttributeError.
