@@ -25,4 +25,5 @@ nitpick_ignore = [
     ("py:class", "unittest.case.TestCase"),  # Sphinx can not see TestCase.
     ("py:obj", "deprecated.sphinx.deprecated"),  # No intersphinx for deprecated package.
     ("py:class", "LsstLoggers"),  # Sphinx does not understand type aliases
+    ("py:obj", "structlog"),  # structlog does not have intersphinx mapping.
 ]
