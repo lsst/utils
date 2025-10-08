@@ -28,7 +28,7 @@ import time
 from collections.abc import Generator
 from contextlib import contextmanager
 from logging import LoggerAdapter
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeGuard
 
 try:
     import lsst.log.utils as logUtils
@@ -56,7 +56,9 @@ VERBOSE = (logging.INFO + logging.DEBUG) // 2
 logging.addLevelName(VERBOSE, "VERBOSE")
 
 
-def _is_structlog_logger(logger: logging.Logger | LsstLogAdapter | BindableLogger) -> bool:
+def _is_structlog_logger(
+    logger: logging.Logger | LsstLogAdapter | BindableLogger,
+) -> TypeGuard[BindableLogger]:
     """Check if the given logger is a structlog logger."""
     if get_structlog_context is None:
         return False  # type: ignore[unreachable]
