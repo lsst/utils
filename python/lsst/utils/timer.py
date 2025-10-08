@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, overload
 from astropy import units as u
 
 from .introspection import find_outside_stacklevel
-from .logging import LsstLoggers
+from .logging import LsstLoggers, _is_structlog_logger
 from .usage import _get_current_rusage, get_current_mem_usage, get_peak_mem_usage
 
 if TYPE_CHECKING:
@@ -374,9 +374,10 @@ def time_this(
     level: int = logging.DEBUG,
     prefix: str | None = "timer",
     args: Iterable[Any] = (),
+    kwargs: dict[str, Any] | None = None,
     mem_usage: bool = False,
     mem_child: bool = False,
-    mem_unit: u.Quantity = u.byte,
+    mem_unit: u.Unit = u.byte,
     mem_fmt: str = ".0f",
     force_mem_usage: bool = False,
 ) -> Iterator[_TimerResult]:
@@ -386,7 +387,8 @@ def time_this(
     ----------
     log : `logging.Logger`, optional
         Logger to use to report the timer message. The root logger will
-        be used if none is given.
+        be used if none is given. Is also allowed to be a `structlog` bound
+        logger.
     msg : `str`, optional
         Context to include in log message.
     level : `int`, optional
@@ -400,6 +402,11 @@ def time_this(
     args : iterable of any
         Additional parameters passed to the log command that should be
         written to ``msg``.
+    kwargs : `dict`, optional
+        Additional keyword parameters passed to the log command. If a Structlog
+        is used then these will be added to the structured data. Otherwise
+        they will be converted to a single string for inclusion in the log
+        message.
     mem_usage : `bool`, optional
         Flag indicating whether to include the memory usage in the report.
         Defaults, to False. Does nothing if the log message will not be
@@ -424,9 +431,16 @@ def time_this(
     """
     if log is None:
         log = logging.getLogger()
-    if prefix:
+    is_structlog = _is_structlog_logger(log)
+    if prefix and not is_structlog:
+        # Struct log loggers do not have a name property and so the prefix
+        # is not applied to them.
         log_name = f"{prefix}.{log.name}" if not isinstance(log, logging.RootLogger) else prefix
         log = logging.getLogger(log_name)
+
+    # Some structured data that can be used if we have been given a
+    # structlog logger.
+    structured_args: dict[str, Any] = {}
 
     start = time.time()
 
@@ -467,6 +481,7 @@ def time_this(
         # caller (1 is this file, 2 is contextlib, 3 is user)
         params += (": " if msg else "", duration)
         msg += "%sTook %.4f seconds"
+        structured_args["duration"] = duration
         if errmsg:
             params += (f" (timed code triggered exception of {errmsg!r})",)
             msg += "%s"
@@ -502,7 +517,20 @@ def time_this(
                 f", delta: {current_delta:{mem_fmt}}"
                 f", peak delta: {peak_delta:{mem_fmt}}"
             )
-        log.log(level, msg, *params, stacklevel=3)
+            structured_args["mem_current_usage"] = float(current_usage.value)
+            structured_args["mem_current_delta"] = float(current_delta.value)
+            structured_args["mem_peak_delta"] = float(peak_delta.value)
+        if not is_structlog:
+            # Can only use the structured content if we have structlog logger
+            # but stacklevel is only supported by standard loggers.
+            structured_args = {"stacklevel": 3}
+            if kwargs is not None:
+                msg += " %s"
+                params += ("; ".join(f"{k}={v!r}" for k, v in kwargs.items()),)
+        elif kwargs:
+            structured_args.update(kwargs)
+
+        log.log(level, msg, *params, **structured_args)
 
 
 @contextmanager

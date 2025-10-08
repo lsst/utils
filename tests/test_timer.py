@@ -319,6 +319,22 @@ class TimerTestCase(unittest.TestCase):
         self.assertIn("Took", cm.output[0])
         self.assertIn(msg % test_num, cm.output[0])
 
+        # Now with kwargs.
+        msg = "Test message %d"
+        test_num = 42
+        logname = "test"
+        kwargs = {"extra_info": "extra", "value": 3}
+        with self.assertLogs(level="DEBUG") as cm:
+            with time_this(
+                log=logging.getLogger(logname), msg=msg, args=(test_num,), kwargs=kwargs, prefix=None
+            ):
+                pass
+        self.assertEqual(cm.records[0].name, logname)
+        self.assertIn("Took", cm.output[0])
+        self.assertIn(msg % test_num, cm.output[0])
+        self.assertIn("extra_info='extra'", cm.output[0])
+        self.assertIn("value=3", cm.output[0])
+
         # Prefix the logger.
         prefix = "prefix"
         with self.assertLogs(level="DEBUG") as cm:
@@ -373,6 +389,27 @@ class TimerTestCase(unittest.TestCase):
                 time.sleep(0.01)
         self.assertGreater(timer.duration, 0.0)
         self.assertIsInstance(timer.mem_current_usage, float)
+
+    def test_structlog(self):
+        """Test that the timer works with structlog loggers."""
+        try:
+            import structlog
+            from structlog.testing import capture_logs
+        except ImportError:
+            self.skipTest("structlog is not installed")
+
+        msg = "Test message %d"
+        test_num = 42
+        kwargs = {"extra_info": "extra", "value": 3}
+
+        with capture_logs() as cap:
+            slog = structlog.get_logger("structlog_timer")
+            with time_this(log=slog, msg=msg, args=(test_num,), kwargs=kwargs):
+                pass
+        self.assertEqual(cap[0]["value"], 3)
+        self.assertEqual(cap[0]["extra_info"], "extra")
+        self.assertGreaterEqual(cap[0]["duration"], 0.0)
+        self.assertIn("Test message 42", cap[0]["event"])
 
 
 class ProfileTestCase(unittest.TestCase):

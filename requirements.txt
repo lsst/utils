@@ -6,3 +6,4 @@ astropy >= 5.0
 threadpoolctl
 matplotlib
 seaborn
+structlog

@@ -28,13 +28,24 @@ import time
 from collections.abc import Generator
 from contextlib import contextmanager
 from logging import LoggerAdapter
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeGuard
 
 try:
     import lsst.log.utils as logUtils
 except ImportError:
     logUtils = None
 
+try:
+    from structlog import get_context as get_structlog_context
+except ImportError:
+    get_structlog_context = None  # type: ignore[assignment]
+
+
+if TYPE_CHECKING:
+    try:
+        from structlog.typing import BindableLogger
+    except ImportError:
+        BindableLogger: TypeAlias = Any  # type: ignore[no-redef]
 
 # log level for trace (verbose debug).
 TRACE = 5
@@ -43,6 +54,23 @@ logging.addLevelName(TRACE, "TRACE")
 # Verbose logging is midway between INFO and DEBUG.
 VERBOSE = (logging.INFO + logging.DEBUG) // 2
 logging.addLevelName(VERBOSE, "VERBOSE")
+
+
+def _is_structlog_logger(
+    logger: logging.Logger | LsstLogAdapter | BindableLogger,
+) -> TypeGuard[BindableLogger]:
+    """Check if the given logger is a structlog logger."""
+    if get_structlog_context is None:
+        return False  # type: ignore[unreachable]
+
+    try:
+        # Returns a dict for structlog loggers; raises for stdlib logger
+        # objects.
+        get_structlog_context(logger)  # type: ignore[arg-type]
+        return True
+    except Exception:
+        # In practice this is usually ValueError or AttributeError.
+        return False
 
 
 def _calculate_base_stacklevel(default: int, offset: int) -> int:
