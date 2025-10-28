@@ -6,14 +6,14 @@ build-backend = "setuptools.build_meta"
 name = "lsst-utils"
 requires-python = ">=3.10.0"
 description = "Utility functions from Rubin Observatory Data Management for the Legacy Survey of Space and Time (LSST)."
-license = {text = "BSD 3-Clause License"}
+license = "BSD-3-Clause"
+license-files = ["COPYRIGHT", "LICENSE"]
 readme = "README.rst"
 authors = [
     {name="Rubin Observatory Data Management", email="dm-admin@lists.lsst.org"},
 ]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -47,7 +47,6 @@ where = ["python"]
 
 [tool.setuptools]
 zip-safe = true
-license-files = ["COPYRIGHT", "LICENSE"]
 
 [tool.setuptools.package-data]
 "lsst.utils" = ["py.typed"]
