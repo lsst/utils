@@ -780,7 +780,11 @@ def _pkg_constructor(loader: yaml.constructor.SafeConstructor, node: yaml.Node) 
     yield Packages(loader.construct_mapping(node, deep=True))  # type: ignore
 
 
-for loader in (yaml.Loader, yaml.CLoader, yaml.UnsafeLoader, yaml.SafeLoader, yaml.FullLoader):
+for loader_str in ("Loader", "CLoader", "UnsafeLoader", "SafeLoader", "FullLoader"):
+    loader = getattr(yaml, loader_str, None)
+    if loader is None:
+        continue
+
     yaml.add_constructor("lsst.utils.packages.Packages", _pkg_constructor, Loader=loader)
 
     # Register the old name with YAML.
