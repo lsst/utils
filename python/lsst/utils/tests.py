@@ -1014,7 +1014,7 @@ def methodParameters(**settings: Sequence[Any]) -> Callable:
         def wrapper(self: unittest.TestCase, *args: Any, **kwargs: Any) -> None:
             for params in _settingsIterator(settings):
                 kwargs.update(params)
-                with self.subTest(**params):
+                with self.subTest(**{k: repr(v) for k, v in params.items()}):
                     func(self, *args, **kwargs)
 
         return wrapper
