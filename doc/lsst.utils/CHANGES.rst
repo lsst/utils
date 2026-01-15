@@ -1,3 +1,14 @@
+lsst-utils v30.0.0 (2026-01-15)
+===============================
+
+Now works with Python 3.13 and 3.14.
+
+Miscellaneous Changes of Minor Interest
+---------------------------------------
+
+- Swapped i-band color in multiband plot colors (with white background) so that the ``gri`` triplet isn’t mapped to the counterintuitive GRB order. (`DM-51690 <https://rubinobs.atlassian.net/browse/DM-51690>`_)
+
+
 lsst-utils v29.1.1 (2025-06-19)
 ===============================
 
