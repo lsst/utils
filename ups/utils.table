@@ -2,4 +2,8 @@
 # deprecation period.
 setupRequired(sconsUtils)
 
+# Add this for convenience in testing documentation builds, even if the
+# utils code does not yet use it directly during code builds.
+setupRequired(sphinxutils)
+
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
