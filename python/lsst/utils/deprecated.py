@@ -35,11 +35,11 @@ def deprecate_pybind11(obj: Any, reason: str, version: str, category: type[Warni
 
     Parameters
     ----------
-    obj : function, method, or class
+    obj : `~collections.abc.Callable`
         The function, method, or class to deprecate.
     reason : `str`
         Reason for deprecation, passed to `~deprecated.sphinx.deprecated`.
-    version : 'str'
+    version : `str`
         Next major version in which the interface will be deprecated,
         passed to `~deprecated.sphinx.deprecated`.
     category : `Warning`
@@ -47,7 +47,7 @@ def deprecate_pybind11(obj: Any, reason: str, version: str, category: type[Warni
 
     Returns
     -------
-    obj : function, method, or class
+    obj : `~collections.abc.Callable`
         Wrapped function, method, or class.
 
     Examples
@@ -88,7 +88,7 @@ def suppress_deprecations(category: type[Warning] = FutureWarning) -> Iterator[N
 
     Parameters
     ----------
-    category : `Warning` or subclass
+    category : `Warning`
         The category of warning to suppress.
     """
     with warnings.catch_warnings():

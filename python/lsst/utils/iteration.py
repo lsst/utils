@@ -26,10 +26,10 @@ def chunk_iterable(data: Iterable[Any], chunk_size: int = 1_000) -> Iterator[tup
 
     Parameters
     ----------
-    data : iterable of anything
+    data : `~collections.abc.Iterable` [ `typing.Any` ] of anything
         The iterable to be chunked. Can be a mapping, in which case
         the keys are returned in chunks.
-    chunk_size : int, optional
+    chunk_size : `int`, optional
         The largest chunk to return. Can be smaller and depends on the
         number of elements in the iterator. Defaults to 1_000.
 
@@ -58,7 +58,7 @@ def ensure_iterable(a: Any) -> Iterable[Any]:
 
     Parameters
     ----------
-    a : iterable or `str` or not iterable
+    a : `~collections.abc.Iterable` or `str` or not iterable
         Argument to be converted to an iterable.
 
     Returns
@@ -115,18 +115,19 @@ def _extract_numeric_suffix(s: str) -> tuple[str, int | None]:
     Returns the prefix and the numeric suffix as an integer, if present.
 
     For example:
-    'node1' -> ('node', 1)
-    'node' -> ('node', None)
-    'node123abc' -> ('node123abc', None)
+
+      'node1' -> ('node', 1)
+      'node' -> ('node', None)
+      'node123abc' -> ('node123abc', None)
 
     Parameters
     ----------
-    s : str
+    s : `str`
         The string to extract the numeric suffix from.
 
     Returns
     -------
-    suffix : str
+    suffix : `str`
         The numeric suffix of the string, if any.
     """
     index = len(s)
@@ -151,13 +152,13 @@ def _add_pair_to_name(val_name: list[str], val0: int | str, val1: int | str, str
 
     Parameters
     ----------
-    val_name : List[str]
+    val_name : `list` [ `str` ]
         The list to append the formatted string to.
-    val0 : [int, str]
+    val0 : `int` or `str`
         The starting value of the sequence.
-    val1 : [int, str]
+    val1 : `int` or `str`
         The ending value of the sequence.
-    stride : int, optional
+    stride : `int`, optional
         The stride or difference between consecutive numbers in the
         sequence. Defaults to 1.
     """
@@ -195,12 +196,12 @@ def _is_list_of_ints(values: list[int | str]) -> TypeGuard[list[int]]:
 
     Parameters
     ----------
-    values : List[int, str]:
+    values : `list` [`int` or `str`]:
         The list of values to check.
 
     Returns
     -------
-    is_ints : bool
+    is_ints : `bool`
         True if all values are integers, False otherwise.
     """
     return all(isinstance(v, int) for v in values)
@@ -217,31 +218,33 @@ def sequence_to_string(values: list[int | str]) -> str:
     strings with common prefixes are handled to produce a concise
     representation.
 
+    Parameters
+    ----------
+    values : `list` [ `int` or `str` ]
+        A list of items to be compacted. Must all be of the same type.
+
+    Returns
+    -------
+    sequence_as_string : `str`
+        A compact string representation of the input list.
+
+    Notes
+    -----
+    - The function handles both integers and strings.
+    - For strings with common prefixes, only the differing suffixes are
+      considered.
+    - The stride is determined as the minimum difference between
+        consecutive numbers.
+    - Strings without common prefixes are listed individually.
+
+    Examples
+    --------
     >>> getNameOfSet([1, 2, 3, 5, 7, 8, 9])
     '1..3^5^7..9'
     >>> getNameOfSet(["node1", "node2", "node3"])
     'node1..node3'
     >>> getNameOfSet([10, 20, 30, 40])
     '10..40:10'
-
-    Parameters
-    ----------
-    values : list[int, str]:
-        A list of items to be compacted. Must all be of the same type.
-
-    Returns
-    -------
-    sequence_as_string : str
-        A compact string representation of the input list.
-
-    Notes
-    -----
-        - The function handles both integers and strings.
-        - For strings with common prefixes, only the differing suffixes are
-            considered.
-        - The stride is determined as the minimum difference between
-            consecutive numbers.
-        - Strings without common prefixes are listed individually.
     """
     if not values:
         return ""

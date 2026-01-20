@@ -28,12 +28,12 @@ def inheritDoc(klass: type) -> Callable:
 
     Parameters
     ----------
-    klass : object
+    klass : `type`
         The class to inherit documentation from.
 
     Returns
     -------
-    decorator : callable
+    decorator : `~collections.abc.Callable`
         Intermediate decorator used in the documentation process.
 
     Notes

@@ -273,7 +273,7 @@ class LsstLogAdapter(LoggerAdapter):
         *args : `~typing.Any`
             Parameters references by log message.
         **kwargs : `~typing.Any`
-            Parameters forwarded to `log`.
+            Parameters forwarded to underlying logger.
         """
         # There is no other way to achieve this other than a special logger
         # method.
@@ -294,7 +294,7 @@ class LsstLogAdapter(LoggerAdapter):
         *args : `~typing.Any`
             Parameters references by log message.
         **kwargs : `~typing.Any`
-            Parameters forwarded to `log`.
+            Parameters forwarded to underlying logger.
         """
         # There is no other way to achieve this other than a special logger
         # method.
