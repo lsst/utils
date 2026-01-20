@@ -186,7 +186,7 @@ class TemplateMeta(type):
     classes with multiple template parameters) are good choices.  Alternate
     type keys for existing classes can be added by calling ``alias``, but only
     after a subclass already been registered with a "primary" type key.  For
-    example::
+    example:
 
     .. code-block:: python
 
@@ -210,7 +210,7 @@ class TemplateMeta(type):
 
     This allows user code to construct objects directly using ``Image``, as
     long as an extra ``dtype`` keyword argument is passed that matches one of
-    the type keys::
+    the type keys:
 
     .. code-block:: python
 
@@ -233,7 +233,7 @@ class TemplateMeta(type):
     As an aid for those writing the Python wrappers for C++ classes,
     ``TemplateMeta`` also provides a way to add pure-Python methods and other
     attributes to the wrapped template classes.  To add a ``sum`` method to
-    all registered types, for example, we can just do::
+    all registered types, for example, we can just do:
 
     .. code-block:: python
 
@@ -259,7 +259,7 @@ class TemplateMeta(type):
 
     Finally, abstract base classes that use ``TemplateMeta`` define a dict-
     like interface for accessing their registered subclasses, providing
-    something like the C++ syntax for templates::
+    something like the C++ syntax for templates:
 
     .. code-block:: python
 
