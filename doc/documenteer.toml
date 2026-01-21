@@ -26,3 +26,7 @@ nitpick_ignore_regex = [
   ['py:class', 'None\.  .*'],  # collections.abc.Mapping inheritance.
   ['py:class', 'an object providing.*'],  # collections.abc.Mapping inheritance.
 ]
+
+[sphinx.intersphinx.projects]
+astropy = "https://docs.astropy.org/en/stable"
+python = "https://docs.python.org/3"

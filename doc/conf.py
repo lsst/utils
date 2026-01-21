@@ -7,6 +7,3 @@ This configuration only affects single-package Sphinx documenation builds.
 from documenteer.conf.guide import *
 
 exclude_patterns.append("changes/*")
-
-intersphinx_mapping["astropy"] = ("https://docs.astropy.org/en/stable", None)
-intersphinx_mapping["python"] = ("https://docs.python.org/3", None)
