@@ -165,7 +165,7 @@ def logInfo(
         Name prefix, the resulting entries are ``CpuTime``, etc.. For example
         `timeMethod` uses ``prefix = Start`` when the method begins and
         ``prefix = End`` when the method ends.
-    logLevel : optional
+    logLevel : `int`, optional
         Log level (a `logging` level constant, such as `logging.DEBUG`).
     metadata : `collections.abc.MutableMapping`, optional
         Metadata object to write entries to, overriding ``obj.metadata``.
@@ -399,7 +399,7 @@ def time_this(
         Prefix to use to prepend to the supplied logger to
         create a new logger to use instead. No prefix is used if the value
         is set to `None`. Defaults to "timer".
-    args : iterable of any
+    args : `~collections.abc.Iterable` [ `typing.Any` ]
         Additional parameters passed to the log command that should be
         written to ``msg``.
     kwargs : `dict`, optional

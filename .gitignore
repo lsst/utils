@@ -8,6 +8,7 @@ config.log
 *.so
 *.cfgc
 *.pyc
+doc/api
 doc/html
 doc/xml
 doc/*.tag

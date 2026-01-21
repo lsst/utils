@@ -35,6 +35,7 @@ dependencies = [
 dynamic = ["version"]
 [project.urls]
 "Homepage" = "https://github.com/lsst/utils"
+"Source" = "https://github.com/lsst/utils"
 [project.optional-dependencies]
 test = [
     "pytest >= 3.2",
