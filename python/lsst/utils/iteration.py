@@ -17,7 +17,7 @@ from __future__ import annotations
 __all__ = ["chunk_iterable", "ensure_iterable", "isplit", "sequence_to_string"]
 
 import itertools
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from typing import Any, TypeGuard, TypeVar
 
 
@@ -207,7 +207,7 @@ def _is_list_of_ints(values: list[int | str]) -> TypeGuard[list[int]]:
     return all(isinstance(v, int) for v in values)
 
 
-def sequence_to_string(values: list[int | str]) -> str:
+def sequence_to_string(values: Sequence[int | str]) -> str:
     """Convert a list of integers or strings into a compact string
     representation by merging consecutive values or sequences.
 
