@@ -11,12 +11,13 @@
 
 from __future__ import annotations
 
-__all__ = ["deprecate_pybind11", "suppress_deprecations"]
+__all__ = ["DeprecatedDict", "deprecate_pybind11", "suppress_deprecations"]
 
+import copy
 import functools
 import unittest.mock
 import warnings
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from typing import Any
 
@@ -95,3 +96,142 @@ def suppress_deprecations(category: type[Warning] = FutureWarning) -> Iterator[N
         warnings.simplefilter("ignore", category)
         with unittest.mock.patch.object(warnings, "simplefilter"):
             yield
+
+
+class DeprecatedDict(dict):
+    """A `dict` that warns when deprecated keys are first used.
+
+    DeprecatedDict behaves exactly like a built-in dict, except that each
+    deprecated key carries a reason. The first time a deprecated key is used
+    through a single-key operation (d[key], ~dict.get, ~dict.pop,
+    ~dict.setdefault, d[key] = value and del d[key]), it warns with that
+    reason. Bulk operations (iteration, copy, ``dict(d)``, ``update``) never
+    warn.
+
+    Parameters
+    ----------
+    *args : `~typing.Any`
+        Forwarded to `dict` to populate the initial contents.
+    deprecations : `~collections.abc.Mapping`
+        Maps each deprecated key to the reason shown in its warning. An
+        empty mapping warns that a plain `dict` should be used instead.
+    version : `str`, optional
+        Version in which the keys were deprecated, added to the message.
+    category : `type` [ `Warning` ], optional
+        Default warning category for deprecated keys.
+    deprecated_categories : `~collections.abc.Mapping`
+        Per-key overrides of ``category``.
+    stacklevel : `int`, optional
+        ``stacklevel`` for `warnings.warn`, so the warning points at the
+        caller rather than at ``DeprecatedDict`` internals.
+    **kwargs : `~typing.Any`
+        Forwarded to `dict` to populate the initial contents.
+    """
+
+    def __init__(
+        self,
+        *args: Any,
+        deprecations: Mapping[Any, str],
+        version: str = "",
+        category: type[Warning] = FutureWarning,
+        deprecated_categories: Mapping[Any, type[Warning]] | None = None,
+        stacklevel: int = 2,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._deprecations: dict[Any, str] = dict(deprecations)
+        self._version = version
+        overrides = deprecated_categories or {}
+        self._categories: dict[Any, type[Warning]] = {
+            key: overrides.get(key, category) for key in self._deprecations
+        }
+        self._stacklevel = stacklevel
+        # Fire each key at most once.
+        self._warned: set[Any] = set()
+        if not self._deprecations:
+            warnings.warn(
+                "DeprecatedDict was created with no deprecated keys; use a regular `dict` instead.",
+                UserWarning,
+                stacklevel=stacklevel,
+            )
+
+    def _warn(self, key: Any) -> None:
+        """Emit a one-time deprecation warning for ``key``.
+
+        Parameters
+        ----------
+        key : `~typing.Any`
+            The key being accessed.
+        """
+        if key not in self._deprecations or key in self._warned:
+            return
+        self._warned.add(key)
+        message = f"Key {key!r} is deprecated"
+        if self._version:
+            message += f" since {self._version}"
+        message += " and should no longer be used."
+        if reason := self._deprecations[key]:
+            message += f" {reason}"
+        # +1 for the ``_warn`` frame between the public method and warn().
+        warnings.warn(message, self._categories[key], stacklevel=self._stacklevel + 1)
+
+    # Targeted single-key access: these warn.
+    def __getitem__(self, key: Any) -> Any:
+        self._warn(key)
+        return super().__getitem__(key)
+
+    def __setitem__(self, key: Any, value: Any) -> None:
+        self._warn(key)
+        super().__setitem__(key, value)
+
+    def __delitem__(self, key: Any) -> None:
+        self._warn(key)
+        super().__delitem__(key)
+
+    def get(self, key: Any, default: Any = None) -> Any:
+        # Docstring inherited.
+        self._warn(key)
+        return super().get(key, default)
+
+    def pop(self, key: Any, *args: Any) -> Any:
+        # Docstring inherited.
+        self._warn(key)
+        return super().pop(key, *args)
+
+    def setdefault(self, key: Any, default: Any = None) -> Any:
+        # Docstring inherited.
+        self._warn(key)
+        return super().setdefault(key, default)
+
+    # Copying: rebuild without routing items through __setitem__.
+    def _clone(self, data: dict) -> DeprecatedDict:
+        """Build a sibling that shares this dict's deprecation config.
+
+        Parameters
+        ----------
+        data : `dict`
+            The contents of the new mapping.
+
+        Returns
+        -------
+        new : `DeprecatedDict`
+            A new mapping with the same deprecation configuration and the
+            same set of already-warned keys.
+        """
+        new = DeprecatedDict(
+            data,
+            deprecations=self._deprecations,
+            version=self._version,
+            deprecated_categories=self._categories,
+            stacklevel=self._stacklevel,
+        )
+        new._warned = set(self._warned)
+        return new
+
+    def __copy__(self) -> DeprecatedDict:
+        return self._clone(dict(self))
+
+    def __deepcopy__(self, memo: dict) -> DeprecatedDict:
+        new = self._clone({k: copy.deepcopy(v, memo) for k, v in dict(self).items()})
+        memo[id(self)] = new
+        return new
