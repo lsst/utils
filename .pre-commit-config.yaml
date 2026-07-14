@@ -5,6 +5,8 @@ repos:
       - id: check-yaml
         args:
           - "--unsafe"
+        # These files are deliberately invalid YAML for testing error handling.
+        exclude: "^tests/config/dbAuth/badDbAuth.*\\.yaml$"
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-toml
