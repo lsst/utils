@@ -34,9 +34,7 @@ from . import (
 
 
 def set_rubin_plotstyle() -> None:
-    """
-    Set the matplotlib style for Rubin publications
-    """
+    """Set the matplotlib style for Rubin publications."""
     from matplotlib import style
 
     style.use("lsst.utils.plotting.rubin")
@@ -98,8 +96,13 @@ def mk_colormap(colorNames):  # type: ignore
 
 
 def divergent_cmap():  # type: ignore
-    """
-    Make a divergent color map.
+    """Make a divergent color map.
+
+    Returns
+    -------
+    cmap : `matplotlib.colors.LinearSegmentedColormap`
+        A colormap stepping from the standard stars color through
+        gray to the accent color.
     """
     cmap = mk_colormap([stars_color(), "#D9DCDE", accent_color()])
 
@@ -107,7 +110,19 @@ def divergent_cmap():  # type: ignore
 
 
 def stars_cmap(single_color=False):  # type: ignore
-    """Make a color map for stars."""
+    """Make a color map for stars.
+
+    Parameters
+    ----------
+    single_color : `bool`, optional
+        If `True` use the standard stars color.
+
+    Returns
+    -------
+    cmap : `matplotlib.colors.Colormap`
+        A colormap derived from the standard stars color if
+        ``single_color`` is `True`, otherwise the seaborn "mako" palette.
+    """
     import seaborn as sns
     from matplotlib.colors import ListedColormap
 
@@ -119,20 +134,35 @@ def stars_cmap(single_color=False):  # type: ignore
 
 
 def stars_color() -> str:
-    """Return the star color string for lines"""
+    """Return the star color string for lines."""
     return "#084d96"
 
 
 def accent_color() -> str:
-    """Return a contrasting color for overplotting,
-    black is the best for this but if you need two colors
+    """Return a contrasting color for overplotting.
+
+    Notes
+    -----
+    Black is the best for this but if you need two colors
     this works well on blue.
     """
     return "#DE8F05"
 
 
-def galaxies_cmap(single_color=False):  # type: ignore
-    """Make a color map for galaxies."""
+def galaxies_cmap(single_color: bool = False):  # type: ignore
+    """Make a color map for galaxies.
+
+    Parameters
+    ----------
+    single_color : `bool`, optional
+        If `True` use the standard galaxies color.
+
+    Returns
+    -------
+    cmap : `matplotlib.colors.LinearSegmentedColormap` or `str`
+        A colormap derived from the standard galaxies color if
+        ``single_color`` is `True`, otherwise the colormap name "inferno".
+    """
     if single_color:
         cmap = mk_colormap([galaxies_color()])
     else:
@@ -141,17 +171,29 @@ def galaxies_cmap(single_color=False):  # type: ignore
 
 
 def galaxies_color() -> str:
-    """Return the galaxy color string for lines"""
+    """Return the galaxy color string for lines."""
     return "#961A45"
 
 
 def sso_color() -> str:
-    """Return the SSO color string for lines"""
+    """Return the SSO color string for lines."""
     return "#01694c"
 
 
-def sso_cmap(single_color=False):  # type: ignore
-    """Make a color map for solar system objects."""
+def sso_cmap(single_color: bool = False):  # type: ignore
+    """Make a color map for solar system objects.
+
+    Parameters
+    ----------
+    single_color : `bool`, optional
+        If `True` use the standard SSO color.
+
+    Returns
+    -------
+    cmap : `matplotlib.colors.LinearSegmentedColormap` or `str`
+        A colormap derived from the standard SSO color if
+        ``single_color`` is `True`, otherwise the colormap name "viridis".
+    """
     if single_color:
         cmap = mk_colormap([sso_color()])
     else:
@@ -160,16 +202,19 @@ def sso_cmap(single_color=False):  # type: ignore
 
 
 def get_band_dicts() -> dict:
-    """
-    Define palettes, from RTN-045. This includes dicts for colors (bandpass
-    colors for white background), colors_black (bandpass colors for
-    black background), plot symbols, and line_styles, keyed on band (ugrizy).
+    """Define palettes, from RTN-045.
 
     Returns
     -------
     band_dict : `dict` of `dict`
         Dicts of colors, colors_black, symbols, and line_styles,
         keyed on bands 'u', 'g', 'r', 'i', 'z', and 'y'.
+
+    Notes
+    -----
+    This includes dicts for colors (bandpass colors for white background),
+    colors_black (bandpass colors for black background), plot symbols, and
+    line_styles, keyed on band (ugrizy).
     """
     colors = get_multiband_plot_colors()
     colors_black = get_multiband_plot_colors(dark_background=True)

@@ -12,7 +12,13 @@ log = logging.getLogger("disable_timer")
 
 @timeMethod(logger=log, logLevel=logging.INFO)
 def sleep_and_log(self, duration: float) -> None:
-    """Check that this does not log if the decorator was disabled on import."""
+    """Check that this does not log if the decorator was disabled on import.
+
+    Parameters
+    ----------
+    duration : `float`
+        Time to sleep.
+    """
     time.sleep(duration)
 
 
@@ -20,5 +26,10 @@ def sleep_and_log(self, duration: float) -> None:
 def sleep_and_nothing(self, duration: float) -> None:
     """Check that this does not have a `__wrapped__` attribute to confirm that
     the decorator is disabled.
+
+    Parameters
+    ----------
+    duration : `float`
+        Time to sleep.
     """
     time.sleep(duration)

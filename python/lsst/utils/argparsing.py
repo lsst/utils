@@ -30,6 +30,36 @@ class AppendDict(argparse.Action):
     does not contain exactly one "=" character is invalid. If the default value
     is non-empty, the default key-value pairs may be overwritten by values from
     the command line.
+
+    Parameters
+    ----------
+    option_strings : `str` | `list` [ `str` ]
+        The command-line option strings that trigger this action, e.g.
+        ``--config``.
+    dest : `str`
+        The name of the `~argparse.Namespace` attribute in which the
+        accumulated `dict` is stored.
+    nargs : `int` | `str` | `None`, optional
+        The number of command-line arguments consumed each time the option
+        appears, as accepted by `argparse.ArgumentParser.add_argument`.
+    const : `typing.Any` | `None`, optional
+        A constant value required by some ``nargs`` settings; unused by this
+        action.
+    default : `typing.Any` | `None`, optional
+        The initial value of the mapping if the option does not appear on the
+        command line. Must be a `~collections.abc.Mapping` or `None`; `None`
+        is converted to an empty `dict`.
+    type : `type` | `None`, optional
+        A callable applied by argparse to each command-line argument before
+        it is passed to this action.
+    choices : `typing.Any` | `None`, optional
+        A container of the allowable values for the argument.
+    required : `bool`, optional
+        Whether the option must appear on the command line.
+    help : `str` | `None`, optional
+        A brief description of the argument for usage messages.
+    metavar : `str` | `None`, optional
+        The name for the argument's value(s) in usage messages.
     """
 
     def __init__(
