@@ -15,12 +15,16 @@ from __future__ import annotations
 
 __all__ = ["disable_implicit_threading", "set_thread_envvars"]
 
+import logging
 import os
+import sys
 
 try:
     from threadpoolctl import threadpool_limits
 except ImportError:
     threadpool_limits = None
+
+_LOG = logging.getLogger(__name__)
 
 
 def set_thread_envvars(num_threads: int = 1, override: bool = False) -> None:
@@ -44,6 +48,12 @@ def set_thread_envvars(num_threads: int = 1, override: bool = False) -> None:
         "MPI_NUM_THREADS",
         "NUMEXPR_NUM_THREADS",
         "NUMEXPR_MAX_THREADS",
+        "NUMBA_NUM_THREADS",
+        "ARROW_IO_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+        "RAYON_NUM_THREADS",
+        "POLARS_MAX_THREADS",
+        "BLIS_NUM_THREADS",
     )
 
     for var in envvars:
@@ -63,8 +73,8 @@ def disable_implicit_threading() -> None:
     Notes
     -----
     Explicitly limits the number of threads allowed to be used by ``numexpr``
-    and attempts to limit the number of threads in all APIs supported by
-    the ``threadpoolctl`` package.
+    and ``pyarrow`` (if already imported) and attempts to limit the number of
+    threads in all APIs supported by the ``threadpoolctl`` package.
     """
     # Force one thread and force override.
     set_thread_envvars(1, True)
@@ -79,6 +89,19 @@ def disable_implicit_threading() -> None:
     else:
         numexpr.utils.set_num_threads(1)
 
+    # pyarrow sizes its thread pools from the environment only when each pool
+    # is first used, so pools that may already exist must be resized
+    # explicitly. If pyarrow has not been imported the environment variables
+    # set above are sufficient and there is no need to pay for an import here.
+    if (pyarrow := sys.modules.get("pyarrow")) is not None:
+        pyarrow.set_cpu_count(1)
+        pyarrow.set_io_thread_count(1)
+
     # Try to set threads for openblas and openmp
     if threadpool_limits is not None:
         threadpool_limits(limits=1)
+    else:
+        _LOG.warning(
+            "threadpoolctl is not installed: thread pools of already-loaded libraries cannot be "
+            "limited and implicit threading may remain enabled."
+        )

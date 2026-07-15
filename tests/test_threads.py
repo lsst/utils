@@ -21,6 +21,7 @@
 
 import os
 import unittest
+import unittest.mock
 
 from lsst.utils.threads import disable_implicit_threading, set_thread_envvars
 
@@ -32,6 +33,10 @@ try:
     import threadpoolctl
 except ImportError:
     threadpoolctl = None
+try:
+    import pyarrow
+except ImportError:
+    pyarrow = None
 
 
 class ThreadsTestCase(unittest.TestCase):
@@ -54,6 +59,44 @@ class ThreadsTestCase(unittest.TestCase):
             info = threadpoolctl.threadpool_info()
             for api in info:
                 self.assertEqual(api["num_threads"], 1, f"API: {api}")
+
+    def testEnvVarsForEnvOnlyLibraries(self):
+        """Libraries that are only controllable via environment variables
+        must be included in the list of variables that are set.
+        """
+        set_thread_envvars(2, override=True)
+        for var in (
+            "NUMBA_NUM_THREADS",
+            "ARROW_IO_THREADS",
+            "VECLIB_MAXIMUM_THREADS",
+            "RAYON_NUM_THREADS",
+            "POLARS_MAX_THREADS",
+            "BLIS_NUM_THREADS",
+        ):
+            self.assertEqual(os.environ.get(var), "2", f"Variable: {var}")
+
+    @unittest.skipIf(pyarrow is None, "pyarrow is not available")
+    def testDisablePyarrow(self):
+        """Already-created pyarrow thread pools must be resized since they
+        do not react to environment variables after creation.
+        """
+        pyarrow.set_cpu_count(4)
+        pyarrow.set_io_thread_count(4)
+        disable_implicit_threading()
+        self.assertEqual(pyarrow.cpu_count(), 1)
+        self.assertEqual(pyarrow.io_thread_count(), 1)
+
+    @unittest.skipIf(threadpoolctl is None, "threadpoolctl is not available")
+    def testMissingThreadpoolctlWarning(self):
+        """Absence of threadpoolctl silently weakens the thread disabling
+        so it must be reported.
+        """
+        with (
+            unittest.mock.patch("lsst.utils.threads.threadpool_limits", None),
+            self.assertLogs("lsst.utils.threads", "WARNING") as cm,
+        ):
+            disable_implicit_threading()
+        self.assertIn("threadpoolctl", "\n".join(cm.output))
 
 
 if __name__ == "__main__":
