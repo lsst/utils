@@ -1,3 +1,12 @@
+lsst-utils v30.0.9 (2026-07-14)
+===============================
+
+New Features
+------------
+
+- Added ``DeprecatedDict`` mapping.
+  This can be used to configure a `dict` that issues deprecation warnings when certain keys are accessed.
+
 lsst-utils v30.0.0 (2026-01-15)
 ===============================
 
