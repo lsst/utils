@@ -1,4 +1,5 @@
 Improved the coverage of ``disable_implicit_threading``.
 The thread-related environment variables now also include ``NUMBA_NUM_THREADS``, ``ARROW_IO_THREADS``, ``VECLIB_MAXIMUM_THREADS``, ``RAYON_NUM_THREADS``, ``POLARS_MAX_THREADS``, and ``BLIS_NUM_THREADS``.
 Existing ``pyarrow`` thread pools are now resized explicitly since they do not react to environment variables after creation.
+An already-imported ``numba`` is now limited at runtime since it reads its environment variable only at import time.
 A warning is now logged if ``threadpoolctl`` is not installed since thread pools of already-loaded libraries can then no longer be limited.

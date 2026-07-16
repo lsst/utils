@@ -97,6 +97,11 @@ def disable_implicit_threading() -> None:
         pyarrow.set_cpu_count(1)
         pyarrow.set_io_thread_count(1)
 
+    # numba reads its environment variable only at import time so an
+    # already-imported numba must be limited at runtime.
+    if (numba := sys.modules.get("numba")) is not None:
+        numba.set_num_threads(1)
+
     # Try to set threads for openblas and openmp
     if threadpool_limits is not None:
         threadpool_limits(limits=1)

@@ -37,6 +37,10 @@ try:
     import pyarrow
 except ImportError:
     pyarrow = None
+try:
+    import numba
+except ImportError:
+    numba = None
 
 
 class ThreadsTestCase(unittest.TestCase):
@@ -85,6 +89,16 @@ class ThreadsTestCase(unittest.TestCase):
         disable_implicit_threading()
         self.assertEqual(pyarrow.cpu_count(), 1)
         self.assertEqual(pyarrow.io_thread_count(), 1)
+
+    @unittest.skipIf(numba is None, "numba is not available")
+    def testDisableNumba(self):
+        """An already-imported numba must be limited at runtime since it
+        reads its environment variable only at import time.
+        """
+        if numba.config.NUMBA_NUM_THREADS > 1:
+            numba.set_num_threads(2)
+        disable_implicit_threading()
+        self.assertEqual(numba.get_num_threads(), 1)
 
     @unittest.skipIf(threadpoolctl is None, "threadpoolctl is not available")
     def testMissingThreadpoolctlWarning(self):
