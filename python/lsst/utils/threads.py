@@ -97,9 +97,26 @@ def disable_implicit_threading() -> None:
         pyarrow.set_cpu_count(1)
         pyarrow.set_io_thread_count(1)
 
-    # numba reads its environment variable only at import time so an
-    # already-imported numba must be limited at runtime.
+    # numba records the value of NUMBA_NUM_THREADS as the maximum size of its
+    # thread pool, and numba.config.reload_config() (which numba runs on every
+    # jit compilation) raises if the environment variable no longer matches
+    # that recorded value once the pool has been launched. The number of
+    # threads actually used defaults to that recorded maximum too, so limiting
+    # an already-imported numba requires masking execution with
+    # set_num_threads in addition to keeping the recorded value and the
+    # environment variable consistent.
     if (numba := sys.modules.get("numba")) is not None:
+        try:
+            # The pool has not been launched yet, so make numba adopt the
+            # NUMBA_NUM_THREADS=1 set above before it launches.
+            numba.config.reload_config()
+        except RuntimeError:
+            # The pool is already running at a size that cannot be lowered, so
+            # numba refuses the new value. Realign NUMBA_NUM_THREADS with the
+            # launched value instead so later reloads stay consistent.
+            os.environ["NUMBA_NUM_THREADS"] = str(numba.config.NUMBA_NUM_THREADS)
+            numba.config.reload_config()
+        # Mask execution down to a single thread.
         numba.set_num_threads(1)
 
     # Try to set threads for openblas and openmp

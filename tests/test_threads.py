@@ -92,12 +92,23 @@ class ThreadsTestCase(unittest.TestCase):
 
     @unittest.skipIf(numba is None, "numba is not available")
     def testDisableNumba(self):
-        """An already-imported numba must be limited at runtime since it
-        reads its environment variable only at import time.
+        """An already-imported numba must be limited to a single thread, and
+        jit compilation afterwards must still work.
         """
         if numba.config.NUMBA_NUM_THREADS > 1:
             numba.set_num_threads(2)
         disable_implicit_threading()
+        self.assertEqual(numba.get_num_threads(), 1)
+
+        # numba re-reads NUMBA_NUM_THREADS every time it reloads its
+        # configuration, which happens on each jit compilation. Compiling a
+        # function must not raise because the environment variable and numba's
+        # recorded thread count disagree.
+        @numba.njit("float64(float64)")
+        def add_one(x: float) -> float:
+            return x + 1.0
+
+        self.assertEqual(add_one(1.0), 2.0)
         self.assertEqual(numba.get_num_threads(), 1)
 
     @unittest.skipIf(threadpoolctl is None, "threadpoolctl is not available")
