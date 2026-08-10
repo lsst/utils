@@ -23,7 +23,7 @@ import logging
 import time
 import unittest
 
-from lsst.utils.logging import PeriodicLogger, getLogger, trace_set_at
+from lsst.utils.logging import LogState, PeriodicLogger, getLogger, trace_set_at
 
 
 class TestLogging(unittest.TestCase):
@@ -139,6 +139,67 @@ class TestLogging(unittest.TestCase):
         with self.assertLogs(pylog.name, level=logging.DEBUG) as cm:
             periodic.log("Message")
         self.assertEqual(cm.records[0].filename, "test_logging.py", str(cm.records[0]))
+
+    def test_logstate(self):
+        class Myclass:
+            x: int = 0
+            y: float = 0.0
+            z: float = 0.0
+
+            @classmethod
+            def method1(cls, x: int) -> None:
+                cls.x = x
+
+            @classmethod
+            def method2(cls, y: float) -> None:
+                cls.y = y
+
+        # set the initial state
+        LogState.record((Myclass.method1, 451))
+        LogState.record((Myclass.method2, 3.14))
+
+        # check to see how it was set
+        state = LogState.get_state()
+        first = state[0]
+        self.assertEqual(first[0].__func__, Myclass.method1.__func__)
+        self.assertEqual(first[1], 451)
+        second = state[1]
+        self.assertEqual(second[0].__func__, Myclass.method2.__func__)
+        self.assertEqual(second[1], 3.14)
+
+        # ask state to be cleared
+        LogState.clear_state()
+
+        # make sure it was cleared
+        clear_state = LogState.get_state()
+        self.assertEqual(len(clear_state), 0)
+
+        # replay the state
+        LogState.replay_state(state)
+
+        # check to be sure the state was set as requested
+        self.assertEqual(Myclass.x, 451)
+        self.assertEqual(Myclass.y, 3.14)
+
+        # try to do it again, and receive a log warning
+        LogState.replay_state(state)
+
+        # clear the state; be sure it's cleared
+        LogState.clear_state()
+        clear_state = LogState.get_state()
+        self.assertEqual(len(clear_state), 0)
+
+        # call set state
+        LogState.set_state(state)
+
+        # and make sure it was set as requested
+        state = LogState.get_state()
+        first = state[0]
+        self.assertEqual(first[0].__func__, Myclass.method1.__func__)
+        self.assertEqual(first[1], 451)
+        second = state[1]
+        self.assertEqual(second[0].__func__, Myclass.method2.__func__)
+        self.assertEqual(second[1], 3.14)
 
 
 if __name__ == "__main__":

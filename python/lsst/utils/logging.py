@@ -472,3 +472,62 @@ class PeriodicLogger:
             self.num_issued += 1
             return True
         return False
+
+
+class LogState:
+    """Library-style helper to record and replay logging configuration.
+
+    This class stores a sequence of callable-and-arguments tuples that can be
+    serialized and replayed in a subprocess to reproduce the same logging
+    configuration that was applied in the parent process.
+
+    It is intentionally independent of CLI parsing logic; that is handled
+    by `CliLog`.
+    """
+
+    configState: list[tuple[Any, ...]] = []
+    _replayed: bool = False
+
+    @classmethod
+    def record(cls, value: tuple[Any, ...]) -> None:
+        """Append to configState contents"""
+        cls.configState.append(value)
+
+    @classmethod
+    def get_state(cls) -> list[tuple[Any, ...]]:
+        """Return a shallow copy of the current state."""
+        return list(cls.configState)
+
+    @classmethod
+    def set_state(cls, value: list[tuple[Any, ...]]) -> None:
+        """Replace configState contents"""
+        cls.configState.clear()
+        cls.configState.extend(value)
+
+    @classmethod
+    def clear_state(cls) -> None:
+        """Clear any recorded state."""
+        cls.configState.clear()
+        cls._replayed = False
+
+    @classmethod
+    def replay_state(cls, configState: list[tuple[Any, ...]]) -> None:
+        """Re-create configuration using configuration state recorded earlier.
+
+        Parameters
+        ----------
+        configState : `list` of `tuple`
+            Tuples contain a method as first item and arguments for the method.
+        """
+        if cls._replayed:
+            # Already initialized, do not touch anything.
+            log = logging.getLogger(__name__)
+            log.warning("Log is already initialized, will not replay configuration.")
+            return
+
+        # execute each one in order
+        for call in configState:
+            method, *args = call
+            method(*args)
+
+        cls._replayed = True
