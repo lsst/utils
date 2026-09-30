@@ -121,7 +121,9 @@ def getAllPythonDistributions() -> dict[str, str]:
     packages = {"python": sys.version}
 
     for dist in importlib.metadata.distributions():
-        packages[dist.name] = dist.version
+        # Keep the first version seen when a distribution
+        # name appears more than once.
+        packages.setdefault(dist.name, dist.version)
     return _mangle_lsst_package_names(packages)
 
 
