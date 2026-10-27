@@ -92,6 +92,10 @@ class PublicationPlotsTestCase(unittest.TestCase):
         set_rubin_plotstyle()
         # Confirm that the settings took effect by checking one of them
         self.assertEqual(rcParams["errorbar.capsize"], 3.0)
+        # Set the plot style with the "lowres" kwarg
+        set_rubin_plotstyle()
+        # Confirm that the settings took effect by checking dpi
+        self.assertEqual(rcParams["figure.dpi"], 100.0)
 
     def testMultibandPlotColors(self):
         bands_dict = get_band_dicts()
