@@ -1,3 +1,18 @@
+lsst-utils v30.0.12 (2026-10-27)
+================================
+
+API Changes
+-----------
+
+- Added new parameter to ``set_rubin_plotstyle`` to generate a lower resolution figure. (`DM-56844 <https://rubinobs.atlassian.net/browse/DM-56844>`_)
+
+Bug Fixes
+---------
+
+- When searching for version information using package info, use the first package found rather than the last.
+  This fix is needed if a SCons local setup shadows an installed Conda package. (`DM-56449 <https://rubinobs.atlassian.net/browse/DM-56449>`_)
+
+
 lsst-utils v30.0.10 (2026-07-20)
 ================================
 
