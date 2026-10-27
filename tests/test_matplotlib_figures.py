@@ -93,7 +93,7 @@ class PublicationPlotsTestCase(unittest.TestCase):
         # Confirm that the settings took effect by checking one of them
         self.assertEqual(rcParams["errorbar.capsize"], 3.0)
         # Set the plot style with the "lowres" kwarg
-        set_rubin_plotstyle()
+        set_rubin_plotstyle(lowres=True)
         # Confirm that the settings took effect by checking dpi
         self.assertEqual(rcParams["figure.dpi"], 100.0)
 
