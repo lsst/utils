@@ -33,7 +33,7 @@ from . import (
 )
 
 
-def set_rubin_plotstyle(lowres=False) -> None:
+def set_rubin_plotstyle(lowres=False):  # type: ignore
     """Set the matplotlib style for Rubin publications.
 
     Parameters
