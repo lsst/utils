@@ -47,7 +47,7 @@ def set_rubin_plotstyle(lowres=False) -> None:
     style.use("lsst.utils.plotting.rubin")
 
     if lowres:
-        plt.rcParams['figure.dpi'] = 100.0
+        plt.rcParams["figure.dpi"] = 100.0
 
 
 def mk_colormap(colorNames):  # type: ignore
