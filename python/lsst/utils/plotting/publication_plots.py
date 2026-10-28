@@ -41,13 +41,13 @@ def set_rubin_plotstyle(lowres=False):  # type: ignore
     lowres : `bool`, optional
         If `True`, set figure resolution to lower dpi.
     """
-    import matplotlib.pyplot as plt
+    import matplotlib as mpl
     from matplotlib import style
 
     style.use("lsst.utils.plotting.rubin")
 
     if lowres:
-        plt.rcParams["figure.dpi"] = 100.0
+        mpl.rcParams["figure.dpi"] = 100.0
 
 
 def mk_colormap(colorNames):  # type: ignore
